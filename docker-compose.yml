@@ -18,3 +18,6 @@ services:
       - "7777:7777"  # expose port to REPL
     links:
       - broker
+    environment:
+      - "BROKER_USER=${BROKER_USER}"
+      - "BROKER_PASS=${BROKER_PASS}"
