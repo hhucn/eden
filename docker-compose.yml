@@ -1,0 +1,15 @@
+version: "3.1"
+
+services:
+  broker:
+    image: rabbitmq:3.6-alpine
+
+  aggregator:
+    build: aggregator/
+    volumes:
+      - ~/.m2:/root/.m2  # cache leiningen dependencies
+      - ./aggregator/:/code  # enable hot-code reloading
+    ports:
+      - "7777:7777"  # expose port to REPL
+    links:
+      - broker
