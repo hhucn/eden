@@ -2,7 +2,12 @@ version: "3.1"
 
 services:
   broker:
-    image: rabbitmq:3.6-alpine
+    image: rabbitmq:3.6-management-alpine
+    ports:
+      - "8080:15672"  # web-access to management console
+    environment:
+      - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
+      - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
 
   aggregator:
     build: aggregator/
