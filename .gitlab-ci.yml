@@ -1,5 +1,3 @@
-image: clojure:alpine
-
 cache:
   paths:
     - ~/.m2
@@ -7,18 +5,24 @@ cache:
   untracked: true
 
 up-to-date?:
+  image: clojure:alpine
   stage: test
   script:
+    - cd aggregator
     - lein ancient
   allow_failure: true
 
 idiomatic?:
+  image: clojure:alpine
   stage: test
   script:
+    - cd aggregator
     - lein kibit
   allow_failure: true
 
 test:
+  image: clojure:alpine
   stage: test
   script:
+    - cd aggregator
     - lein test
