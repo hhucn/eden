@@ -30,3 +30,19 @@ container.
 
 Clojure test-application which acts as a consumer for RabbitMQ. You can read the
 messages from a specified queue via this service. Just for testing purposes.
+
+
+### query
+
+The core module of the repository, which coordinates the flow of information. All
+internal and external calls for arguments and other information flow trough this
+module which coordinates the cache usage and retrieves the information if needed.
+Retrieval works as a tiered process:
+1. Cache
+2. Local DB
+3. External Queries and Search
+
+The query also uses the pub/sub system to trigger publishes of new information and
+subscriptions to updates to aquired information from external sources.
+
+Dev-Status: 0%
