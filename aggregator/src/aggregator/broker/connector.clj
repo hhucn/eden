@@ -31,4 +31,7 @@
   (let [ch (startup-exchange "argweb")]
     (publish-statement ch "argweb" (byte-array 4) (format "new.%s" aggregator-id))))
 
-;; (publish-new-statement {:aggregator-id 1 :local-id 42 :content {:whoami :iamgroot}})
+(comment
+  (startup-exchange "argweb")
+  (publish-new-statement {:aggregator-id "weltDE" :local-id 42 :content {:whoami :iamgroot}})
+  )
