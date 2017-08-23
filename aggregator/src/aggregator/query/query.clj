@@ -13,19 +13,25 @@
 
 (defn check-db
   "Check the database for a statement and update cache after item is found."
-  [uri]
-  (let [possible-statement :check-db function] ;;TODO
-    (if (= possible-statement :missing)
-      :retrieve-remote
-      (cache/cache-miss possible-statement))))
+  ([uri]
+   (check-db uri {}))
+  ([uri options]
+   (let [possible-statement :check-db function] ;;TODO
+     (if (= possible-statement :missing)
+       (if (contains options :no-remote)
+         :not-found
+         (retrieve-remote uri))
+       (cache/cache-miss possible-statement)))))
 
 (defn tiered-retrieval
   "Check whether the Cache contains the desired statement. If not delegate to DB and remote acquisition."
-  [uri]
-  (let [cached-statement (cache/retrieve uri)]
-    (if (= cached-statement :missing)
-      (check-db uri)
-      cached-statement)))
+  ([uri]
+   (tiered-retrieval uri {}))
+  ([uri options] 
+   (let [cached-statement (cache/retrieve uri)]
+     (if (= cached-statement :missing)
+       (check-db uri)
+       cached-statement))))
 
 
 ;;
