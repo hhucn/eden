@@ -19,6 +19,15 @@ services:
       - "7777:7777"  # expose port to REPL
     links:
       - broker
+      - db
     environment:
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
+
+  db:
+    image: postgres:9.6-alpine
+    ports:
+      - "5432:5432"  # again, just for debugging
+    environment:
+      - "POSTGRES_PASSWORD=${DATABASE_USER}"
+      - "POSTGRES_PASSWORD=${DATABASE_PASSWORD}"
