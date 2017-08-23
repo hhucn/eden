@@ -29,5 +29,5 @@ services:
     ports:
       - "5432:5432"  # again, just for debugging
     environment:
-      - "POSTGRES_PASSWORD=${DATABASE_USER}"
+      - "POSTGRES_USER=${DATABASE_USER}"
       - "POSTGRES_PASSWORD=${DATABASE_PASSWORD}"
