@@ -23,10 +23,9 @@
 
 (defn cache-miss ;;TODO
   "Signalize that an item was missing and fill in the missing value."
-  [uri]
-  (let [statement {:placeholder :foo}]
-    (swap! storage #(cache/miss % uri statement)))
-  (get @storage uri))
+  [uri statement]
+  (swap! storage #(cache/miss % uri statement))
+  (statement))
 
 (defn get-cached-statements
   "Retrieve all arguments currently in the cache"
