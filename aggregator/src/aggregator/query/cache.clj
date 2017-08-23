@@ -11,9 +11,9 @@
   "Try to retrieve an item from cache and trigger the appropriate events.
   Should always be followed by a filling of the value if possible."
   [uri]
-  (if (cache/has? uri
-                  (cache/hit uri)
-                  :missing)))
+  (if (cache/has? uri)
+    (cache/hit uri)
+    :missing))
 
 (defn cache-hit
   "Touch the item in the cache and retrieve it."
