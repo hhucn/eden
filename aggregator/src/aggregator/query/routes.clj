@@ -12,7 +12,8 @@
 (defroutes app-routes
   (GET "/" []
        (response {:status :ok
-                  :data {:payload "Its definitely the horsesized chicken."}})))
+                  :data {:payload "Its definitely the horsesized chicken."}}))
+  (GET "/statement/:id{[0-9]+}" {:keys [params]}))
 
 (def app
   (-> app-routes
