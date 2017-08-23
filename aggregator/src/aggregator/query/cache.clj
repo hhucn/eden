@@ -11,8 +11,9 @@
   "Try to retrieve an item from cache and trigger the appropriate events.
   Should always be followed by a filling of the value if possible."
   [uri]
-                                        ;TODO
-  )
+  (if (cache/has? uri
+                  (cache/hit uri)
+                  :missing)))
 
 (defn cache-hit
   "Touch the item in the cache and retrieve it."
@@ -23,7 +24,7 @@
 (defn cache-miss ;;TODO
   "Signalize that an item was missing and fill in the missing value."
   [uri]
-  (let [statement (query/query uri)]
+  (let [statement {:placeholder :foo}]
     (swap! storage #(cache/miss % uri statement)))
   (get @storage uri))
 
