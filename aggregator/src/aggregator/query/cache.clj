@@ -21,7 +21,7 @@
   (swap! storage #(cache/hit % uri))
   (get @storage uri))
 
-(defn cache-miss ;;TODO
+(defn cache-miss
   "Signalize that an item was missing and fill in the missing value."
   [uri statement]
   (swap! storage #(cache/miss % uri statement))
