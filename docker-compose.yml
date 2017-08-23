@@ -26,6 +26,8 @@ services:
 
   db:
     image: postgres:9.6-alpine
+    volumes:
+      - ./db/entrypoint:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"  # again, just for debugging
     environment:
