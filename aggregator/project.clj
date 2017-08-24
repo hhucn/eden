@@ -5,7 +5,8 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [com.novemberain/langohr "4.1.0"]
-                 [korma "0.4.3"]]
+                 [korma "0.4.3"]
+                 [postgresql/postgresql "9.3-1101.jdbc4"]]
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]}
              :repl {:plugins [[cider/cider-nrepl "0.15.0-SNAPSHOT"]]}
