@@ -12,4 +12,6 @@
 (s/def ::event
   (s/keys :req-un [::sequence_number ::version ::creator ::type]
           :opt-un [::aggregate_id ::entity_id ::data]))
-(s/exercise ::event)
+(comment
+  (s/exercise ::event)
+  )

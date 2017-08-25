@@ -3,12 +3,12 @@ AUTHORIZATION aggregator;
 
 CREATE TABLE IF NOT EXISTS aggregator.events (
        sequence_number SERIAL PRIMARY KEY,
-       version smallint NOT NULL,
+       version smallint NOT NULL DEFAULT 1,
        aggregate_id text,
        entity_id text,
-       creator text  NOT NULL,
+       creator text NOT NULL,
        created  TIMESTAMP NOT NULL DEFAULT now(),
-       type text  NOT NULL,
+       type text NOT NULL,
        data text
 )
 WITH (
