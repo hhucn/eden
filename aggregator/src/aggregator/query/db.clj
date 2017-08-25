@@ -15,10 +15,12 @@
   (entity-fields :aggregate_id :entity_id :data))
 
 (defn statement-by-uri [uri]
-  (let [[[aggretate_id entity_id] (str/split uri #"/" 1)]
-        [query-value (select events
-                             (where {:aggregate_id aggregate_id
-                                     :entity_id entity_id}))]]
+  (let [split-uri (str/split uri #"/" 1)
+        aggregate_id (first split-uri)
+        entity_id (last split-uri)
+        query-value (select events
+                            (where {:aggregate_id aggregate_id
+                                    :entity_id entity_id}))]
     (if (= '() query-value)
       :missing
       query-value)))

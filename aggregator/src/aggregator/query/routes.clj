@@ -14,9 +14,9 @@
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/statement/:id{[0-9]+}" {:keys [params]}
-       (query/tiered-retrieval (str "localhost::" (:id params)) {:no-remote 1})))
-;; At this part localhost should be replaced by host configuration
+  (GET "/entity/:aggregate_id{.+}/:id{.+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/tiered-retrieval (str (:aggregate_id params) "/" (:id params)) {:no-remote 1})}})))
 
 (def app
   (-> app-routes
