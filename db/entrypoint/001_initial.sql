@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS aggregator.events (
        sequence_number SERIAL PRIMARY KEY,
        version smallint NOT NULL,
        aggregate_id text,
+       entity_id text,
        creator text  NOT NULL,
        created  TIMESTAMP NOT NULL DEFAULT now(),
        type text  NOT NULL,
