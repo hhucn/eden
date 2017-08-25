@@ -1,5 +1,6 @@
 (ns aggregator.query.query
-  (:require [aggregator.query.cache :as cache]))
+  (:require [aggregator.query.cache :as cache]
+            [aggregator.query.db :as db]))
 
 ;; The main module for queries. All internal calls run through the functions defined here. The other aggregator module call these functions, as well as the utility-handlers.
 
@@ -16,9 +17,9 @@
   ([uri]
    (check-db uri {}))
   ([uri options]
-   (let [possible-statement :check-db function] ;;TODO
+   (let [possible-statement (db/statement-by-uri uri)]
      (if (= possible-statement :missing)
-       (if (contains options :no-remote)
+       (if (contains? options :no-remote)
          :not-found
          (retrieve-remote uri))
        (cache/cache-miss possible-statement)))))
