@@ -1,6 +1,9 @@
 (ns aggregator.query.query
   (:require [aggregator.query.cache :as cache]
-            [aggregator.query.db :as db]))
+            [aggregator.query.db :as db]
+            [clj-http.client :as client]
+            [clojure.string :as str]
+            [clojure.data.json :as json]))
 
 ;; The main module for queries. All internal calls run through the functions defined here. The other aggregator module call these functions, as well as the utility-handlers.
 
@@ -8,18 +11,28 @@
 ;; Non-API helper functions
 
 (defn retrieve-remote
-  "Try to retrieve an argument from a remote aggregator."
+  "Try to retrieve an argument from a remote aggregator. The host part is treated as the webhost."
   [uri]
-  :returned-statement-or-not-found)
+  (let [split-uri (str/split uri #"/" 1)
+        aggregate (first split-uri)
+        entity (last split-uri)])
+  :chello)
+
+
+(comment) (-> (client/get "http://localhost:8080/entity/dbas/34234" {:accept :json})
+              :body
+              (json/read-str :key-fn keyword)
+              :data
+              :payload)
 
 (defn check-db
   "Check the database for a statement and update cache after item is found."
   ([uri]
    (check-db uri {}))
-  ([uri options]
+  ([uri {:keys [opts]}]
    (let [possible-statement (db/statement-by-uri uri)]
      (if (= possible-statement :missing)
-       (if (contains? options :no-remote)
+       (if (some #(= % :no-remote) opts)
          :not-found
          (retrieve-remote uri))
        (cache/cache-miss possible-statement)))))
