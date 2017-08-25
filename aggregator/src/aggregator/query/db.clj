@@ -12,8 +12,13 @@
                      :delimiters ""}))
 
 (defentity events
-  (entity-fields :aggregate_id :text))
+  (entity-fields :aggregate_id :entity_id :data))
 
-(System/getenv "POSTGRES_USER")
-
-(select events)
+(defn statement-by-uri [uri]
+  (let [[[aggretate_id entity_id] (str/split uri #"/" 1)]
+        [query-value (select events
+                             (where {:aggregate_id aggregate_id
+                                     :entity_id entity_id}))]]
+    (if (= '() query-value)
+      :missing
+      query-value)))
