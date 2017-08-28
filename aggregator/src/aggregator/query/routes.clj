@@ -25,3 +25,6 @@
       wrap-keyword-params
       wrap-json-params
       wrap-json-response))
+
+(comment (use 'ring.adapter.jetty)
+         (run-jetty app {:port 8080}))
