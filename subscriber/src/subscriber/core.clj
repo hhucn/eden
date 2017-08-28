@@ -1,24 +1,27 @@
 (ns subscriber.core
-  (:require [clojure.core.async :as async :refer [go-loop <!]]
+  (:require [clojure.core.async :as async :refer [go-loop <! timeout]]
             [langohr.core :as rmq]
             [langohr.channel :as lch]
-            [langohr.queue :as lq]
             [langohr.consumers :as lcons]))
 
-(defn start-consumer []
+(defn message-handler
+  [ch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
+  (println (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
+                   (String. payload "UTF-8") delivery-tag content-type type)))
+
+(defn subscribe
+  "Subscribe to queue and print output to Emacs Buffer *cider-repl localhost*."
+  [queue]
   (let [conn (rmq/connect
               {:host "localhost"
                :username "groot"
                :password "iamgroot"})
-        ch (lch/open conn)
-        queue-name (:queue (lq/declare ch "testname" {:exclusive false :auto-delete true}))
-        handler (fn [ch {:keys [routing-key] :as meta} ^bytes payload]
-                  (println (format "[consumer] got new statement")))]
-    (lq/bind ch queue-name "argweb" {:routing-key "new.weltDE"})
-    (lcons/subscribe ch queue-name handler {:auto-ack true})))
+        ch (lch/open conn)]
+    (println (format "[main] Connected. Channel id: %d" (.getChannelNumber ch)))
+    (go-loop []
+      (<! (timeout 1000))
+      (lcons/subscribe ch queue message-handler {:auto-ack true})
+      (recur))))
 
 (defn -main [& args]
-  (go-loop []
-    (<! (timeout 1000))
-    (start-consumer)
-    (recur)))
+  (subscribe "statement.update"))
