@@ -15,15 +15,13 @@
   [uri]
   (let [split-uri (str/split uri #"/" 1)
         aggregate (first split-uri)
-        entity (last split-uri)])
-  :chello)
-
-
-(comment) (-> (client/get "http://localhost:8080/entity/dbas/34234" {:accept :json})
-              :body
-              (json/read-str :key-fn keyword)
-              :data
-              :payload)
+        entity (last split-uri)
+        request-url (str "http://" aggregate "/entity/" entity)]
+    (-> (client/get request-url {:accept :json})
+        :body
+        (json/read-str :key-fn keyword)
+        :data
+        :payload)))
 
 (defn check-db
   "Check the database for a statement and update cache after item is found."
@@ -44,7 +42,7 @@
   ([uri options] 
    (let [cached-statement (cache/retrieve uri)]
      (if (= cached-statement :missing)
-       (check-db uri)
+       (check-db uri options)
        cached-statement))))
 
 
