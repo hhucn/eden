@@ -1,14 +1,9 @@
 (ns aggregator.broker.connector
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
+  (:require [clojure.tools.logging :as log]
             [langohr.core :as rmq]
             [langohr.channel :as lch]
-            [langohr.basic :as lb]
             [langohr.exchange :as le]
-            [langohr.queue :as lq]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [langohr.queue :as lq]))
 
 (def exchange "argweb")
 (def queues
@@ -39,43 +34,19 @@
   (lq/declare channel queue-name {:durable true :auto-delete false :exclusive false})
   channel)
 
+(defn open-channel []
+  (lch/open @conn))
+(defn close-channel [ch]
+  (lch/close ch))
+
 (defn init-connection! []
   (create-connection!)
-  (let [ch (lch/open @conn)]
+  (log/debug "Connection to Message Broker established.")
+  (let [ch (open-channel)]
     (-> ch
         (create-exchange exchange)
         (create-queue (:statement queues))
         (create-queue (:issue queues)))
     (lq/bind ch (:statement queues) exchange)
     (lq/bind ch (:issue queues) exchange)
-    (lch/close ch)))
-
-
-;; -----------------------------------------------------------------------------
-;; Publishing
-
-(defn- publish
-  "Puts payload in a queue and handles channel for this command."
-  [queue payload]
-  (let [ch (lch/open @conn)]
-    (lb/publish ch "" (get queues queue) payload)
-    (lch/close ch)))
-
-(defn publish-statement
-  "Put a statement to the correct queue. Statement must conform spec."
-  [statement]
-  {:pre [(s/valid? ::gspecs/statement statement)]}
-  (publish :statement statement))
-
-(s/fdef publish-statement
-        :args (s/cat :statement ::gspecs/statement))
-
-
-;; -----------------------------------------------------------------------------
-;; Testing-Area
-
-(comment
-  (init-connection!)
-  (publish :statement "foo")
-  (publish-statement "foo")
-  )
+    (close-channel ch)))
