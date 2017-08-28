@@ -15,8 +15,8 @@ you can access the message broker. But this is only for debugging purposes,
 since you can directly connect to RabbitMQ when you are inside a container.
 
 After you started the containers, you can access the management console at
-http://localhost:8080 with the user `groot` and the password `iamgroot`. This
-can be configured in the [.env](.env)-file.
+http://localhost:15672/ with the user `groot` and the password `iamgroot`. This
+user can be configured in the [.env](.env)-file.
 
 ### aggregator
 

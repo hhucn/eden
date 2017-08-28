@@ -1,13 +1,15 @@
 (ns aggregator.broker.connector
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
+  (:require [clojure.tools.logging :as log]
             [langohr.core :as rmq]
             [langohr.channel :as lch]
-            [langohr.basic :as lb]
             [langohr.exchange :as le]
             [langohr.queue :as lq]))
 
-(alias 'gspecs 'aggregator.specs)
+(def exchange "argweb")
+(def queues
+  {:statement "statement.update"
+   :issue "issue.update"})
+
 
 ;; -----------------------------------------------------------------------------
 ;; Setup broker
@@ -32,50 +34,19 @@
   (lq/declare channel queue-name {:durable true :auto-delete false :exclusive false})
   channel)
 
+(defn open-channel []
+  (lch/open @conn))
+(defn close-channel [ch]
+  (lch/close ch))
+
 (defn init-connection! []
   (create-connection!)
-  (-> (lch/open @conn)
-      (create-exchange "argweb")
-      (create-queue "statement.id.*")
-      (create-queue "issue.id.*")
-      lch/close)
-  )
-
-(defn- publish []
-  (let [ch (lch/open @conn)]
-    (lb/publish ch "argweb" "awesomequeue" "")
-    (lch/close ch)))
-
-(defn fuck-up-rabbitmq []
-  (dotimes [_ 100000]
-    (let [ch (lch/open @conn)]
-      (create-queue ch (gen/generate (s/gen string?)))
-      (lch/close ch))))
-
-(comment
-  (init-connection!)
-  (fuck-up-rabbitmq)
-  )
-
-;; -----------------------------------------------------------------------------
-;; Publishing
-
-(defn- publish-statement [ch exchange statement routing-key]
-  (lb/publish ch exchange routing-key statement {:content-type "application/json"
-                                                 :type "statement.new"}))
-
-(defn publish-new-statement
-  "Publishs a statement in the broker."
-  [{:keys [aggregator-id local-id content] :as statement}]
-  (let [ch (create-exchange "argweb")]
-    (publish-statement ch "argweb" (byte-array 4) (format "new.%s" aggregator-id))))
-
-(comment
-  (create-exchange "argweb")
-  (publish-new-statement {:aggregator-id "weltDE" :local-id 42 :content {:whoami :iamgroot}})
-  )
-
-(s/exercise ::gspecs/statement)
-
-
-
+  (log/debug "Connection to Message Broker established.")
+  (let [ch (open-channel)]
+    (-> ch
+        (create-exchange exchange)
+        (create-queue (:statement queues))
+        (create-queue (:issue queues)))
+    (lq/bind ch (:statement queues) exchange)
+    (lq/bind ch (:issue queues) exchange)
+    (close-channel ch)))
