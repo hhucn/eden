@@ -1,10 +1,12 @@
 # Aggregator
 
+
 ## Setup
 
 As usual, you only need one command:
 
     docker-compose up --build
+
 
 ## Services
 
@@ -26,12 +28,6 @@ message broker.
 Exposes the port 7777 of the REPL so you can directly connect to the REPL in the
 container.
 
-### subscriber
-
-Clojure test-application which acts as a consumer for RabbitMQ. You can read the
-messages from a specified queue via this service. Just for testing purposes.
-
-
 ### query
 
 The core module of the repository, which coordinates the flow of information. All
@@ -46,3 +42,11 @@ The query also uses the pub/sub system to trigger publishes of new information a
 subscriptions to updates to aquired information from external sources.
 
 Dev-Status: 0%
+
+
+## Testing
+
+### subscriber
+
+Clojure test-application which acts as a consumer for RabbitMQ. You can read the
+messages from a specified queue via this service. Just for testing purposes.
