@@ -1,6 +1,7 @@
 (ns aggregator.query.query
   (:require [aggregator.query.cache :as cache]
             [aggregator.query.db :as db]
+            [aggregator.query.utils :as utils]
             [clj-http.client :as client]
             [clojure.string :as str]
             [clojure.data.json :as json]))
@@ -18,8 +19,7 @@
         entity (last split-uri)
         request-url (str "http://" aggregate "/entity/" entity)]
     (-> (client/get request-url {:accept :json})
-        :body
-        (json/read-str :key-fn keyword)
+        (utils/http-response->map)
         :data
         :payload)))
 

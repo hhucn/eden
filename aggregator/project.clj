@@ -10,6 +10,7 @@
                  [compojure "1.6.0"]
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
+                 [ring/ring-mock "0.3.1"]
                  [ring/ring-jetty-adapter "1.6.2"]
                  [org.clojure/data.json "0.2.6"]
                  [com.novemberain/langohr "3.6.1"]

@@ -2,7 +2,7 @@
   (:require [clj-time.core :as time]
             [clj-time.coerce :as tc]
             [clojure.data.json :as json]
-            [argapi.cache :as cache]))
+            [aggregator.query.cache :as cache]))
 
 ;; This file contains utility functions triggered by the different REST API calls.
 
