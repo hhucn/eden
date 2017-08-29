@@ -2,8 +2,8 @@
   (:require [aggregator.specs]
             [clojure.spec.alpha :as s]
             [clojure.spec.test.alpha :as stest]
-            [aggregator.query.auery :as query])
-  (:use [clojure.test]))
+            [aggregator.query.query :as query]
+            [clojure.test :refer :all]))
 
 (alias 'gspecs 'aggregator.specs)
 
