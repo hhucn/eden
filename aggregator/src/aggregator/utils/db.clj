@@ -15,9 +15,9 @@
   (entity-fields :aggregate_id :entity_id :data))
 
 (defn statement-by-uri [uri]
-  (let [split-uri (str/split uri #"/" 1)
+  (let [split-uri (str/split uri #"/")
         aggregate_id (first split-uri)
-        entity_id (last split-uri)
+        entity_id (second split-uri)
         query-value (select events
                             (where {:aggregate_id aggregate_id
                                     :entity_id entity_id}))]

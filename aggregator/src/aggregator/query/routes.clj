@@ -14,9 +14,11 @@
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/entity/:aggregate_id{.+}/:id{.+}" {:keys [params]}
+  (GET "/entity/:entity{.+}" {:keys [params]}
        (response {:status :ok
-                  :data {:payload (query/tiered-retrieval (str (:aggregate_id params) "/" (:id params)) {:opts [:no-remote]})}})))
+                  :data {:payload (query/tiered-retrieval
+                                   (str (:entity params))
+                                   {:opts [:no-remote]})}})))
 
 (def app
   (-> app-routes
