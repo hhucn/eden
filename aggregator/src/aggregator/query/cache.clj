@@ -16,7 +16,7 @@
   "Signalize that an item was missing and fill in the missing value."
   [uri statement]
   (swap! storage #(cache/miss % uri statement))
-  (statement))
+  statement)
 
 (defn retrieve
   "Try to retrieve an item from cache and trigger the appropriate events.
@@ -29,7 +29,4 @@
 (defn get-cached-statements
   "Retrieve all arguments currently in the cache"
   []
-  (into {} 
-        (map (fn [[k v]] [(second (str/split k #"::")) v])
-             (filter (fn [[k v]] (str/starts-with? k "dbas::")) @storage))))
-
+  @storage)
