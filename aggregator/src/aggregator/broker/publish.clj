@@ -1,6 +1,5 @@
 (ns aggregator.broker.publish
   (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as gen]
             [langohr.basic :as lb]
             [aggregator.broker.connector :as connector]
             [aggregator.specs]))
