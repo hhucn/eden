@@ -1,24 +1,52 @@
 CREATE SCHEMA IF NOT EXISTS aggregator
 AUTHORIZATION aggregator;
 
-CREATE TABLE IF NOT EXISTS aggregator.events (
-       sequence_number SERIAL PRIMARY KEY,
-       version smallint NOT NULL DEFAULT 1,
-       aggregate_id text,
-       entity_id text,
-       creator text NOT NULL,
-       created  TIMESTAMP NOT NULL DEFAULT now(),
-       type text NOT NULL,
-       data text
+CREATE TABLE IF NOT EXISTS aggregator.statements (
+       id SERIAL PRIMARY KEY,
+       author text NOT NULL,
+       content text NOT NULL,
+       aggregate_id text NOT NULL,
+       entity_id text NOT NULL,
+       version integer NOT NULL DEFAULT 1,
+       ancestor_aggregate_id text,
+       ancestor_entity_id text,
+       ancestor_version integer,
+       created TIMESTAMP NOT NULL DEFAULT now()
 )
 WITH (
      OIDS = FALSE
 )
 TABLESPACE pg_default;
 
-CREATE INDEX on aggregator.events (aggregate_id);
-CREATE INDEX on aggregator.events (creator);
-CREATE INDEX on aggregator.events (type);
+CREATE INDEX on aggregator.statements (id);
+CREATE INDEX on aggregator.statements (entity_id);
+CREATE INDEX on aggregator.statements (aggregate_id);
+
+ALTER TABLE aggregator.statements OWNER to aggregator;
 
 
-ALTER TABLE aggregator.events OWNER to aggregator;
+CREATE TABLE IF NOT EXISTS aggregator.links (
+       id SERIAL PRIMARY KEY,
+       author text NOT NULL,
+       type text NOT NULL,
+       aggregate_id text NOT NULL,
+       entity_id text NOT NULL,
+       from_aggregate_id text NOT NULL,
+       from_entity_id text NOT NULL,
+       from_version integer NOT NULL DEFAULT 1,
+       to_aggregate_id text NOT NULL,
+       to_entity_id text NOT NULL,
+       to_version integer,
+       created TIMESTAMP NOT NULL DEFAULT now()
+)
+WITH (
+     OIDS = FALSE
+)
+TABLESPACE pg_default;
+
+CREATE INDEX on aggregator.links (id);
+CREATE INDEX on aggregator.links (entity_id);
+CREATE INDEX on aggregator.links (aggregate_id);
+
+ALTER TABLE aggregator.links OWNER to aggregator;
+
