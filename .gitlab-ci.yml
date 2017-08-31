@@ -1,8 +1,33 @@
+services:
+  - name: postgres:9.6
+    alias: db
+
+variables:
+  POSTGRES_DB: aggregator
+  POSTGRES_USER: aggregator
+  POSTGRES_PASSWORD: "kI1BtN@rCbh2i6wg7EiEO*FwcdugST7s"
+
 cache:
   paths:
     - ~/.m2
     - /root/.m2
   untracked: true
+
+
+################################################################################
+# Job-Templates
+
+.job_template: &seed_db  # Hidden key that defines an anchor named 'job_definition'
+  before_script:
+    - apk add --no-cache postgresql-client
+    - export PGPASSWORD=$POSTGRES_PASSWORD
+    - cd db/entrypoint
+    - for f in *.sql ; do psql -h "db" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f $f ; done
+    - cd ../../
+
+
+################################################################################
+# Jobs
 
 up-to-date?:
   image: clojure:alpine
@@ -21,6 +46,7 @@ idiomatic?:
   allow_failure: true
 
 test:
+  <<: *seed_db
   image: clojure:alpine
   stage: test
   script:
