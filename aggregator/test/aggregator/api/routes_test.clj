@@ -1,5 +1,5 @@
-(ns aggregator.query.routes-test
-  (:require [aggregator.query.routes :as routes]
+(ns aggregator.api.routes-test
+  (:require [aggregator.api.routes :as routes]
             [aggregator.query.utils :as utils]
             [clojure.test :refer :all]
             [ring.mock.request :as mock]

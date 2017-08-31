@@ -1,4 +1,4 @@
-(ns aggregator.query.routes
+(ns aggregator.api.routes
 
   ;; Define and expose the routes for the REST API in this file.
 
