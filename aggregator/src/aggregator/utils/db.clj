@@ -11,14 +11,14 @@
                      :password (System/getenv "POSTGRES_PASSWORD")
                      :delimiters ""}))
 
-(defentity events
-  (entity-fields :aggregate_id :entity_id :data))
+(defentity statements
+  (entity-fields :aggregate_id :entity_id :content))
 
 (defn statement-by-uri [uri]
   (let [split-uri (str/split uri #"/")
         aggregate_id (first split-uri)
         entity_id (second split-uri)
-        query-value (select events
+        query-value (select statements
                             (where {:aggregate_id aggregate_id
                                     :entity_id entity_id}))]
     (if (= '() query-value)
