@@ -7,9 +7,7 @@
 
 (def exchange "argweb")
 (def queues
-  {:statement "statement.update"
-   :issue "issue.update"})
-
+  {:statement "statement.update"})
 
 ;; -----------------------------------------------------------------------------
 ;; Setup broker
@@ -20,7 +18,7 @@
   "Read variables from environment and establish connection to the message
    broker."
   []
-  (reset! conn (rmq/connect {:host "broker"
+  (reset! conn (rmq/connect {:host (System/getenv "BROKER_HOST")
                              :username (System/getenv "BROKER_USER")
                              :password (System/getenv "BROKER_PASS")})))
 
@@ -45,8 +43,7 @@
   (let [ch (open-channel)]
     (-> ch
         (create-exchange exchange)
-        (create-queue (:statement queues))
-        (create-queue (:issue queues)))
+        (create-queue (:statement queues)))
     (lq/bind ch (:statement queues) exchange)
     (lq/bind ch (:issue queues) exchange)
     (close-channel ch)))
