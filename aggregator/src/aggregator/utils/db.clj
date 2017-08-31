@@ -12,7 +12,7 @@
                      :delimiters ""}))
 
 (defentity statements
-  (entity-fields :aggregate_id :entity_id :content))
+  (entity-fields :aggregate_id :entity_id :version :content :author :created))
 
 (defn statement-by-uri [uri]
   (let [split-uri (str/split uri #"/")
