@@ -14,3 +14,9 @@
          "the city is planing a new park in the upcoming month"))
   (is (= (:author (first (db/statement-by-uri "hhu.de/7")))
          "Bolek")))
+
+(deftest statement-by-author-test
+  (is (= (count (db/statement-by-author "XxxBaerchiDarkDestoyerxxX"))
+         1))
+  (is (= (count (db/statement-by-author "George"))
+         2)))
