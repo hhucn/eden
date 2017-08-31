@@ -1,6 +1,6 @@
 (ns aggregator.query.query
   (:require [aggregator.query.cache :as cache]
-            [aggregator.query.db :as db]
+            [aggregator.utils.db :as db]
             [aggregator.query.utils :as utils]
             [clj-http.client :as client]
             [clojure.string :as str]
