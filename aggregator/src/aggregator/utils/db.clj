@@ -1,4 +1,4 @@
-(ns aggregator.query.db
+(ns aggregator.utils.db
   (:use [korma.db]
         [korma.core])
   (:require [clojure.string :as str]))
