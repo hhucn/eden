@@ -2,7 +2,9 @@
   (:require [clojure.spec.alpha :as s]
             [langohr.basic :as lb]
             [aggregator.broker.connector :as connector]
-            [aggregator.specs]))
+            [aggregator.specs]
+            [aggregator.broker.lib :as blib]
+            [aggregator.utils.common :as lib]))
 
 (alias 'gspecs 'aggregator.specs)
 
@@ -11,16 +13,16 @@
 
   TODO: We are currently ignoring the Exchange. I think we do not need it
   here..."
-  [queue payload]
+  [entity]
   (let [ch (connector/open-channel)]
-    (lb/publish ch "" (get connector/queues queue) payload)
+    (lb/publish ch "" (blib/get-queue-name entity) entity)
     (connector/close-channel ch)))
 
 (defn publish-statement
   "Put a statement to the correct queue. Statement must conform spec."
   [statement]
-  {:pre [(s/valid? ::gspecs/statement statement)]}
-  (publish :statement statement))
+  {:pre [(lib/check-argument ::gspecs/statement statement)]}
+  (publish statement))
 
 (s/fdef publish-statement
         :args (s/cat :statement ::gspecs/statement))
