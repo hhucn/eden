@@ -20,26 +20,26 @@
         :payload)))
 
 (defn check-db
-  "Check the database for a statement and update cache after item is found."
+  "Check the database for an entity and update cache after item is found."
   ([uri]
    (check-db uri {}))
   ([uri {:keys [opts]}]
-   (let [possible-statement (db/statement-by-uri uri)]
-     (if (= possible-statement :missing)
+   (let [possible-entity (db/statement-by-uri uri)]
+     (if (= possible-entity :missing)
        (if (some #(= % :no-remote) opts)
          :not-found
          (retrieve-remote uri))
-       (cache/cache-miss possible-statement)))))
+       (cache/cache-miss possible-entity)))))
 
 (defn tiered-retrieval
-  "Check whether the Cache contains the desired statement. If not delegate to DB and remote acquisition."
+  "Check whether the Cache contains the desired entity. If not delegate to DB and remote acquisition."
   ([uri]
    (tiered-retrieval uri {}))
   ([uri options] 
-   (let [cached-statement (cache/retrieve uri)]
-     (if (= cached-statement :missing)
+   (let [cached-entity (cache/retrieve uri)]
+     (if (= cached-entity :missing)
        (check-db uri options)
-       cached-statement))))
+       cached-entity))))
 
 
 
