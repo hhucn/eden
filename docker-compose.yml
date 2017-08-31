@@ -22,6 +22,7 @@ services:
       - broker
       - db
     environment:
+      - "BROKER_HOST=${BROKER_HOST}"
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
       - "POSTGRES_USER=${DATABASE_USER}"
