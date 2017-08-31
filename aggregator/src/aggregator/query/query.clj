@@ -6,10 +6,6 @@
             [clojure.string :as str]
             [clojure.data.json :as json]))
 
-;; The main module for queries. All internal calls run through the functions defined here. The other aggregator module call these functions, as well as the utility-handlers.
-
-
-;; Non-API helper functions
 
 (defn retrieve-remote
   "Try to retrieve an argument from a remote aggregator. The host part is treated as the webhost."
@@ -44,36 +40,6 @@
      (if (= cached-statement :missing)
        (check-db uri options)
        cached-statement))))
-
-
-;;
-;;;; Call the following functions directly
-;;
-
-(defn statement [uri]
-  (let [result (tiered-retrieval uri)]
- ))
-
-(defn link [id]
-  id)
-
-(defn statement-by-link [link]
-  {:statement "hi"})
-
-(defn add-link [link]
-   {:status :ok})
-
-(defn add-statement [statement]
-  {:status :ok})
-
-(defn statements-by-provider [provider]
-  (:a :b :c))
-
-(defn statements-by-author [author]
-  (:d :e :f))
-
-(defn linked-statements [uri]
-  (:foo :bar))
 
 
 
