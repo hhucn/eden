@@ -6,7 +6,7 @@
             [langohr.queue :as lq]
             [aggregator.broker.lib :as blib]))
 
-(def exchange "argweb") ;; Currently unused
+(def exchange "argweb")
 
 ;; -----------------------------------------------------------------------------
 ;; Setup broker
@@ -53,5 +53,5 @@
   (log/debug "Connection to Message Broker established.")
   (let [ch (open-channel)]
     (-> ch
-        #_(create-exchange exchange)
+        (create-exchange exchange)
         (close-channel))))
