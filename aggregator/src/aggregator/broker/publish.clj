@@ -3,9 +3,9 @@
             [clojure.data.json :as json]
             [langohr.basic :as lb]
             [aggregator.broker.connector :as connector]
-            [aggregator.specs]
             [aggregator.broker.lib :as blib]
-            [aggregator.utils.common :as lib]))
+            [aggregator.utils.common :as lib]
+            [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
 
@@ -38,4 +38,5 @@
   (connector/init-connection!)
   (publish-statement statement)
   (blib/get-queue-name statement)
+  (json/write-str statement)
   )
