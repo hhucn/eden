@@ -20,3 +20,16 @@
          1))
   (is (= (count (db/statements-by-author "George"))
          2)))
+
+(deftest insert-statement-test
+  (db/insert-statement {:author "Wegi" :content "Test me baby one more time"
+                     :aggregate-id "schneider.gg" :entity-id "W01" :version 1337})
+  (is (= (:content (db/exact-statement "schneider.gg" "W01" 1337))
+         "Test me baby one more time")))
+
+(deftest insert-link-test
+  (db/insert-link {:author "Wegi" :type "undercut" :from-aggregate-id "schneider.gg"
+                   :from-entity-id "W01" :from-version 1337 :to-aggregate-id "schneider.gg"
+                   :to-entity-id "W_link_35" :aggregate-id "schneider.gg" :entity-id "link0r1337"})
+  (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35"))
+         "Wegi")))

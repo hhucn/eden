@@ -63,3 +63,17 @@
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
   [statement-map]
   (insert statements (values (utils/underscore-keys statement-map))))
+
+(defn exact-link
+  "Return the exact link and only that if possible."
+  [from-aggregate from-entity from-version to-aggregate to-entity & [to-version]]
+  (let [db-result (select links (where {:from_aggregate_id from-aggregate :from_entity_id from-entity
+                                        :from_version from-version :to_aggregate_id to-aggregate
+                                        :to_entity_id to-entity :to_version to-version}))]
+    (first db-result)))
+
+(defn insert-link
+  "Requires a map conforming to the ::aggregator.specs/link as input. Inserts the statement into the database."
+  [link-map]
+  (insert links (values (utils/underscore-keys link-map))))
+
