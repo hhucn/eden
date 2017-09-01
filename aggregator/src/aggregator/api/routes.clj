@@ -14,7 +14,7 @@
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/entity/:entity{.+}" {:keys [params]}
+  (GET "/statement/:entity{.+}" {:keys [params]}
        (response {:status :ok
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))

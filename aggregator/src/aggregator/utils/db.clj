@@ -29,3 +29,5 @@
 (defn statement-by-author [author]
   "Return all statements with a certain author."
   (select statements (where {:author author})))
+
+
