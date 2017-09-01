@@ -8,7 +8,7 @@
                  [org.clojure/core.cache "0.6.5"]
                  [org.postgresql/postgresql "42.1.4"]
                  [com.novemberain/langohr "4.1.0"]
-                 [com.taoensso/timbre "4.1.0"]  ;; logging lib
+                 [com.taoensso/timbre "4.10.0"]  ;; logging lib
                  [korma "0.4.3"]
                  [compojure "1.6.0"]
                  [ring/ring-defaults "0.3.1"]
