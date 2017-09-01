@@ -1,7 +1,8 @@
 (ns aggregator.utils.db
   (:use [korma.db]
         [korma.core])
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [aggregator.query.utils :as utils]))
 
 (defdb db (postgres {
                      :host "db"
@@ -49,3 +50,16 @@
   "Return all link-versions defined by the uri"
   [uri]
   (entity-by-uri uri links))
+
+(defn exact-statement
+  "Return the exact statement and only that if possible."
+  [aggregate-id entity-id version]
+  (let [db-result (select statements (where {:aggregate_id aggregate-id
+                                             :entity_id entity-id
+                                             :version version}))]
+    (first db-result)))
+
+(defn insert-statement
+  "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
+  [statement-map]
+  (insert statements (values (utils/underscore-keys statement-map))))
