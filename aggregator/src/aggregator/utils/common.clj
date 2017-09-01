@@ -3,10 +3,11 @@
   (:require [clojure.spec.alpha :as s]
             [taoensso.timbre :as log]))
 
-(defn log-argument
+(defn valid?
   "Verify that data conforms to spec. Calls clojure.spec/explain-str to show a
-  useful error message. Prints output to logs and *always* return true for usage
-  within pre-conditions."
-  [type data]
-  (when-not (s/valid? type data) (log/info (s/explain-str type data)))
-  true)
+  useful error message. Prints output to logs and returns a boolean."
+  [spec data]
+  (if (s/valid? spec data)
+    true
+    (do (log/info (s/explain-str spec data))
+        false)))

@@ -21,10 +21,10 @@
     (connector/close-channel ch)))
 
 (defn publish-statement
-  "Put a statement to the correct queue. Statement must conform spec."
+  "Put a statement to the correct queue. Statement must conform spec to be
+  published."
   [statement]
-  {:pre [(lib/log-argument ::gspecs/statement statement)]}
-  (when (s/valid? ::gspecs/statement statement)
+  (when (lib/valid? ::gspecs/statement statement)
     (publish statement)))
 
 (s/fdef publish-statement
