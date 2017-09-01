@@ -1,5 +1,5 @@
 (ns aggregator.broker.connector
-  (:require [clojure.tools.logging :as log]
+  (:require [taoensso.timbre :as log]
             [langohr.core :as rmq]
             [langohr.channel :as lch]
             [langohr.exchange :as le]
