@@ -14,6 +14,6 @@
   (is (= (:status (routestest-helper "/"))
          "ok")))
 
-(deftest entity-retrieval-test
-  (is (= (get-in (routestest-helper "/entity/fantasy.dork/non-existent-id") [:data :payload])
+(deftest statement-retrieval-test
+  (is (= (get-in (routestest-helper "/statement/fantasy.dork/non-existent-id") [:data :payload])
          "not-found")))
