@@ -64,4 +64,5 @@ coverage:
   stage: analyze
   image: clojure:alpine
   script:
+    - cd aggregator
     - lein cloverage
