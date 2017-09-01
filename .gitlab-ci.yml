@@ -1,3 +1,9 @@
+stages:
+  - build
+  - test
+  - analyze
+  - deploy
+
 services:
   - name: postgres:9.6
     alias: db
@@ -52,3 +58,11 @@ test:
   script:
     - cd aggregator
     - lein test
+
+coverage:
+  <<: *seed_db
+  stage: analyze
+  image: clojure:alpine
+  script:
+    - cd aggregator
+    - lein cloverage

@@ -24,7 +24,8 @@
 
   :plugins [[lein-kibit "0.1.5"]
             [lein-ancient "0.6.10"]
-            [lein-ring "0.9.7"]]
+            [lein-ring "0.9.7"]
+            [lein-cloverage "1.0.9"]]
 
   :ring {:handler aggregator.query.routes/app}
 
