@@ -6,7 +6,7 @@
   [statement]
   (let [db-result (db/exact-statement (:aggregate-id statement) (:entity-id statement)
                                       (:version statement))]
-    (when (not db-result)
+    (when-not db-result
       (db/insert-statement statement))))
 
 
@@ -14,5 +14,5 @@
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
   [link]
   (let [db-result (db/exact-link (:aggregate-id link) (:entity-id link))]
-    (when (not db-result)
+    (when-not db-result
       (db/insert-link link))))
