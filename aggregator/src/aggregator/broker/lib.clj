@@ -1,7 +1,8 @@
 (ns aggregator.broker.lib
   (:require [clojure.spec.alpha :as s]
-            [aggregator.specs]
-            [aggregator.utils.common :as lib]))
+            [aggregator.utils.common :as lib]
+            [clojure.spec.test.alpha :as stest]
+            [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
 
@@ -12,5 +13,10 @@
              (lib/valid? ::gspecs/entity-id entity-id))
     (str "statement/queues" "/" aggregate-id "/" entity-id)))
 
+
+;; -----------------------------------------------------------------------------
+;; Specs
+
 (s/fdef get-queue-name
-        :args (s/cat :aggregate-id ::gspecs/aggregate-id :entity-id ::gspecs/entity-id))
+        :args (s/cat :statement ::gspecs/statement)
+        :ret string?)
