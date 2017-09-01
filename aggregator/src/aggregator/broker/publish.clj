@@ -23,8 +23,9 @@
 (defn publish-statement
   "Put a statement to the correct queue. Statement must conform spec."
   [statement]
-  {:pre [(lib/check-argument ::gspecs/statement statement)]}
-  (publish statement))
+  {:pre [(lib/log-argument ::gspecs/statement statement)]}
+  (when (s/valid? ::gspecs/statement statement)
+    (publish statement)))
 
 (s/fdef publish-statement
         :args (s/cat :statement ::gspecs/statement))
@@ -36,7 +37,7 @@
 (comment
   (def statement (ffirst (s/exercise ::gspecs/statement)))
   (connector/init-connection!)
-  (publish-statement statement)
+  (publish-statement {:iam :groot})
   (blib/get-queue-name statement)
   (json/write-str statement)
   )

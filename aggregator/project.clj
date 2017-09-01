@@ -16,6 +16,7 @@
                  [ring/ring-mock "0.3.1"]
                  [ring/ring-jetty-adapter "1.6.2"]
                  [clj-http "3.7.0"]]
+
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]}
              :repl {:plugins [[cider/cider-nrepl "0.15.1-SNAPSHOT"]
                               [refactor-nrepl "2.3.1"]]}

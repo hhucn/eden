@@ -6,8 +6,8 @@
 (alias 'gspecs 'aggregator.specs)
 
 (defn get-queue-name [{:keys [aggregate-id entity-id]}]
-  {:pre [(lib/check-argument ::gspecs/aggregate-id aggregate-id)
-         (lib/check-argument ::gspecs/entity-id entity-id)]}
+  {:pre [(lib/log-argument ::gspecs/aggregate-id aggregate-id)
+         (lib/log-argument ::gspecs/entity-id entity-id)]}
   (str "statement/queues" "/" aggregate-id "/" entity-id))
 
 (s/fdef get-queue-name
