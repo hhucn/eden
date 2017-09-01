@@ -3,8 +3,7 @@
             [aggregator.utils.db :as db]
             [aggregator.query.utils :as utils]
             [clj-http.client :as client]
-            [clojure.string :as str]
-            [clojure.data.json :as json]))
+            [clojure.string :as str]))
 
 
 (defn retrieve-remote
@@ -24,12 +23,12 @@
   ([uri]
    (check-db uri {}))
   ([uri {:keys [opts]}]
-   (let [possible-entity (db/statement-by-uri uri)]
+   (let [possible-entity (db/statements-by-uri uri)]
      (if (= possible-entity :missing)
        (if (some #(= % :no-remote) opts)
          :not-found
          (retrieve-remote uri))
-       (cache/cache-miss possible-entity)))))
+       (cache/cache-miss uri possible-entity)))))
 
 (defn tiered-retrieval
   "Check whether the Cache contains the desired entity. If not delegate to DB and remote acquisition."
@@ -41,5 +40,14 @@
        (check-db uri options)
        cached-entity))))
 
-
+(defn retrieve-link
+  "Retrieve a link from cache or db. Returns :missing if no such link can be found."
+  [uri]
+  (let [cached-link (cache/retrieve uri)]
+    (if (= cached-link :missing)
+      (let [db-result (db/links-by-uri uri)]
+        (if (= db-result :missing)
+          :not-found
+          db-result))
+      cached-link)))
 

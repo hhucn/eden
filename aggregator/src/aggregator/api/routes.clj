@@ -3,7 +3,6 @@
   ;; Define and expose the routes for the REST API in this file.
 
   (:require [compojure.core :refer [GET POST defroutes]]
-            [compojure.route :as route]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
             [ring.util.response :refer [response]]
@@ -18,7 +17,10 @@
        (response {:status :ok
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))
-                                   {:opts [:no-remote]})}})))
+                                   {:opts [:no-remote]})}}))
+  (GET "/link/:entity{.+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/retrieve-link (str (:entity params)))}})))
 
 (def app
   (-> app-routes

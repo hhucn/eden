@@ -4,19 +4,19 @@
 
 
 (deftest statement-uri-retrieval-test
-  (is (= (:version (first (db/statement-by-uri "hhu.de/34")))
+  (is (= (:version (first (db/statements-by-uri "hhu.de/34")))
          1))
-  (is (= (:aggregate_id (first (db/statement-by-uri "hhu.de/P12")))
+  (is (= (:aggregate_id (first (db/statements-by-uri "hhu.de/P12")))
          "hhu.de"))
-  (is (= (:entity_id (first (db/statement-by-uri "hhu.de/P13")))
+  (is (= (:entity_id (first (db/statements-by-uri "hhu.de/P13")))
          "P13"))
-  (is (= (:content (first (db/statement-by-uri "hhu.de/P22")))
+  (is (= (:content (first (db/statements-by-uri "hhu.de/P22")))
          "the city is planing a new park in the upcoming month"))
-  (is (= (:author (first (db/statement-by-uri "hhu.de/7")))
+  (is (= (:author (first (db/statements-by-uri "hhu.de/7")))
          "Bolek")))
 
 (deftest statement-by-author-test
-  (is (= (count (db/statement-by-author "XxxBaerchiDarkDestoyerxxX"))
+  (is (= (count (db/statements-by-author "XxxBaerchiDarkDestoyerxxX"))
          1))
-  (is (= (count (db/statement-by-author "George"))
+  (is (= (count (db/statements-by-author "George"))
          2)))
