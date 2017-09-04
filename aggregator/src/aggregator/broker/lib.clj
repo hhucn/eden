@@ -11,7 +11,7 @@
   [{:keys [aggregate-id entity-id]}]
   (when (and (lib/valid? ::gspecs/aggregate-id aggregate-id)
              (lib/valid? ::gspecs/entity-id entity-id))
-    (str "statement/queues" "/" aggregate-id "/" entity-id)))
+    (str "statement/update" "/" aggregate-id "/" entity-id)))
 
 
 ;; -----------------------------------------------------------------------------

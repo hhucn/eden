@@ -6,6 +6,7 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha19"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/core.cache "0.6.5"]
+                 [org.clojure/core.async "0.3.443"]
                  [org.postgresql/postgresql "42.1.4"]
                  [com.novemberain/langohr "4.1.0"]
                  [com.taoensso/timbre "4.10.0"]  ;; logging lib

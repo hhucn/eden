@@ -1,6 +1,7 @@
 (ns aggregator.utils.common
   "Common functions, which can be used in several namespaces."
   (:require [clojure.spec.alpha :as s]
+            [clojure.data.json :as json]
             [taoensso.timbre :as log]))
 
 (defn valid?
@@ -9,5 +10,19 @@
   [spec data]
   (if (s/valid? spec data)
     true
-    (do (log/info (s/explain-str spec data))
+    (do (log/debug (s/explain-str spec data))
         false)))
+
+(defn json->edn
+  "Try to parse payload. Return EDN if payload is json. Else return
+   string as provided by postgres."
+  [payload]
+  (try
+    (json/read-str payload :key-fn keyword)
+    (catch Exception e
+      payload)))
+
+(s/fdef json->edn
+        :args (s/cat :json string?)
+        :ret map?)
+

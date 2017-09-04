@@ -1,7 +1,8 @@
 (ns aggregator.utils.common-test
-  (:require [aggregator.utils.common :as lib]
-            [clojure.test :refer [deftest are is]]
+  (:require [clojure.test :refer [deftest are is]]
             [clojure.spec.alpha :as s]
+            [clojure.data.json :as json]
+            [aggregator.utils.common :as lib]
             [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
@@ -14,3 +15,10 @@
     false (lib/valid? string? :foo)
     false (lib/valid? string? nil)
     true (lib/valid? ::gspecs/statement statement)))
+
+(deftest json->edn
+  (are [x y] (= x y)
+    nil (lib/json->edn (json/write-str nil))
+    "iamgroot" (lib/json->edn (json/write-str :iamgroot))
+    {:foo "bar"} (lib/json->edn (json/write-str {:foo :bar}))
+    "{\"invalid\"" (lib/json->edn "{\"invalid\"")))

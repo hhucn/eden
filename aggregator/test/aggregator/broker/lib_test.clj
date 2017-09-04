@@ -14,5 +14,5 @@
     nil (blib/get-queue-name {:foo :bar})
     nil (blib/get-queue-name {:aggregate-id "foo"})
     nil (blib/get-queue-name {:aggregate-id "foo" :entity-id nil})
-    "statement/queues/foo/bar" (blib/get-queue-name {:aggregate-id "foo" :entity-id "bar"}))
+    "statement/update/foo/bar" (blib/get-queue-name {:aggregate-id "foo" :entity-id "bar"}))
   (is (s/valid? string? (blib/get-queue-name statement))))
