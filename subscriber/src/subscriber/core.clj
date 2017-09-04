@@ -24,5 +24,5 @@
       (recur))))
 
 (defn -main [& args]
-  (subscribe "welt.de")
+  (subscribe "faz.net")
   )

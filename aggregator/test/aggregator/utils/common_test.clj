@@ -19,4 +19,6 @@
 (deftest json->edn
   (are [x y] (= x y)
     nil (lib/json->edn (json/write-str nil))
-    {:foo "bar"} (lib/json->edn (json/write-str {:foo :bar}))))
+    "iamgroot" (lib/json->edn (json/write-str :iamgroot))
+    {:foo "bar"} (lib/json->edn (json/write-str {:foo :bar}))
+    "{\"invalid\"" (lib/json->edn "{\"invalid\"")))

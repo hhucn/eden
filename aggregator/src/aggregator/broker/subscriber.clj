@@ -3,14 +3,13 @@
             [langohr.core :as rmq]
             [langohr.channel :as lch]
             [langohr.consumers :as lcons]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [aggregator.utils.common :as lib]))
 
-(defn message-handler
-  [ch {:keys [content-type delivery-tag type]} ^bytes payload]
-  (log/debug (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
-                   (String. payload "UTF-8") delivery-tag content-type type))
-  (println (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
-                   (String. payload "UTF-8") delivery-tag content-type type)))
+(defn- message-handler
+  [ch _ ^bytes payload]
+  (log/debug (format "[subscriber] Received a message: %s"
+                     (lib/json->edn (String. payload "UTF-8")))))
 
 (defn subscribe
   "Subscribe to queue and print output to Emacs Buffer *cider-repl localhost*."
@@ -38,9 +37,5 @@
                   :entity-id "42",
                   :version 1,
                   :created nil})
-  (subscribe "iamgro.ot")
-  (bpub/publish-statement statement)
-  (let [ch (bc/open-channel)]
-    (bc/create-queue ch statement)
-    (bc/close-channel ch))
+  (subscribe "nobo.dy")
   )

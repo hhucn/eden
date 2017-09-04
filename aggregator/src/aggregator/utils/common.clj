@@ -14,9 +14,13 @@
         false)))
 
 (defn json->edn
-  "Convert valid json to EDN."
-  [data]
-  (json/read-str data :key-fn keyword))
+  "Try to parse payload. Return EDN if payload is json. Else return
+   string as provided by postgres."
+  [payload]
+  (try
+    (json/read-str payload :key-fn keyword)
+    (catch Exception e
+      payload)))
 
 (s/fdef json->edn
         :args (s/cat :json string?)
