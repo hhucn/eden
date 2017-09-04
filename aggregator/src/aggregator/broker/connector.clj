@@ -43,10 +43,7 @@
   "Initializes connection to broker and creates an exchange."
   []
   (create-connection!)
-  (log/debug "Connection to Message Broker established.")
-  #_(let [ch (open-channel)]
-    (-> ch
-        (close-channel))))
+  (log/debug "Connection to Message Broker established."))
 
 
 ;; -----------------------------------------------------------------------------

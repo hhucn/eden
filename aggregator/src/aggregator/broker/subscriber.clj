@@ -30,12 +30,5 @@
 ;; Testing
 
 (comment
-  queue
-  (def statement {:author "groot",
-                  :content "iamgroot",
-                  :aggregate-id "hhu.de",
-                  :entity-id "42",
-                  :version 1,
-                  :created nil})
   (subscribe "nobo.dy")
   )
