@@ -12,7 +12,7 @@
   (let [split-uri (str/split uri #"/" 1)
         aggregate (first split-uri)
         entity (last split-uri)
-        request-url (str "http://" aggregate "/entity/" entity)]
+        request-url (str "http://" aggregate "/statements/" entity)]
     (-> (client/get request-url {:accept :json})
         (utils/http-response->map)
         :data
@@ -50,3 +50,9 @@
           :not-found
           db-result))
       cached-link)))
+
+(defn exact-statement
+  "Return the exact statement from cache or db"
+  [aggregate-id entity-id version]
+  :check-here-for-cache
+  (db/exact-statement aggregate-id entity-id version))
