@@ -38,6 +38,7 @@
   (def statement (ffirst (s/exercise ::gspecs/statement)))
   (connector/init-connection!)
   (publish-statement {:iam :groot})
+  (publish-statement statement)
   (blib/get-queue-name statement)
   (json/write-str statement)
   )
