@@ -1,9 +1,17 @@
 (ns aggregator.broker.connector-test
   (:require [aggregator.broker.connector :as connector]
-            [clojure.test :refer [deftest is are]]))
+            [clojure.test :refer [deftest is use-fixtures]]))
 
-(deftest init-connection-test
-  (is true (connector/init-connection!)))
+;; Test preparation
+(defn fixtures [f]
+  (connector/init-connection!)
+  (f)
+  (connector/close-connection!))
+(use-fixtures :once fixtures)
+
+
+;; -----------------------------------------------------------------------------
+;; Tests
 
 (deftest open-channel-test
   (is true (connector/open-channel)))

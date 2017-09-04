@@ -5,9 +5,6 @@
             [langohr.queue :as lq]
             [aggregator.broker.config :as bconf]))
 
-;; -----------------------------------------------------------------------------
-;; Setup broker
-
 (def ^:private conn (atom nil))
 
 (defn- create-connection!
@@ -45,6 +42,17 @@
   (create-connection!)
   (log/debug "Connection to Message Broker established."))
 
+(defn close-connection!
+  "Close connection to message broker."
+  []
+  (rmq/close @conn)
+  (reset! conn nil))
+
+(defn connected?
+  "Check if connection to broker is established."
+  []
+  (if (and @conn (not (rmq/closed? @conn)))
+    true false))
 
 ;; -----------------------------------------------------------------------------
 ;; Testing
