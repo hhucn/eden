@@ -5,7 +5,7 @@
             [langohr.consumers :as lcons]))
 
 (defn message-handler
-  [ch {:keys [content-type delivery-tag type] :as meta} ^bytes payload]
+  [ch {:keys [content-type delivery-tag type]} ^bytes payload]
   (println (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
                    (String. payload "UTF-8") delivery-tag content-type type)))
 
@@ -24,4 +24,5 @@
       (recur))))
 
 (defn -main [& args]
-  (subscribe "statement/update/hhu.de/42"))
+  (subscribe "statement/update/hhu.de/42")
+  )
