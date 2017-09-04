@@ -36,8 +36,14 @@
 
 (comment
   (def statement (ffirst (s/exercise ::gspecs/statement)))
+
   (connector/init-connection!)
+  (doall
+   (map connector/create-queue
+        ["welt.de" "zeit.de" "faz.net" "iamgro.ot" "iamgro.ot" "nobo.dy"]))
+
   (publish {:iam :groot} bconf/default-route)
+
   (publish-statement statement)
   (blib/get-queue-name statement)
   (json/write-str statement)

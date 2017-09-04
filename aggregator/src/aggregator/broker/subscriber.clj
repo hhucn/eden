@@ -3,37 +3,27 @@
             [langohr.core :as rmq]
             [langohr.channel :as lch]
             [langohr.consumers :as lcons]
-            [taoensso.timbre :as log]
-            [aggregator.broker.connector :as bc]
-            [aggregator.broker.lib :as blib]
-            [aggregator.broker.publish :as bpub]
-            [aggregator.specs]))
+            [taoensso.timbre :as log]))
 
-(alias 'gspecs 'aggregator.specs)
-
-(defn- make-handler
-  [ch {:keys [type]} ^bytes payload]
+(defn message-handler
+  [ch {:keys [content-type delivery-tag type]} ^bytes payload]
   (log/debug (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
-                     (String. payload "UTF-8") type))
+                   (String. payload "UTF-8") delivery-tag content-type type))
   (println (format "[consumer] Received a message: %s, delivery tag: %d, content type: %s, type: %s"
-                   (String. payload "UTF-8") type)))
+                   (String. payload "UTF-8") delivery-tag content-type type)))
 
 (defn subscribe
   "Subscribe to queue and print output to Emacs Buffer *cider-repl localhost*."
-  [entity]
+  [queue]
   (let [conn (rmq/connect
               {:host "broker"
                :username "groot"
                :password "iamgroot"})
-        ch (lch/open conn)
-        queue (blib/get-queue-name entity)]
-    (println (format "[main] Connected. Channel id: %d" (.getChannelNumber ch)))
-    (println "Connecting to queue '" queue "'")
-    (def queue queue)
+        ch (lch/open conn)]
+    (log/debug "[subscriber] Connected. Channel id: " (.getChannelNumber ch))
     (go-loop []
       (<! (timeout 1000))
-      #_(bc/create-queue ch entity)
-      (lcons/subscribe ch "statement/update/hhu.de/42" make-handler {:auto-ack true})
+      (lcons/subscribe ch queue message-handler {:auto-ack true})
       (recur))))
 
 
@@ -48,7 +38,7 @@
                   :entity-id "42",
                   :version 1,
                   :created nil})
-  (subscribe statement)
+  (subscribe "iamgro.ot")
   (bpub/publish-statement statement)
   (let [ch (bc/open-channel)]
     (bc/create-queue ch statement)

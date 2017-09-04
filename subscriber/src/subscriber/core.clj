@@ -24,5 +24,5 @@
       (recur))))
 
 (defn -main [& args]
-  (subscribe "statement/update/hhu.de/42")
+  (subscribe "welt.de")
   )
