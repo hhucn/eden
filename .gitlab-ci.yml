@@ -60,7 +60,6 @@ test:
     - lein test
 
 coverage:
-  <<: *seed_db
   stage: analyze
   image: clojure:alpine
   script:

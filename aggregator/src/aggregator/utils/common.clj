@@ -9,5 +9,5 @@
   [spec data]
   (if (s/valid? spec data)
     true
-    (do (log/info (s/explain-str spec data))
+    (do (log/debug (s/explain-str spec data))
         false)))

@@ -1,7 +1,7 @@
 (ns aggregator.utils.common-test
-  (:require [aggregator.utils.common :as lib]
-            [clojure.test :refer [deftest are is]]
+  (:require [clojure.test :refer [deftest are is]]
             [clojure.spec.alpha :as s]
+            [aggregator.utils.common :as lib]
             [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
