@@ -1,6 +1,7 @@
 (ns aggregator.utils.common
   "Common functions, which can be used in several namespaces."
   (:require [clojure.spec.alpha :as s]
+            [clojure.data.json :as json]
             [taoensso.timbre :as log]))
 
 (defn valid?
@@ -11,3 +12,13 @@
     true
     (do (log/debug (s/explain-str spec data))
         false)))
+
+(defn json->edn
+  "Convert valid json to EDN."
+  [data]
+  (json/read-str data :key-fn keyword))
+
+(s/fdef json->edn
+        :args (s/cat :json string?)
+        :ret map?)
+
