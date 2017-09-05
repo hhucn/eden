@@ -20,3 +20,18 @@
           additional-links (query/links-to statement)]
       (concat (rest queue) undercuts additional-links))
     (rest queue)))
+
+(defn loop-next
+  "Loop the next function with the queue until its empty."
+  [queue]
+  (loop [q queue]
+    (let [next-step (next q)]
+      (if next-step
+        (recur next-step)
+        nil))))
+
+(defn lookup-related
+  "Lookup all related links and statements 'downstream' from the starting statement. Runs in a separate thread and returns the future. Warning: dereferencing the future might block the system if the lookup is still going on."
+  [statement]
+  (let [startlinks (query/links-to statement)]
+    (future (loop-next startlinks))))
