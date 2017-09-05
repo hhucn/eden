@@ -7,13 +7,20 @@
             [aggregator.utils.common :as lib]))
 
 (defn- message-handler
-  [ch _ ^bytes payload]
-  (log/debug (format "[subscriber] Received a message: %s"
-                     (lib/json->edn (String. payload "UTF-8")))))
+  "Creates a handler, which is called on new messages. Converts the payload into
+  data and calls f/1 with it."
+  [f ch _ ^bytes payload]
+  (let [p (lib/json->edn (String. payload "UTF-8"))]
+    (log/debug (format "[subscriber] Received a message: %s" p))
+    (f p)))
 
 (defn subscribe
-  "Subscribe to queue and print output to Emacs Buffer *cider-repl localhost*."
-  [queue]
+  "Subscribe to queue and print output to Emacs Buffer *cider-repl localhost*.
+  Calls a function f/1 with the payload.
+
+  Example:
+  (subscribe \"hhu.de\" (fn [payload] (println \"do something with: \" payload)))"
+  [queue f]
   (let [conn (rmq/connect
               {:host "broker"
                :username "groot"
@@ -22,7 +29,7 @@
     (log/debug "[subscriber] Connected. Channel id: " (.getChannelNumber ch))
     (go-loop []
       (<! (timeout 1000))
-      (lcons/subscribe ch queue message-handler {:auto-ack true})
+      (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
       (recur))))
 
 
@@ -30,12 +37,5 @@
 ;; Testing
 
 (comment
-  queue
-  (def statement {:author "groot",
-                  :content "iamgroot",
-                  :aggregate-id "hhu.de",
-                  :entity-id "42",
-                  :version 1,
-                  :created nil})
-  (subscribe "nobo.dy")
+  (subscribe "welt.de" (fn [payload] (println "i am groot" payload)))
   )

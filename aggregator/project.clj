@@ -20,7 +20,7 @@
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]}
              :repl {:plugins [[cider/cider-nrepl "0.15.1-SNAPSHOT"]
-                              [refactor-nrepl "2.3.1"]]}
+                              [refactor-nrepl "2.4.0-SNAPSHOT"]]}
              :uberjar {:aot :all}}
 
   :plugins [[lein-kibit "0.1.5"]

@@ -5,13 +5,20 @@ stages:
   - deploy
 
 services:
-  - name: postgres:9.6
+  - name: postgres:9.6-alpine
     alias: db
+  - name: rabbitmq:3.6-alpine
+    alias: broker
 
 variables:
   POSTGRES_DB: aggregator
   POSTGRES_USER: aggregator
   POSTGRES_PASSWORD: "kI1BtN@rCbh2i6wg7EiEO*FwcdugST7s"
+  RABBITMQ_DEFAULT_USER: "groot"
+  RABBITMQ_DEFAULT_PASS: "iamgroot"
+  BROKER_HOST: "broker"
+  BROKER_USER: "groot"
+  BROKER_PASS: "iamgroot"
 
 cache:
   paths:
