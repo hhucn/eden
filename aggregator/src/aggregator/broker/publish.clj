@@ -11,10 +11,11 @@
 
 (defn- publish
   "Create queue for entity and publish it on this queue."
-  [payload routing-key]
+  [payload routing-key entity-type]
   (let [ch (connector/open-channel)]
     (try
-      (lb/publish ch bconf/exchange routing-key (json/write-str payload))
+      (lb/publish ch bconf/exchange routing-key (json/write-str payload)
+                  {:content-type "application/json" :type (name entity-type)})
       (catch Throwable t
         (.printStackTrace t))
       (finally
@@ -25,10 +26,22 @@
   published."
   [statement]
   (when (lib/valid? ::gspecs/statement statement)
-    (publish statement bconf/default-route)))
+    (publish statement bconf/default-route :statement)))
+
+(defn publish-link
+  "Put a link to the correct queues. Link must conform spec to be published."
+  [link]
+  (when (lib/valid? ::gspecs/link link)
+    (publish link bconf/default-route :link)))
+
+
+;; -----------------------------------------------------------------------------
+;; Specs
 
 (s/fdef publish-statement
         :args (s/cat :statement ::gspecs/statement))
+(s/fdef publish-link
+        :args (s/cat :link ::gspecs/link))
 
 
 ;; -----------------------------------------------------------------------------
@@ -38,13 +51,14 @@
   (def statement (ffirst (s/exercise ::gspecs/statement)))
 
   (connector/init-connection!)
+  (connector/close-connection!)
   (doall
    (map connector/create-queue
         ["welt.de" "zeit.de" "faz.net" "iamgro.ot" "iamgro.ot" "nobo.dy"]))
 
   (publish {:iam :groot} bconf/default-route)
 
+  (-> (connector/open-channel) connector/close-channel)
+
   (publish-statement statement)
-  (blib/get-queue-name statement)
-  (json/write-str statement)
   )

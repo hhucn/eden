@@ -1,9 +1,12 @@
-(ns aggregator.broker.subscriber-test
-  (:require [clojure.test :refer [deftest is are use-fixtures]]
-            [aggregator.broker.subscriber :as sub]
+(ns aggregator.broker.publish-test
+  (:require [clojure.test :refer [deftest is use-fixtures]]
             [aggregator.broker.publish :as pub]
             [aggregator.broker.connector :as connector]
-            [aggregator.utils.common :as lib]))
+            [aggregator.utils.common :as lib]
+            [clojure.spec.alpha :as s]
+            [aggregator.specs]))
+
+(alias 'gspecs 'aggregator.specs)
 
 (def queue (str (lib/uuid)))
 
@@ -14,11 +17,13 @@
                 :version 1
                 :created nil})
 
+(def statements (for [[x _] (s/exercise ::gspecs/statement)] x))
+(def links (for [[x _] (s/exercise ::gspecs/link)] x))
+
 ;; Test preparation
 (defn fixtures [f]
   (connector/init-connection!)
   (connector/create-queue queue)
-  (pub/publish-statement statement)
   (f)
   (connector/delete-queue queue)
   (connector/close-connection!))
@@ -28,5 +33,9 @@
 ;; -----------------------------------------------------------------------------
 ;; Tests
 
-(deftest subscribe
-  (is true (sub/subscribe queue (fn [payload] (println "Received some content: " payload)))))
+(deftest publish-statement
+  (is true (pub/publish-statement statement))
+  (is (every? nil? (doall (map pub/publish-statement statements)))))
+
+(deftest publish-link
+  (is (every? nil? (doall (map pub/publish-link links)))))

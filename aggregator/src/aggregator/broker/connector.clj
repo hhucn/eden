@@ -54,6 +54,14 @@
   (if (and @conn (not (rmq/closed? @conn)))
     true false))
 
+(defn delete-queue
+  "Given a queue-name, delete it!"
+  [queue]
+  (let [ch (open-channel)]
+    (lq/delete ch queue)
+    (close-channel ch)))
+
+
 ;; -----------------------------------------------------------------------------
 ;; Testing
 
