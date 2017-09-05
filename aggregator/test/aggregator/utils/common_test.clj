@@ -22,3 +22,6 @@
     "iamgroot" (lib/json->edn (json/write-str :iamgroot))
     {:foo "bar"} (lib/json->edn (json/write-str {:foo :bar}))
     "{\"invalid\"" (lib/json->edn "{\"invalid\"")))
+
+(deftest uuid
+  (is (s/valid? uuid? (lib/uuid))))

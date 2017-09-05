@@ -22,7 +22,14 @@
     (catch Exception e
       payload)))
 
+(defn uuid [] (java.util.UUID/randomUUID))
+
+;; -----------------------------------------------------------------------------
+;; Specs
+
 (s/fdef json->edn
         :args (s/cat :json string?)
         :ret map?)
 
+(s/fdef uuid
+        :ret uuid?)
