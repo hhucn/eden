@@ -39,7 +39,16 @@
   [link]
   (let [aggregate (:aggregate-id link)
         entity-id (:entity-id link)
-        request-url (str " http://" aggregate "/link/undercuts/" aggregate "/" entity-id)]
+        request-url (str "http://" aggregate "/link/undercuts/" aggregate "/" entity-id)]
+    (get-payload request-url)))
+
+(defn links-to
+  "Retrieve all links pointing to provided statement. (From the statements aggregator)"
+  [statement]
+  (let [aggregate (:aggregate-id statement)
+        entity-id (:entity-id statement)
+        version (:version statement)
+        request-url (str "http://" aggregate "/link/to/" aggregate "/" entity-id "/" version)]
     (get-payload request-url)))
 
 (defn check-db
@@ -93,3 +102,8 @@
         aggregate (first split-uri)
         entity-id (second split-uri)]
     (db/get-undercuts aggregate entity-id)))
+
+(defn links-by-target
+  "Retrieve all local links in db pointing to the target."
+  [target-aggregator target-entity target-version]
+  (db/links-by-target target-aggregator target-entity target-version))

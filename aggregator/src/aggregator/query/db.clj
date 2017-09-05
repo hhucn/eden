@@ -83,3 +83,10 @@
   (select links (where {:type "undercut"
                         :to_aggregate_id target-aggregator
                         :to_entity_id target-entity-id})))
+
+(defn links-by-target
+  "Return all links with the corresponding target."
+  [target-aggregator target-entity target-version]
+  (select links (where {:to_aggregate_id target-aggregator
+                        :to_entity_id target-entity
+                        :to_version target-version})))

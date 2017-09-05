@@ -21,6 +21,11 @@
   (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
        (response {:status :ok
                   :data {:payload (query/local-undercuts (str (:target-entity params)))}}))
+  (GET "/link/to/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/links-by-target (:aggregate params)
+                                                         (:entity params)
+                                                         (read-string (:version params)))}}))
   (GET "/link/:entity{.+}" {:keys [params]}
        (response {:status :ok
                   :data {:payload (query/retrieve-link (str (:entity params)))}}))
