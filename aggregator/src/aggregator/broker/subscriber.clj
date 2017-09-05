@@ -8,15 +8,14 @@
 
 (defn- message-handler
   "Creates a handler, which is called on new messages. Converts the payload into
-  data and calls f/1 with it."
-  [f ch _ ^bytes payload]
+  data and calls f/2 with it."
+  [f ch meta ^bytes payload]
   (let [p (lib/json->edn (String. payload "UTF-8"))]
     (log/debug (format "[subscriber] Received a message: %s" p))
-    (f p)))
+    (f p meta)))
 
 (defn subscribe
-  "Subscribe to queue and print output to Emacs Buffer *cider-repl localhost*.
-  Calls a function f/1 with the payload.
+  "Subscribe to queue and call a function f with the payload and meta-information.
 
   Example:
   (subscribe \"hhu.de\" (fn [payload] (println \"do something with: \" payload)))"
@@ -37,5 +36,5 @@
 ;; Testing
 
 (comment
-  (subscribe "welt.de" (fn [payload] (println "i am groot" payload)))
+  (subscribe "welt.de" (fn [payload meta] (println "i am groot" payload meta)))
   )
