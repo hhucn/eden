@@ -1,7 +1,6 @@
 (ns aggregator.query.retriever
   (:require [aggregator.settings :as settings]
-            [aggregator.query.query :as query]
-            [aggregator.query.update :as update]))
+            [aggregator.query.query :as query]))
 
 (defn whitelisted?
   "Return whether the source of a link is whitelisted."
@@ -19,7 +18,5 @@
           statement (query/retrieve-exact-statement aggregate entity-id version)
           undercuts (query/remote-undercuts link)
           additional-links (query/links-to statement)]
-      :construct result-queue
-      :return-queue
-      )
+      (concat (rest queue) undercuts additional-links))
     (rest queue)))
