@@ -27,9 +27,8 @@
   [queue]
   (loop [q queue]
     (let [next-step (next q)]
-      (if next-step
-        (recur next-step)
-        nil))))
+      (when next-step
+        (recur next-step)))))
 
 (defn lookup-related
   "Lookup all related links and statements 'downstream' from the starting statement. Runs in a separate thread and returns the future. Warning: dereferencing the future might block the system if the lookup is still going on."
