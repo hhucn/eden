@@ -2,6 +2,7 @@
   (:require [aggregator.query.cache :as cache]
             [aggregator.query.db :as db]
             [aggregator.query.utils :as utils]
+            [aggregator.query.update :as up]
             [clj-http.client :as client]
             [clojure.string :as str]))
 
@@ -15,32 +16,40 @@
       :payload))
 
 (defn retrieve-remote
-  "Try to retrieve an argument from a remote aggregator. The host part is treated as the webhost."
+  "Try to retrieve a statement from a remote aggregator. The host part is treated as the webhost."
   [uri]
   (let [split-uri (str/split uri #"/")
         aggregate (first split-uri)
-        request-url (str "http://" aggregate "/statements/" uri)]
-    (get-payload request-url)))
+        request-url (str "http://" aggregate "/statements/" uri)
+        results (get-payload request-url)]
+    (doall (map up/update-statement results))
+    results))
 
 (defn retrieve-exact-statement
   "Retrieves an exact statement from a remote aggregator."
   [aggregate entity version]
-  (let [request-url (str "http://" aggregate "/statement/" aggregate "/" entity "/" version)]
-    (get-payload request-url)))
+  (let [request-url (str "http://" aggregate "/statement/" aggregate "/" entity "/" version)
+        result (get-payload request-url)]
+    (up/update-statement result)
+    result))
 
 (defn remote-link
   "Retrieves a remote link from its aggregator"
   [aggregate entity-id]
-  (let [request-url (str "http://" aggregate "/link/" aggregate "/" entity-id)]
-    (get-payload request-url)))
+  (let [request-url (str "http://" aggregate "/link/" aggregate "/" entity-id)
+        result (get-payload request-url)]
+    (up/update-link result)
+    result))
 
 (defn remote-undercuts
   "Retrieve a remote list of undercuts. The argument is the link being undercut."
   [link]
   (let [aggregate (:aggregate-id link)
         entity-id (:entity-id link)
-        request-url (str "http://" aggregate "/link/undercuts/" aggregate "/" entity-id)]
-    (get-payload request-url)))
+        request-url (str "http://" aggregate "/link/undercuts/" aggregate "/" entity-id)
+        results (get-payload request-url)]
+    (doall (map up/update-link results))
+    results))
 
 (defn links-to
   "Retrieve all links pointing to provided statement. (From the statements aggregator)"
@@ -48,8 +57,10 @@
   (let [aggregate (:aggregate-id statement)
         entity-id (:entity-id statement)
         version (:version statement)
-        request-url (str "http://" aggregate "/link/to/" aggregate "/" entity-id "/" version)]
-    (get-payload request-url)))
+        request-url (str "http://" aggregate "/link/to/" aggregate "/" entity-id "/" version)
+        results (get-payload request-url)]
+    (doall (map up/update-link results))
+    results))
 
 (defn check-db
   "Check the database for an entity and update cache after item is found."

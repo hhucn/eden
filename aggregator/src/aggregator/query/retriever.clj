@@ -19,8 +19,7 @@
           statement (query/retrieve-exact-statement aggregate entity-id version)
           undercuts (query/remote-undercuts link)
           additional-links (query/links-to statement)]
-      (update/update-statement statement)
-      :retrieve-links
+      :construct result-queue
       :return-queue
       )
     (rest queue)))
