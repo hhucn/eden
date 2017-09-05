@@ -38,6 +38,10 @@
     (future (loop-next startlinks))))
 
 (defn automatic-retriever
-  "Starts an automatic retriever that looks up statements and links related to things contained in the cache.")
-
-(rand-nth (keys {:foo :bar :baz :buf}))
+  "Starts an automatic retriever that looks up statements and links related to things contained in the cache."
+  []
+  (future
+    (loop [starter (rand-nth (keys (cache/get-cached-statements)))]
+      (lookup-related starter)
+      (Thread/sleep 60000)
+      (recur (rand-nth (keys (cache/get-cached-statements)))))))
