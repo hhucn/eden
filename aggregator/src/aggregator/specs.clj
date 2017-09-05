@@ -23,6 +23,7 @@
 (s/def ::from-aggregate-id ::no-slash)
 (s/def ::from-entity-id ::no-slash)
 (s/def ::from-version ::version)
+(s/def ::type keyword?)
 (s/def ::to-aggregate-id ::no-slash)
 (s/def ::to-entity-id ::no-slash)
 (s/def ::to-version ::version)
