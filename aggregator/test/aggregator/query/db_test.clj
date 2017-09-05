@@ -1,5 +1,5 @@
-(ns aggregator.utils.db-test
-  (:require [aggregator.utils.db :as db]
+(ns aggregator.query.db-test
+  (:require [aggregator.query.db :as db]
             [clojure.test :refer :all]))
 
 

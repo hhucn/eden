@@ -1,5 +1,5 @@
 (ns aggregator.query.update
-  (:require [aggregator.utils.db :as db]))
+  (:require [aggregator.query.db :as db]))
 
 (defn update-statement
   "Update a database-entry for a statement. Typically inserts an entry if not in DB yet."
