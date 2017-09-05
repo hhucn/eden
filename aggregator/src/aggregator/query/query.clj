@@ -54,5 +54,10 @@
 (defn exact-statement
   "Return the exact statement from cache or db"
   [aggregate-id entity-id version]
-  :check-here-for-cache
-  (db/exact-statement aggregate-id entity-id version))
+  (let [cached-statement (cache/retrieve (str aggregate-id "/" entity-id))]
+    (if (and (not= cached-statement :missing)
+             (= (:version cached-statement) version))
+      cached-statement
+      (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
+        (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
+            maybe-statement)))))
