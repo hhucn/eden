@@ -17,8 +17,8 @@
                 :version 1
                 :created nil})
 
-(def statements (for [[x _] (s/exercise ::gspecs/statement)] x))
-(def links (for [[x _] (s/exercise ::gspecs/link)] x))
+(def statements (map first (s/exercise ::gspecs/statement)))
+(def links (map first (s/exercise ::gspecs/link)))
 
 ;; Test preparation
 (defn fixtures [f]

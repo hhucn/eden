@@ -55,10 +55,5 @@
   (doall
    (map connector/create-queue
         ["welt.de" "zeit.de" "faz.net" "iamgro.ot" "iamgro.ot" "nobo.dy"]))
-
-  (publish {:iam :groot} bconf/default-route)
-
-  (-> (connector/open-channel) connector/close-channel)
-
   (publish-statement statement)
   )

@@ -1,6 +1,5 @@
 (ns aggregator.broker.subscriber
-  (:require [clojure.core.async :as async :refer [go-loop <! timeout]]
-            [langohr.core :as rmq]
+  (:require [langohr.core :as rmq]
             [langohr.channel :as lch]
             [langohr.consumers :as lcons]
             [taoensso.timbre :as log]
@@ -15,8 +14,7 @@
   data and calls f/2 with it."
   [f ch meta ^bytes payload]
   (let [p (lib/json->edn (String. payload "UTF-8"))]
-    (log/debug (format "Received a message: %s" p))
-    (f p meta)))
+    (f meta p)))
 
 (defn subscribe
   "Subscribe to queue and call a function f with the payload and meta-information.
@@ -33,17 +31,24 @@
     (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})))
 
 
-(defn dispatch-query
-  [entity {:keys [type]}]
-  (let [entity-type (keyword type)]
-    (case entity-type
-      :statement (when (lib/valid? ::gspecs/statement entity) (qupd/update-statement entity))
-      :link (when (lib/valid? ::gspecs/link entity) (qupd/update-link entity))
-      :default (log/debug "Received invalid entity: " entity meta))))
+(defmulti to-query (fn [meta _] (keyword (:type meta))))
+(defmethod to-query :default [meta payload]
+  (log/error "Could not dispatch type of received message: " meta payload))
+
+(defmethod to-query :statement [_ statement]
+  (when (lib/valid? ::gspecs/statement statement)
+    (log/debug "Received a valid statement. Passing it to query-module...")
+    (qupd/update-statement statement)))
+
+(defmethod to-query :link [_ link]
+  (when (lib/valid? ::gspecs/link link)
+    (log/debug "Received a valid link. Passing it to query-module...")
+    (qupd/update-link link)))
+
 
 ;; -----------------------------------------------------------------------------
 ;; Testing
 
 (comment
-  (subscribe "zeit.de" dispatch-query)
+  (subscribe "zeit.de" to-query)
   )
