@@ -20,6 +20,7 @@
   (connector/create-queue queue)
   (pub/publish-statement statement)
   (f)
+  (connector/delete-queue queue)
   (connector/close-connection!))
 (use-fixtures :once fixtures)
 
