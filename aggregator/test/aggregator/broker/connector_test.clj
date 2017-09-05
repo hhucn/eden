@@ -1,6 +1,7 @@
 (ns aggregator.broker.connector-test
   (:require [aggregator.broker.connector :as connector]
-            [clojure.test :refer [deftest is use-fixtures]]))
+            [clojure.test :refer [deftest is use-fixtures]]
+            [aggregator.utils.common :as lib]))
 
 ;; Test preparation
 (defn fixtures [f]
@@ -21,3 +22,8 @@
 
 (deftest create-queue-test
   (is true (connector/create-queue "i.am.groot")))
+
+(deftest delete-queue-test
+  (let [queue (str (lib/uuid))]
+    (connector/create-queue queue)
+    (is true (connector/delete-queue queue))))
