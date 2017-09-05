@@ -18,12 +18,12 @@
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))
                                    {:opts [:no-remote]})}}))
+  (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/local-undercuts (str (:target-entity params)))}}))
   (GET "/link/:entity{.+}" {:keys [params]}
        (response {:status :ok
                   :data {:payload (query/retrieve-link (str (:entity params)))}}))
-  (GET "link/undercuts/:entity{.+}" {:keys [params]}
-       (response {:status :ok
-                  :data {:payload (query/local-undercuts (str (:entity params)))}}))
   (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
        (response {:status :ok
                   :data {:payload (query/exact-statement (:aggregate params)

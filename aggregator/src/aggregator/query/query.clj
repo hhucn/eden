@@ -34,6 +34,14 @@
   (let [request-url (str "http://" aggregate "/link/" aggregate "/" entity-id)]
     (get-payload request-url)))
 
+(defn remote-undercuts
+  "Retrieve a remote list of undercuts. The argument is the link being undercut."
+  [link]
+  (let [aggregate (:aggregate-id link)
+        entity-id (:entity-id link)
+        request-url (str " http://" aggregate "/link/undercuts/" aggregate "/" entity-id)]
+    (get-payload request-url)))
+
 (defn check-db
   "Check the database for an entity and update cache after item is found."
   ([uri]
