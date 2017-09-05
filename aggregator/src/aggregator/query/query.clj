@@ -68,7 +68,7 @@
     (up/update-link result)
     result))
 
-(defn remote-undercuts
+(defn retrieve-undercuts
   "Retrieve a (possibly remote) list of undercuts. The argument is the link being undercut."
   [link]
   (if-let [possible-undercuts (local-undercuts link)]
@@ -118,7 +118,7 @@
 (defn retrieve-link
   "Retrieve a link from cache or db. Returns :missing if no such link can be found."
   [uri]
-  (let [cached-link (cache/retrieve uri)]
+  (let [cached-link (cache/retrieve-link uri)]
     (if (= cached-link :missing)
       (let [db-result (db/links-by-uri uri)]
         (if (= db-result :missing)

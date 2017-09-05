@@ -41,7 +41,7 @@ Retrieval works as a tiered process:
 The query also uses the pub/sub system to trigger publishes of new information and
 subscriptions to updates to aquired information from external sources.
 
-Dev-Status: 0%
+Dev-Status: 90%
 
 
 ## Testing

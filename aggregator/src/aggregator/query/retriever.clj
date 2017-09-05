@@ -1,6 +1,7 @@
 (ns aggregator.query.retriever
   (:require [aggregator.settings :as settings]
-            [aggregator.query.query :as query]))
+            [aggregator.query.query :as query]
+            [aggregator.query.cache :as cache]))
 
 (defn whitelisted?
   "Return whether the source of a link is whitelisted."
@@ -16,7 +17,7 @@
           entity-id (:from_entity_id link)
           version (:from_version link)
           statement (query/retrieve-exact-statement aggregate entity-id version)
-          undercuts (query/remote-undercuts link)
+          undercuts (query/retrieve-undercuts link)
           additional-links (query/links-to statement)]
       (concat (rest queue) undercuts additional-links))
     (rest queue)))
@@ -35,3 +36,8 @@
   [statement]
   (let [startlinks (query/links-to statement)]
     (future (loop-next startlinks))))
+
+(defn automatic-retriever
+  "Starts an automatic retriever that looks up statements and links related to things contained in the cache.")
+
+(rand-nth (keys {:foo :bar :baz :buf}))

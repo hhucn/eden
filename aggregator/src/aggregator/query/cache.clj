@@ -5,28 +5,57 @@
 ;; This module handles the dynamic caching to improve the performance of the queries.
 
 (def storage (atom (cache/lru-cache-factory {} :threshold 2000)))
+(def links-storage (atom (cache/lru-cache-factory {} :threshold 2000)))
 
-(defn cache-hit
+(defn hit-template
   "Touch the item in the cache and retrieve it."
-  [uri]
-  (swap! storage #(cache/hit % uri))
-  (get @storage uri))
+  [store uri]
+  (swap! store #(cache/hit % uri))
+  (get (deref store) uri))
 
-(defn cache-miss
+(defn miss-template
   "Signalize that an item was missing and fill in the missing value."
-  [uri statement]
-  (swap! storage #(cache/miss % uri statement))
+  [store uri statement]
+  (swap! store #(cache/miss % uri statement))
   statement)
 
-(defn retrieve
+(defn cache-hit
+  [uri]
+  (hit-template storage uri))
+
+(defn cache-hit-link
+  [uri]
+  (hit-template links-storage uri))
+
+(defn cache-miss
+  [uri statement]
+  (miss-template storage uri statement))
+
+(defn cache-miss-link
+  [uri statement]
+  (miss-template links-storage uri statement))
+
+(defn retrieve-template
   "Try to retrieve an item from cache and trigger the appropriate events.
   Should always be followed by a filling of the value if possible."
-  [uri]
-  (if (cache/has? @storage uri)
-    (cache-hit uri)
+  [store uri]
+  (if (cache/has? (deref store) uri)
+    (hit-template store uri)
     :missing))
+
+(defn retrieve
+  [uri]
+  (retrieve-template storage uri))
+
+(defn retrieve-link
+  [uri]
+  (retrieve-template links-storage uri))
 
 (defn get-cached-statements
   "Retrieve all arguments currently in the cache"
   []
   @storage)
+
+(defn get-cached-links
+  []
+  @links-storage)
