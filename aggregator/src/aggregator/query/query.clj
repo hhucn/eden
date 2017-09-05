@@ -15,6 +15,31 @@
       :data
       :payload))
 
+(defn exact-statement
+  "Return the exact statement from cache or db"
+  [aggregate-id entity-id version]
+  (let [cached-statement (cache/retrieve (str aggregate-id "/" entity-id))]
+    (if (and (not= cached-statement :missing)
+             (= (:version cached-statement) version))
+      cached-statement
+      (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
+        (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
+            maybe-statement)))))
+
+(defn local-undercuts
+  "Retrieve all links from the db that undercut the link passed as argument."
+  [link]
+  (let [aggregate (:aggregate-id link)
+        entity-id (:entity-id link)]
+    (db/get-undercuts aggregate entity-id)))
+
+(defn links-by-target
+  "Retrieve all local links in db pointing to the target statement."
+  [target]
+  (db/links-by-target (:aggregate-id target)
+                      (:entity-id target)
+                      (:version  target)))
+
 (defn retrieve-remote
   "Try to retrieve a statement from a remote aggregator. The host part is treated as the webhost."
   [uri]
@@ -26,12 +51,14 @@
     results))
 
 (defn retrieve-exact-statement
-  "Retrieves an exact statement from a remote aggregator."
+  "Retrieves an exact statement from cache / db / a remote aggregator."
   [aggregate entity version]
-  (let [request-url (str "http://" aggregate "/statement/" aggregate "/" entity "/" version)
-        result (get-payload request-url)]
-    (up/update-statement result)
-    result))
+  (if-let [local-statement (exact-statement aggregate entity version)]
+    local-statement
+    (let [request-url (str "http://" aggregate "/statement/" aggregate "/" entity "/" version)
+          result (get-payload request-url)]
+      (up/update-statement result)
+      result)))
 
 (defn remote-link
   "Retrieves a remote link from its aggregator"
@@ -42,25 +69,29 @@
     result))
 
 (defn remote-undercuts
-  "Retrieve a remote list of undercuts. The argument is the link being undercut."
+  "Retrieve a (possibly remote) list of undercuts. The argument is the link being undercut."
   [link]
-  (let [aggregate (:aggregate-id link)
-        entity-id (:entity-id link)
-        request-url (str "http://" aggregate "/link/undercuts/" aggregate "/" entity-id)
-        results (get-payload request-url)]
-    (doall (map up/update-link results))
-    results))
+  (if-let [possible-undercuts (local-undercuts link)]
+    possible-undercuts
+    (let [aggregate (:aggregate-id link)
+          entity-id (:entity-id link)
+          request-url (str "http://" aggregate "/link/undercuts/" aggregate "/" entity-id)
+          results (get-payload request-url)]
+      (doall (map up/update-link results))
+      results)))
 
 (defn links-to
   "Retrieve all links pointing to provided statement. (From the statements aggregator)"
   [statement]
-  (let [aggregate (:aggregate-id statement)
-        entity-id (:entity-id statement)
-        version (:version statement)
-        request-url (str "http://" aggregate "/link/to/" aggregate "/" entity-id "/" version)
-        results (get-payload request-url)]
-    (doall (map up/update-link results))
-    results))
+  (if-let [possible-links (links-by-target statement)]
+    possible-links
+    (let [aggregate (:aggregate-id statement)
+          entity-id (:entity-id statement)
+          version (:version statement)
+          request-url (str "http://" aggregate "/link/to/" aggregate "/" entity-id "/" version)
+          results (get-payload request-url)]
+      (doall (map up/update-link results))
+      results)))
 
 (defn check-db
   "Check the database for an entity and update cache after item is found."
@@ -95,26 +126,3 @@
           db-result))
       cached-link)))
 
-(defn exact-statement
-  "Return the exact statement from cache or db"
-  [aggregate-id entity-id version]
-  (let [cached-statement (cache/retrieve (str aggregate-id "/" entity-id))]
-    (if (and (not= cached-statement :missing)
-             (= (:version cached-statement) version))
-      cached-statement
-      (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
-        (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
-            maybe-statement)))))
-
-(defn local-undercuts
-  "Retrieve all links from the db that undercut the link passed as argument."
-  [link-uri]
-  (let [split-uri (str/split link-uri #"/")
-        aggregate (first split-uri)
-        entity-id (second split-uri)]
-    (db/get-undercuts aggregate entity-id)))
-
-(defn links-by-target
-  "Retrieve all local links in db pointing to the target."
-  [target-aggregator target-entity target-version]
-  (db/links-by-target target-aggregator target-entity target-version))
