@@ -15,5 +15,5 @@
          "ok")))
 
 (deftest statement-retrieval-test
-  (is (= (get-in (routestest-helper "/statement/fantasy.dork/non-existent-id") [:data :payload])
+  (is (= (get-in (routestest-helper "/statements/fantasy.dork/non-existent-id") [:data :payload])
          "not-found")))

@@ -13,14 +13,27 @@
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/statement/:entity{.+}" {:keys [params]}
+  (GET "/statements/:entity{.+}" {:keys [params]}
        (response {:status :ok
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))
                                    {:opts [:no-remote]})}}))
+  (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/local-undercuts (str (:target-entity params)))}}))
+  (GET "/link/to/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/links-by-target (:aggregate params)
+                                                         (:entity params)
+                                                         (read-string (:version params)))}}))
   (GET "/link/:entity{.+}" {:keys [params]}
        (response {:status :ok
-                  :data {:payload (query/retrieve-link (str (:entity params)))}})))
+                  :data {:payload (query/retrieve-link (str (:entity params)))}}))
+  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
+       (response {:status :ok
+                  :data {:payload (query/exact-statement (:aggregate params)
+                                                         (:entity params)
+                                                         (read-string (:version params)))}})))
 
 (def app
   (-> app-routes

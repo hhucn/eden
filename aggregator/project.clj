@@ -28,7 +28,7 @@
             [lein-ring "0.9.7"]
             [lein-cloverage "1.0.9"]]
 
-  :ring {:handler aggregator.query.routes/app}
+  :ring {:handler aggregator.api.routes/app}
 
   :main ^:skip-aot aggregator.core
   :target-path "target/%s")
