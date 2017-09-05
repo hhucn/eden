@@ -77,3 +77,9 @@
   [link-map]
   (insert links (values (utils/underscore-keys link-map))))
 
+(defn get-undercuts
+  "Returns all undercuts that point to target aggregator and entity-id."
+  [target-aggregator target-entity-id]
+  (select links (where {:type "undercut"
+                        :to_aggregate_id target-aggregator
+                        :to_entity_id target-entity-id})))
