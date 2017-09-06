@@ -4,7 +4,8 @@
             [aggregator.query.utils :as utils]
             [aggregator.query.update :as up]
             [clj-http.client :as client]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [taoensso.timbre :as log]))
 
 
 (defn get-payload
@@ -24,6 +25,7 @@
       cached-statement
       (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
         (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
+            (log/debug "[query] Return statement from db.")
             maybe-statement)))))
 
 (defn local-undercuts
