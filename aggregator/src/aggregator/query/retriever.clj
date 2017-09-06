@@ -1,7 +1,8 @@
 (ns aggregator.query.retriever
   (:require [aggregator.settings :as settings]
             [aggregator.query.query :as query]
-            [aggregator.query.cache :as cache]))
+            [aggregator.query.cache :as cache]
+            [taoensso.timbre :as log]))
 
 (defn whitelisted?
   "Return whether the source of a link is whitelisted."
@@ -33,6 +34,7 @@
 (defn lookup-related
   "Lookup all related links and statements 'downstream' from the starting statement. Runs in a separate thread and returns the future. Warning: dereferencing the future might block the system if the lookup is still going on."
   [statement]
+  (log/debug (format "[retriever] Starting to pull related data for %s" statement))
   (let [startlinks (query/links-to statement)]
     (future (loop-next startlinks))))
 
@@ -43,4 +45,5 @@
     (loop [starter (rand-nth (keys (cache/get-cached-statements)))]
       (lookup-related starter)
       (Thread/sleep 60000)
+      (log/debug "[retriever] Automatic search waking up.")
       (recur (rand-nth (keys (cache/get-cached-statements)))))))
