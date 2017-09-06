@@ -1,5 +1,6 @@
 (ns aggregator.query.update
-  (:require [aggregator.query.db :as db]))
+  (:require [aggregator.query.db :as db]
+            [aggregator.query.cache :as cache]))
 
 (defn update-statement
   "Update a database-entry for a statement. Typically inserts an entry if not in DB yet."
@@ -7,7 +8,8 @@
   (let [db-result (db/exact-statement (:aggregate-id statement) (:entity-id statement)
                                       (:version statement))]
     (when-not db-result
-      (db/insert-statement statement))))
+      (do (cache/cache-miss (str (:aggregate-id statement) "/" (:entity-id statement)) statement)
+       (db/insert-statement statement)))))
 
 
 (defn update-link
@@ -15,4 +17,5 @@
   [link]
   (let [db-result (db/exact-link (:aggregate-id link) (:entity-id link))]
     (when-not db-result
-      (db/insert-link link))))
+      (do (cache/cache-miss-link (str (:aggregate-id link) "/" (:entity-id link)) link)
+        (db/insert-link link)))))
