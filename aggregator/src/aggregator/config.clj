@@ -1,4 +1,4 @@
-(ns aggregator.settings)
+(ns aggregator.config)
 
 (def whitelist
   ["foo.bar"

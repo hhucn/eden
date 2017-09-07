@@ -27,7 +27,7 @@
                :username "groot"
                :password "iamgroot"})
         ch (lch/open conn)]
-    (log/debug "Connected. Channel id: " (.getChannelNumber ch))
+    (log/debug "Connected. Channel id:" (.getChannelNumber ch))
     (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})))
 
 

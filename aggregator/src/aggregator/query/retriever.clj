@@ -1,5 +1,5 @@
 (ns aggregator.query.retriever
-  (:require [aggregator.settings :as settings]
+  (:require [aggregator.config :as config]
             [aggregator.query.query :as query]
             [aggregator.query.cache :as cache]
             [taoensso.timbre :as log]))
@@ -7,7 +7,7 @@
 (defn whitelisted?
   "Return whether the source of a link is whitelisted."
   [link]
-  (some #{(:from_aggregate_id link)} settings/whitelist))
+  (some #{(:from_aggregate_id link)} config/whitelist))
 
 (defn next
   "Accepts a list and retrieves the statement the head-link is sourced by if its provider is whitelisted. Then retrieves all links connected to it and queues them. Returns the updated list."
