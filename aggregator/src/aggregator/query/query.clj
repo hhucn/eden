@@ -4,7 +4,8 @@
             [aggregator.query.utils :as utils]
             [aggregator.query.update :as up]
             [clj-http.client :as client]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [taoensso.timbre :as log]))
 
 
 (defn get-payload
@@ -24,6 +25,7 @@
       cached-statement
       (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
         (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
+            (log/debug "[query] Return statement from db.")
             maybe-statement)))))
 
 (defn local-undercuts
@@ -116,13 +118,14 @@
        cached-entity))))
 
 (defn retrieve-link
-  "Retrieve a link from cache or db. Returns :missing if no such link can be found."
+  "Retrieve a link from cache or db. Returns :not-found if no such link can be found."
   [uri]
   (let [cached-link (cache/retrieve-link uri)]
     (if (= cached-link :missing)
       (let [db-result (db/links-by-uri uri)]
         (if (= db-result :missing)
           :not-found
-          db-result))
+          (do (cache/cache-miss-link uri db-result)
+            db-result)))
       cached-link)))
 
