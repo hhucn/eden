@@ -2,7 +2,11 @@
   "Common functions, which can be used in several namespaces."
   (:require [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [aggregator.specs]
+            [clojure.spec.test.alpha :as stest]))
+
+(alias 'gspecs 'aggregator.specs)
 
 (defn valid?
   "Verify that data conforms to spec. Calls clojure.spec/explain-str to show a
@@ -24,6 +28,13 @@
 
 (defn uuid [] (java.util.UUID/randomUUID))
 
+(defn return-error
+  "Sometimes you want to return an error message. This function packs it into a
+  map."
+  [message]
+  {:status :error
+   :message message})
+
 ;; -----------------------------------------------------------------------------
 ;; Specs
 
@@ -33,3 +44,8 @@
 
 (s/fdef uuid
         :ret uuid?)
+
+(s/fdef return-error
+        :args (s/cat :message ::gspecs/message)
+        :ret ::gspecs/error
+        :fn #(= (-> % :args :message) (-> % :ret :message)))

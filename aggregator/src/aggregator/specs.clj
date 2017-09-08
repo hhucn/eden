@@ -35,3 +35,10 @@
                    ::created]
           :opt-un [::to-version]))
 ;; (s/exercise ::link)
+
+
+;; Error messages
+(s/def ::status keyword?)
+(s/def ::message string?)
+
+(s/def ::error (s/keys :req-un [::status ::message]))

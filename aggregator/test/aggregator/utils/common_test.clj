@@ -3,6 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
             [aggregator.utils.common :as lib]
+            [aggregator.utils.testing :as tlib]
             [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
@@ -25,3 +26,6 @@
 
 (deftest uuid
   (is (s/valid? uuid? (lib/uuid))))
+
+(deftest return-error
+  (tlib/check' 'aggregator.utils.common/return-error))
