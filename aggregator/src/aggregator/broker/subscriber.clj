@@ -58,7 +58,7 @@
     (qupd/update-statement statement)))
 
 (defmethod to-query :link [_ link]
-  (let [nlink (assoc link :type (-> link :type read-string))]
+  (let [nlink (assoc link :type (-> link :type keyword))]
     (when (lib/valid? ::gspecs/link nlink)
       (log/debug "Received a valid link. Passing it to query-module...")
       (qupd/update-link nlink))))
