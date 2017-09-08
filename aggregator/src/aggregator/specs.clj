@@ -8,7 +8,7 @@
 (s/def ::aggregate-id ::no-slash)
 (s/def ::entity-id ::no-slash)
 (s/def ::version pos-int?)
-(s/def ::created any?) ;; timestamp
+(s/def ::created (s/or :nil nil? :timestamp string?)) ;; timestamp
 (s/def ::ancestor-aggregate-id ::no-slash)
 (s/def ::ancestor-entity-id ::no-slash)
 (s/def ::ancestor-version ::version)
@@ -35,3 +35,10 @@
                    ::created]
           :opt-un [::to-version]))
 ;; (s/exercise ::link)
+
+
+;; Error messages
+(s/def ::status keyword?)
+(s/def ::message string?)
+
+(s/def ::error (s/keys :req-un [::status ::message]))
