@@ -5,7 +5,7 @@
 
 (defn- summarize-results' [spec-check]
   (doall (map #(-> %
-                   (select-keys [:clojure.test.check/ret :sym])
+                   (select-keys [:clojure.spec.test.check/ret :sym])
                    vals
                    log/debug) spec-check)))
 

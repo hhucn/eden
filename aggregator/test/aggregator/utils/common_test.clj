@@ -27,5 +27,11 @@
 (deftest uuid
   (is (s/valid? uuid? (lib/uuid))))
 
+(deftest return-map
+  (tlib/check' 'aggregator.utils.common/return-map))
+
 (deftest return-error
   (tlib/check' 'aggregator.utils.common/return-error))
+
+(deftest return-ok
+  (tlib/check' 'aggregator.utils.common/return-ok))
