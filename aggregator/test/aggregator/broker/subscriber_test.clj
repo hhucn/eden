@@ -29,4 +29,4 @@
 ;; Tests
 
 (deftest subscribe
-  (is true (sub/subscribe (fn [_meta payload] (println "Received some content: " payload)) queue)))
+  (is true (sub/subscribe (fn [_meta payload] (println "Received some content: " payload)) queue "broker")))

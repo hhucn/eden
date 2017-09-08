@@ -8,7 +8,7 @@
 (s/def ::aggregate-id ::no-slash)
 (s/def ::entity-id ::no-slash)
 (s/def ::version pos-int?)
-(s/def ::created any?) ;; timestamp
+(s/def ::created string?) ;; timestamp
 (s/def ::ancestor-aggregate-id ::no-slash)
 (s/def ::ancestor-entity-id ::no-slash)
 (s/def ::ancestor-version ::version)

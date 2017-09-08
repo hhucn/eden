@@ -2,13 +2,12 @@
   (:require [clojure.test :refer [deftest is use-fixtures]]
             [aggregator.broker.publish :as pub]
             [aggregator.broker.connector :as connector]
-            [aggregator.utils.common :as lib]
             [clojure.spec.alpha :as s]
             [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
 
-(def queue (str (lib/uuid)))
+(def queue (first (last (s/exercise string?))))
 
 (def statement {:author "kangaroo"
                 :content "Schnapspralinen"
