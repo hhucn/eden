@@ -11,24 +11,25 @@
 
 (defn- message-handler
   "Creates a handler, which is called on new messages. Converts the payload into
-  data and calls f/2 with it."
+  EDN-format if possible (otherwise returns it as a string) and calls f/2 with
+  it."
   [f ch meta ^bytes payload]
   (let [p (lib/json->edn (String. payload "UTF-8"))]
     (f meta p)))
 
 (defn subscribe
-  "Subscribe to queue and call a function f with the payload and meta-information.
+  "Subscribe to queue and call a function f with meta-information and payload.
 
   Example:
-  (subscribe \"hhu.de\" (fn [payload] (println \"do something with: \" payload)))"
-  [queue f]
+  (subscribe (fn [meta payload] [meta payload])) \"hhu.de\""
+  [f connect-to-host]
   (let [conn (rmq/connect
-              {:host "broker"
+              {:host connect-to-host
                :username "groot"
                :password "iamgroot"})
         ch (lch/open conn)]
     (log/debug "Connected. Channel id:" (.getChannelNumber ch))
-    (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})))
+    (lcons/subscribe ch connect-to-host (partial message-handler f) {:auto-ack true})))
 
 
 (defmulti to-query (fn [meta _] (keyword (:type meta))))
@@ -50,5 +51,6 @@
 ;; Testing
 
 (comment
-  (subscribe "zeit.de" to-query)
+  (map (partial subscribe to-query) config/subscribe-to)
+  (subscribe to-query "zeit.de")
   )
