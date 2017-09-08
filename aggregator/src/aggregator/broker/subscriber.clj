@@ -27,12 +27,12 @@
 
   Example:
   (subscribe (fn [meta payload] [meta payload])) \"hhu.de\""
-  [f queue connect-to-host]
+  [f queue {:keys [host user password]}]
   (try
     (let [conn (rmq/connect
-                {:host connect-to-host
-                 :username "groot"
-                 :password "iamgroot"})
+                {:host host
+                 :username user
+                 :password password})
           ch (lch/open conn)]
       (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
       (log/debug "Connected. Channel id:" (.getChannelNumber ch))
@@ -40,12 +40,12 @@
     (catch com.rabbitmq.client.AuthenticationFailureException e
       (log/debug (:auth-ex exceptions))
       (lib/return-error (:auth-ex exceptions)))
-    (catch com.rabbitmq.client.ShutdownSignalException e
-      (log/debug (:queue-ex exceptions))
-      (lib/return-error (:queue-ex exceptions)))
     (catch java.net.UnknownHostException e
       (log/debug (:host-ex exceptions))
-      (lib/return-error (:host-ex exceptions)))))
+      (lib/return-error (:host-ex exceptions)))
+    (catch java.io.IOException e
+      (log/debug (:queue-ex exceptions))
+      (lib/return-error (:queue-ex exceptions)))))
 
 
 (defmulti to-query (fn [meta _] (keyword (:type meta))))
@@ -58,9 +58,10 @@
     (qupd/update-statement statement)))
 
 (defmethod to-query :link [_ link]
-  (when (lib/valid? ::gspecs/link link)
-    (log/debug "Received a valid link. Passing it to query-module...")
-    (qupd/update-link link)))
+  (let [nlink (assoc link :type (-> link :type read-string))]
+    (when (lib/valid? ::gspecs/link nlink)
+      (log/debug "Received a valid link. Passing it to query-module...")
+      (qupd/update-link nlink))))
 
 
 ;; -----------------------------------------------------------------------------
@@ -68,5 +69,5 @@
 
 (comment
   (connector/init-connection!)
-  (subscribe to-query "iamgro.ot" "broker")
+  (subscribe to-query "iamgro.ot" {:host "broker" :user "groot" :password "iamgroot"})
   )

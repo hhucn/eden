@@ -14,8 +14,7 @@
   (are [x y] (= x y)
     true (lib/valid? string? "")
     false (lib/valid? string? :foo)
-    false (lib/valid? string? nil)
-    true (lib/valid? ::gspecs/statement statement)))
+    false (lib/valid? string? nil)))
 
 (deftest json->edn
   (are [x y] (= x y)
