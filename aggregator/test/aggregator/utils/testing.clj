@@ -1,13 +1,14 @@
 (ns aggregator.utils.testing
   (:require [clojure.test :refer [is]]
             [clojure.spec.test.alpha :as stest]
-            [taoensso.timbre :as log]))
+            [clojure.pprint :refer [pprint]]))
 
 (defn- summarize-results' [spec-check]
   (doall (map #(-> %
                    (select-keys [:clojure.spec.test.check/ret :sym])
                    vals
-                   log/debug) spec-check)))
+                   pprint) spec-check))
+  (println))
 
 (defn check' [function]
   (let [spec-result (stest/check function)]
