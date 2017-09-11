@@ -22,11 +22,7 @@
 ;; Test preparation
 (defn fixtures [f]
   (connector/init-connection!)
-  (connector/create-queue queue)
-  (Thread/sleep 1000)
   (f)
-  (Thread/sleep 1000)
-  (connector/delete-queue queue)
   (connector/close-connection!))
 (use-fixtures :once fixtures)
 
