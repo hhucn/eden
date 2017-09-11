@@ -23,6 +23,7 @@
 (defn fixtures [f]
   (connector/init-connection!)
   (connector/create-queue queue)
+  (Thread/sleep 1000)
   (f)
   (Thread/sleep 1000)
   (connector/delete-queue queue)
