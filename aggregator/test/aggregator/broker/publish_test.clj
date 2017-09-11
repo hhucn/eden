@@ -7,7 +7,7 @@
 
 (alias 'gspecs 'aggregator.specs)
 
-(def queue (first (last (s/exercise string?))))
+(defonce queue (first (last (s/exercise string?))))
 
 (def statement {:author "kangaroo"
                 :content "Schnapspralinen"
@@ -24,6 +24,7 @@
   (connector/init-connection!)
   (connector/create-queue queue)
   (f)
+  (Thread/sleep 1000)
   (connector/delete-queue queue)
   (connector/close-connection!))
 (use-fixtures :once fixtures)
