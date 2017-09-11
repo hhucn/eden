@@ -55,7 +55,7 @@
      (try
        (let [ch (open-channel)
              queue-name aggregator]
-         (lq/declare ch queue-name {:durable true :auto-delete false :exclusive false})
+         (lq/declare ch queue-name {:arguments {"x-expires" (* 30 60 1000)}}) ;; expires in x ms
          (lq/bind ch queue-name exchange {:routing-key routing-key})
          (close-channel ch)
          (lib/return-ok "Queue created."))
@@ -107,8 +107,7 @@
 
 (comment
   (init-connection!)
-  (create-queue "welt.dey")
+  (create-queue "welt.de")
   (delete-queue "welt.dey")
-  (open-channel)
   (close-connection!)
 )
