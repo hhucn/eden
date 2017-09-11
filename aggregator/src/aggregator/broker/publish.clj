@@ -26,13 +26,15 @@
   published."
   [statement]
   (when (lib/valid? ::gspecs/statement statement)
-    (publish statement bconf/default-route :statement)))
+    (publish statement bconf/default-route :statement)
+    (lib/return-ok "Statement published")))
 
 (defn publish-link
   "Put a link to the correct queues. Link must conform spec to be published."
   [link]
   (when (lib/valid? ::gspecs/link link)
-    (publish link bconf/default-route :link)))
+    (publish link bconf/default-route :link)
+    (lib/return-ok "Link published.")))
 
 
 ;; -----------------------------------------------------------------------------

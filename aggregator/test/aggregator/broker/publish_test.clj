@@ -35,7 +35,7 @@
 ;; Tests
 
 (deftest publish-statement
-  (is true (pub/publish-statement statement))
+  (is (= :ok (:status (pub/publish-statement statement))))
   (is (every? nil? (doall (map pub/publish-statement statements)))))
 
 (deftest publish-link
