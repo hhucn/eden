@@ -36,7 +36,7 @@
        (log/debug "[REST] Someone just retrieved a link")
        (response {:status :ok
                   :data {:payload (query/retrieve-link (str (:entity params)))}}))
-  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
+  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params server-name]}
        (log/debug "[REST] Someone just retrieved a specific statement")
        (response {:status :ok
                   :data {:payload (query/exact-statement (:aggregate params)
