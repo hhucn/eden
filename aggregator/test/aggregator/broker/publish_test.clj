@@ -36,7 +36,7 @@
 
 (deftest publish-statement
   (is (= :ok (:status (pub/publish-statement statement))))
-  (is (every? nil? (doall (map pub/publish-statement statements)))))
+  (is (every? #(= :ok %) (map :status (doall (map pub/publish-statement statements))))))
 
 (deftest publish-link
-  (is (every? nil? (doall (map pub/publish-link links)))))
+  (is (every? #(= :ok %) (map :status (doall (map pub/publish-statement statements))))))
