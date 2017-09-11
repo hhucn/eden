@@ -16,7 +16,8 @@
   [error-msg & body]
   `(if (connected?)
      (do ~@body)
-     (lib/return-error (str ~error-msg " Do you have a valid connection? Try (aggregator.broker.connector/init-connection!)."))))
+     (lib/return-error (str ~error-msg " Do you have a valid connection?
+     Try (aggregator.broker.connector/init-connection!)."))))
 
 
 ;; -----------------------------------------------------------------------------
@@ -30,19 +31,25 @@
 
 (defn open-channel
   "Opens a channel for an existing connection to the broker."
-  [] (with-connection "Could not create channel."
-       (lch/open @conn)))
+  []
+  (with-connection "Could not create channel."
+    (lch/open @conn)))
 
 (defn close-channel
   "Given a channel, close it!"
   [ch]
   (with-connection "Could not close channel."
     (when-not (lch/closed? ch)
-      (lch/close ch))))
+      (lch/close ch)
+      (lib/return-ok "Channel closed."))))
 
 (defn create-queue
-  "Creates a queue for a given entity. Extracts the original aggregator and the
-  entity id from the provided entity."
+  "Creates a queue for a given aggregator. Uses aggregator as the queue name and
+  binds this queue to the default exchange if no other is provided. Typically,
+  aggregator is the hostname of the aggregator.
+
+  Example:
+  (create-queue \"hhu.de\")"
   ([aggregator exchange routing-key]
    (with-connection "Could not create queue."
      (try
@@ -74,14 +81,25 @@
     (reset! conn nil)
     (lib/return-ok "Connection closed.")))
 
+(defn queue-exists?
+  "Check if queue exists. Returns a Boolean when connection is established."
+  [queue]
+  (try
+    (let [ch (open-channel)]
+      (lq/status ch queue)
+      (close-channel ch)
+      true)
+    (catch java.io.IOException _e false)))
+
 (defn delete-queue
   "Given a queue-name, delete it!"
   [queue]
   (with-connection "Could not delete queue."
-    (let [ch (open-channel)]
-      (lq/delete ch queue)
-      (close-channel ch)
-      (lib/return-ok "Queue deleted."))))
+    (when queue-exists?
+      (let [ch (open-channel)]
+        (lq/delete ch queue)
+        (close-channel ch)
+        (lib/return-ok "Queue deleted.")))))
 
 
 ;; -----------------------------------------------------------------------------
@@ -90,6 +108,7 @@
 (comment
   (init-connection!)
   (create-queue "welt.dey")
+  (delete-queue "welt.dey")
   (open-channel)
   (close-connection!)
 )

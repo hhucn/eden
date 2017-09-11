@@ -5,7 +5,8 @@
             [taoensso.timbre :as log]
             [aggregator.utils.common :as lib]
             [aggregator.query.update :as qupd]
-            [aggregator.specs]))
+            [aggregator.specs])
+  (:import [com.rabbitmq.client AuthenticationFailureException]))
 
 (alias 'gspecs 'aggregator.specs)
 
@@ -37,7 +38,7 @@
       (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
       (log/debug "Connected. Channel id:" (.getChannelNumber ch))
       (lib/return-ok "Connection to message queue established."))
-    (catch com.rabbitmq.client.AuthenticationFailureException e
+    (catch AuthenticationFailureException e
       (log/debug (:auth-ex exceptions))
       (lib/return-error (:auth-ex exceptions)))
     (catch java.net.UnknownHostException e
