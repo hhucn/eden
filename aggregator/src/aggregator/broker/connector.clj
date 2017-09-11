@@ -16,7 +16,7 @@
   [error-msg & body]
   `(if (connected?)
      (do ~@body)
-     (lib/return-error (str ~error-msg " Are you really connected?"))))
+     (lib/return-error (str ~error-msg " Do you have a valid connection? Try (aggregator.broker.connector/init-connection!)."))))
 
 
 ;; -----------------------------------------------------------------------------
@@ -44,13 +44,16 @@
   "Creates a queue for a given entity. Extracts the original aggregator and the
   entity id from the provided entity."
   ([aggregator exchange routing-key]
-   (with-connection "Could not create Queue."
-     (let [ch (open-channel)
-           queue-name aggregator]
-       (lq/declare ch queue-name {:durable true :auto-delete false :exclusive false})
-       (lq/bind ch queue-name exchange {:routing-key routing-key})
-       (close-channel ch)
-       (lib/return-ok "Queue created."))))
+   (with-connection "Could not create queue."
+     (try
+       (let [ch (open-channel)
+             queue-name aggregator]
+         (lq/declare ch queue-name {:durable true :auto-delete false :exclusive false})
+         (lq/bind ch queue-name exchange {:routing-key routing-key})
+         (close-channel ch)
+         (lib/return-ok "Queue created."))
+       (catch java.io.IOException e
+         (lib/return-error "Could not create queue, caught IOException.")))))
   ([aggregator exchange]
    (create-queue aggregator exchange bconf/default-route))
   ([aggregator]
