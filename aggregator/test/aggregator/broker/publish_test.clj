@@ -7,7 +7,7 @@
 
 (alias 'gspecs 'aggregator.specs)
 
-(def queue (first (last (s/exercise string?))))
+(defonce queue (first (last (s/exercise string?))))
 
 (def statement {:author "kangaroo"
                 :content "Schnapspralinen"
@@ -23,7 +23,9 @@
 (defn fixtures [f]
   (connector/init-connection!)
   (connector/create-queue queue)
+  (Thread/sleep 1000)
   (f)
+  (Thread/sleep 1000)
   (connector/delete-queue queue)
   (connector/close-connection!))
 (use-fixtures :once fixtures)
@@ -33,8 +35,8 @@
 ;; Tests
 
 (deftest publish-statement
-  (is true (pub/publish-statement statement))
-  (is (every? nil? (doall (map pub/publish-statement statements)))))
+  (is (= :ok (:status (pub/publish-statement statement))))
+  (is (every? #(= :ok %) (map :status (doall (map pub/publish-statement statements))))))
 
 (deftest publish-link
-  (is (every? nil? (doall (map pub/publish-link links)))))
+  (is (every? #(= :ok %) (map :status (doall (map pub/publish-statement statements))))))

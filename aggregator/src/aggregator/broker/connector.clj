@@ -3,9 +3,24 @@
             [langohr.core :as rmq]
             [langohr.channel :as lch]
             [langohr.queue :as lq]
-            [aggregator.broker.config :as bconf]))
+            [aggregator.broker.config :as bconf]
+            [aggregator.utils.common :as lib]))
 
 (def ^:private conn (atom nil))
+
+(defn connected?
+  "Check if connection to broker is established."
+  [] (and @conn (not (rmq/closed? @conn))))
+
+(defmacro with-connection
+  [error-msg & body]
+  `(if (connected?)
+     (do ~@body)
+     (lib/return-error (str ~error-msg " Do you have a valid connection?
+     Try (aggregator.broker.connector/init-connection!)."))))
+
+
+;; -----------------------------------------------------------------------------
 
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
@@ -16,21 +31,36 @@
 
 (defn open-channel
   "Opens a channel for an existing connection to the broker."
-  [] (lch/open @conn))
+  []
+  (with-connection "Could not create channel."
+    (lch/open @conn)))
 
 (defn close-channel
   "Given a channel, close it!"
-  [ch] (lch/close ch))
+  [ch]
+  (with-connection "Could not close channel."
+    (when-not (lch/closed? ch)
+      (lch/close ch)
+      (lib/return-ok "Channel closed."))))
 
 (defn create-queue
-  "Creates a queue for a given entity. Extracts the original aggregator and the
-  entity id from the provided entity."
+  "Creates a queue for a given aggregator. Uses aggregator as the queue name and
+  binds this queue to the default exchange if no other is provided. Typically,
+  aggregator is the hostname of the aggregator.
+
+  Example:
+  (create-queue \"hhu.de\")"
   ([aggregator exchange routing-key]
-   (let [ch (open-channel)
-         queue-name aggregator]
-     (lq/declare ch queue-name {:durable true :auto-delete false :exclusive false})
-     (lq/bind ch queue-name exchange {:routing-key routing-key})
-     (close-channel ch)))
+   (with-connection "Could not create queue."
+     (try
+       (let [ch (open-channel)
+             queue-name aggregator]
+         (lq/declare ch queue-name {:durable true :auto-delete false :exclusive false})
+         (lq/bind ch queue-name exchange {:routing-key routing-key})
+         (close-channel ch)
+         (lib/return-ok "Queue created."))
+       (catch java.io.IOException e
+         (lib/return-error "Could not create queue, caught IOException.")))))
   ([aggregator exchange]
    (create-queue aggregator exchange bconf/default-route))
   ([aggregator]
@@ -40,31 +70,45 @@
   "Initializes connection to broker and creates an exchange."
   []
   (create-connection!)
-  (log/debug "Connection to Message Broker established."))
+  (log/debug "Connection to Message Broker established.")
+  (lib/return-ok "Connection established."))
 
 (defn close-connection!
   "Close connection to message broker."
   []
-  (rmq/close @conn)
-  (reset! conn nil))
+  (with-connection "Connection could not be closed."
+    (rmq/close @conn)
+    (reset! conn nil)
+    (lib/return-ok "Connection closed.")))
 
-(defn connected?
-  "Check if connection to broker is established."
-  []
-  (if (and @conn (not (rmq/closed? @conn)))
-    true false))
+(defn queue-exists?
+  "Check if queue exists. Returns a Boolean when connection is established."
+  [queue]
+  (try
+    (let [ch (open-channel)]
+      (lq/status ch queue)
+      (close-channel ch)
+      true)
+    (catch java.io.IOException _e false)))
 
 (defn delete-queue
   "Given a queue-name, delete it!"
   [queue]
-  (let [ch (open-channel)]
-    (lq/delete ch queue)
-    (close-channel ch)))
+  (with-connection "Could not delete queue."
+    (when queue-exists?
+      (let [ch (open-channel)]
+        (lq/delete ch queue)
+        (close-channel ch)
+        (lib/return-ok "Queue deleted.")))))
 
 
 ;; -----------------------------------------------------------------------------
 ;; Testing
 
 (comment
-  (create-queue "welt.de")
+  (init-connection!)
+  (create-queue "welt.dey")
+  (delete-queue "welt.dey")
+  (open-channel)
+  (close-connection!)
 )
