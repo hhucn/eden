@@ -62,6 +62,8 @@ test:
   <<: *seed_db
   image: clojure:alpine
   stage: test
+  tags:
+    - 10c
   script:
     - cd aggregator
     - lein cloverage
