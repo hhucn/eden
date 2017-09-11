@@ -7,19 +7,21 @@
             [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
             [ring.util.response :refer [response]]
             [aggregator.query.query :as query]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [aggregator.broker.connector :as connector])
   (:use [clojure.repl :refer [source]]))
 
 (defroutes app-routes
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/statements/:entity{.+}" {:keys [params]}
+  (GET "/statements/:entity{.+}" {:keys [params server-name]}
        (log/debug "[REST] Someone just retrieved statements")
        (response {:status :ok
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))
-                                   {:opts [:no-remote]})}}))
+                                   {:opts [:no-remote]})
+                         :queue (connector/create-queue server-name)}}))
   (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved undercuts")
        (response {:status :ok
@@ -34,12 +36,13 @@
        (log/debug "[REST] Someone just retrieved a link")
        (response {:status :ok
                   :data {:payload (query/retrieve-link (str (:entity params)))}}))
-  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
+  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params server-name]}
        (log/debug "[REST] Someone just retrieved a specific statement")
        (response {:status :ok
                   :data {:payload (query/exact-statement (:aggregate params)
                                                          (:entity params)
-                                                         (read-string (:version params)))}})))
+                                                         (read-string (:version params)))
+                         :queue (connector/create-queue server-name)}})))
 
 (def app
   (-> app-routes
