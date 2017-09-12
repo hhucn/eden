@@ -1,6 +1,7 @@
 (ns aggregator.query.update
   (:require [aggregator.query.db :as db]
             [aggregator.query.cache :as cache]
+            [aggregator.broker.publish :as pub]
             [taoensso.timbre :as log]))
 
 (defn update-statement
@@ -10,6 +11,8 @@
                                       (:version statement))]
     (when-not db-result
       (log/debug (format "[query] Added new statement to db: %s " statement))
+      (when (= (:aggregate-id statement) (System/getenv "HOSTNAME"))
+        (pub/publish-statement statement))
       (cache/cache-miss (str (:aggregate-id statement) "/" (:entity-id statement)) statement)
       (db/insert-statement statement))))
 

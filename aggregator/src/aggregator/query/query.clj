@@ -3,18 +3,30 @@
             [aggregator.query.db :as db]
             [aggregator.query.utils :as utils]
             [aggregator.query.update :as up]
+            [aggregator.broker.subscriber :as sub]
             [clj-http.client :as client]
             [clojure.string :as str]
             [taoensso.timbre :as log]))
 
 
-(defn get-payload
-  "Helper to get the payload from a remote query."
+(defn get-data
+  "Get data from a remote aggregator."
   [request-url]
   (-> (client/get request-url  {:accept :json})
       (utils/http-response->map)
-      :data
-      :payload))
+      :data))
+
+(defn get-payload
+  "Helper to get the payload from a remote query."
+  [request-url]
+  (:payload (get-data request-url)))
+
+(defn subscribe-to-queue
+  "Uses the broker module to subscribe to a queue for updates."
+  [queue host]
+  (sub/subscribe sub/to-query {:host host
+                               :user (System/getenv "BROKER_USER")
+                               :password (System/getenv "BROKER_PASS")}))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
@@ -48,7 +60,10 @@
   (let [split-uri (str/split uri #"/")
         aggregate (first split-uri)
         request-url (str "http://" aggregate "/statements/" uri)
-        results (get-payload request-url)]
+        result-data (get-data request-url)
+        results (:payload result-data)
+        queue (:queue result-data)]
+    (subscribe-to-queue queue aggregate)
     (doall (map up/update-statement results))
     results))
 
@@ -58,7 +73,10 @@
   (if-let [local-statement (exact-statement aggregate entity version)]
     local-statement
     (let [request-url (str "http://" aggregate "/statement/" aggregate "/" entity "/" version)
-          result (get-payload request-url)]
+          result-data (get-data request-url)
+          result (:payload result-data)
+          queue (:queue result-data)]
+      (subscribe-to-queue queue aggregate)
       (up/update-statement result)
       result)))
 
