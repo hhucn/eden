@@ -32,8 +32,8 @@
   (try
     (let [conn (rmq/connect
                 {:host host
-                 :username user
-                 :password password})
+                 :username (or user (System/getenv "BROKER_USER"))
+                 :password (or password (System/getenv "BROKER_PASS"))})
           ch (lch/open conn)]
       (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
       (log/debug "Connected. Channel id:" (.getChannelNumber ch))
