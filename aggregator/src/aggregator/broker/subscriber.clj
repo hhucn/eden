@@ -5,7 +5,8 @@
             [taoensso.timbre :as log]
             [aggregator.utils.common :as lib]
             [aggregator.query.update :as qupd]
-            [aggregator.specs])
+            [aggregator.specs]
+            [clojure.spec.alpha :as s])
   (:import [com.rabbitmq.client AuthenticationFailureException]))
 
 (alias 'gspecs 'aggregator.specs)
@@ -23,32 +24,6 @@
   (let [p (lib/json->edn (String. payload "UTF-8"))]
     (f meta p)))
 
-(defn subscribe
-  "Subscribe to queue and call a function f with meta-information and payload.
-
-  Example:
-  (subscribe (fn [meta payload] [meta payload])) \"hhu.de\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})"
-  [f queue {:keys [host user password]}]
-  (try
-    (let [conn (rmq/connect
-                {:host host
-                 :username (or user (System/getenv "BROKER_USER"))
-                 :password (or password (System/getenv "BROKER_PASS"))})
-          ch (lch/open conn)]
-      (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
-      (log/debug "Connected. Channel id:" (.getChannelNumber ch))
-      (lib/return-ok "Connection to message queue established."))
-    (catch AuthenticationFailureException e
-      (log/debug (:auth-ex exceptions))
-      (lib/return-error (:auth-ex exceptions)))
-    (catch java.net.UnknownHostException e
-      (log/debug (:host-ex exceptions))
-      (lib/return-error (:host-ex exceptions)))
-    (catch java.io.IOException e
-      (log/debug (:queue-ex exceptions))
-      (lib/return-error (:queue-ex exceptions)))))
-
-
 (defmulti to-query (fn [meta _] (keyword (:type meta))))
 (defmethod to-query :default [meta payload]
   (log/error "Could not dispatch type of received message: " meta payload))
@@ -63,6 +38,48 @@
     (when (lib/valid? ::gspecs/link nlink)
       (log/debug "Received a valid link. Passing it to query-module...")
       (qupd/update-link nlink))))
+
+(defn subscribe
+  "Subscribe to queue and call a function f with meta-information and payload.
+
+  Example:
+  (subscribe (fn [meta payload] [meta payload])) \"hhu.de\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})"
+  ([f queue {:keys [host user password]}]
+   (try
+     (let [conn (rmq/connect
+                 {:host host
+                  :username (or user (System/getenv "BROKER_USER"))
+                  :password (or password (System/getenv "BROKER_PASS"))})
+           ch (lch/open conn)]
+       (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
+       (log/debug "Connected. Channel id:" (.getChannelNumber ch))
+       (lib/return-ok "Connection to message queue established."))
+     (catch AuthenticationFailureException e
+       (log/debug (:auth-ex exceptions))
+       (lib/return-error (:auth-ex exceptions)))
+     (catch java.net.UnknownHostException e
+       (log/debug (:host-ex exceptions))
+       (lib/return-error (:host-ex exceptions)))
+     (catch java.io.IOException e
+       (log/debug (:queue-ex exceptions))
+       (lib/return-error (:queue-ex exceptions)))))
+  ([queue broker] (subscribe to-query queue broker)))
+
+
+;; -----------------------------------------------------------------------------
+;; Specs
+
+(s/def ::host string?)
+(s/def ::password string?)
+(s/def ::user string?)
+
+(s/def ::broker
+  (s/keys :req-un [::host]
+          :opt-un [::user ::password]))
+
+(s/fdef subscribe
+        :args (s/or :with-fn (s/cat :f any? :queue string? :broker ::broker)
+                    :default-fn (s/cat :queue string? :broker ::broker)))
 
 
 ;; -----------------------------------------------------------------------------
