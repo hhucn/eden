@@ -27,7 +27,7 @@
   "Subscribe to queue and call a function f with meta-information and payload.
 
   Example:
-  (subscribe (fn [meta payload] [meta payload])) \"hhu.de\""
+  (subscribe (fn [meta payload] [meta payload])) \"hhu.de\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})"
   [f queue {:keys [host user password]}]
   (try
     (let [conn (rmq/connect
