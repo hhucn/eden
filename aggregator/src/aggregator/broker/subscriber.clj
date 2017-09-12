@@ -43,7 +43,9 @@
   "Subscribe to queue and call a function f with meta-information and payload.
 
   Example:
-  (subscribe (fn [meta payload] [meta payload])) \"hhu.de\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})"
+  (subscribe (fn [meta payload] [meta payload]) \"hhu.de\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})
+  (subscribe \"hhu.de\" {:host \"broker\"})
+  "
   ([f queue {:keys [host user password]}]
    (try
      (let [conn (rmq/connect
@@ -78,7 +80,7 @@
           :opt-un [::user ::password]))
 
 (s/fdef subscribe
-        :args (s/or :with-fn (s/cat :f any? :queue string? :broker ::broker)
+        :args (s/or :with-fn (s/cat :f ifn? :queue string? :broker ::broker)
                     :default-fn (s/cat :queue string? :broker ::broker)))
 
 
@@ -88,4 +90,5 @@
 (comment
   (connector/init-connection!)
   (subscribe to-query "iamgro.ot" {:host "broker" :user "groot" :password "iamgroot"})
+  (subscribe "iamgro.ot" {:host "broker"})
   )
