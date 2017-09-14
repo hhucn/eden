@@ -6,6 +6,8 @@
             [aggregator.broker.config :as bconf]
             [aggregator.utils.common :as lib]))
 
+(def ^:private conn (atom nil))
+
 (defn connected?
   "Check if connection to broker is established."
   [] (if (and @conn (not (rmq/closed? @conn))) true false))
@@ -14,8 +16,7 @@
   [error-msg & body]
   `(if (connected?)
      (do ~@body)
-     (lib/return-error (str ~error-msg " Do you have a valid connection?
-     Try (aggregator.broker.connector/init-connection!)."))))
+     (lib/return-error (str ~error-msg " Do you have a valid connection? Try (aggregator.broker.connector/init-connection!)."))))
 
 
 ;; -----------------------------------------------------------------------------
@@ -43,7 +44,6 @@
     (reset! conn nil)
     (lib/return-ok "Connection closed.")))
 
-(def ^:private conn (atom (init-connection!)))
 
 ;; -----------------------------------------------------------------------------
 ;; For the communication with the broker
@@ -88,12 +88,13 @@
 (defn queue-exists?
   "Check if queue exists. Returns a Boolean when connection is established."
   [queue]
-  (try
-    (let [ch (open-channel)]
-      (lq/status ch queue)
-      (close-channel ch)
-      true)
-    (catch java.io.IOException _e false)))
+  (with-connection (format "Can't query existens of queue '%s'." queue)
+    (try
+      (let [ch (open-channel)]
+        (lq/status ch queue)
+        (close-channel ch)
+        true)
+      (catch java.io.IOException _e false))))
 
 (defn delete-queue
   "Given a queue-name, delete it!"
@@ -104,6 +105,14 @@
         (lq/delete ch queue)
         (close-channel ch)
         (lib/return-ok "Queue deleted.")))))
+
+
+;; -----------------------------------------------------------------------------
+;; Entrypoint
+
+(defn entrypoint []
+  (init-connection!))
+(entrypoint)
 
 
 ;; -----------------------------------------------------------------------------
