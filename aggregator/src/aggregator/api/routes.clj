@@ -1,15 +1,12 @@
 (ns aggregator.api.routes
-
-  ;; Define and expose the routes for the REST API in this file.
-
+  "Define and expose the routes for the REST API in this file."
   (:require [compojure.core :refer [GET POST defroutes]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
             [ring.util.response :refer [response]]
             [aggregator.query.query :as query]
             [taoensso.timbre :as log]
-            [aggregator.broker.connector :as connector])
-  (:use [clojure.repl :refer [source]]))
+            [aggregator.broker.connector :as connector]))
 
 (defroutes app-routes
   (GET "/" []
@@ -52,5 +49,7 @@
       wrap-json-params
       wrap-json-response))
 
-(comment (use 'ring.adapter.jetty)
-         (run-jetty app {:port 8080}))
+(comment
+  (use 'ring.adapter.jetty)
+  (run-jetty app {:port 8080})
+  )
