@@ -46,7 +46,3 @@ Dev-Status: 90%
 
 ## Testing
 
-### subscriber
-
-Clojure test-application which acts as a consumer for RabbitMQ. You can read the
-messages from a specified queue via this service. Just for testing purposes.
