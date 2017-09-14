@@ -17,7 +17,7 @@ services:
       - ./aggregator/:/code  # enable hot-code reloading
     ports:
       - "7777:7777"  # expose port to REPL
-      - "8081:8080" #ring dev server
+      - "8888:8888" # ring dev server
     links:
       - broker
       - db
