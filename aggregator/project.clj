@@ -18,9 +18,9 @@
                  [ring/ring-jetty-adapter "1.6.2"]
                  [clj-http "3.7.0"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]}
-             :repl {:plugins [[cider/cider-nrepl "0.15.1-SNAPSHOT"]
-                              [refactor-nrepl "2.4.0-SNAPSHOT"]]}
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]
+                   :plugins [[cider/cider-nrepl "0.15.1"]
+                             [refactor-nrepl "2.4.0-SNAPSHOT"]]}
              :uberjar {:aot :all}}
 
   :plugins [[lein-kibit "0.1.5"]
@@ -29,7 +29,11 @@
             [lein-cloverage "1.0.9"]
             [nightlight/lein-nightlight "1.7.2"]]
 
-  :ring {:handler aggregator.api.routes/app}
+  :ring {:handler aggregator.api.routes/app
+         :port 8888
+         :nrepl {:start? true
+                 :port 7777
+                 :host "0.0.0.0"}}
 
   :main ^:skip-aot aggregator.core
   :target-path "target/%s")
