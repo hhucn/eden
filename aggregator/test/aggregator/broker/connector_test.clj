@@ -34,3 +34,10 @@
     (is (connector/queue-exists? queue))
     (is (= :ok (:status (connector/delete-queue queue))))
     (is (not (connector/queue-exists? queue)))))
+
+(deftest connected?
+  (connector/init-connection!)
+  (is (connector/connected?))
+  (connector/close-connection!)
+  (is (not (connector/connected?)))
+  (connector/init-connection!))
