@@ -6,11 +6,9 @@
             [aggregator.broker.config :as bconf]
             [aggregator.utils.common :as lib]))
 
-(def ^:private conn (atom nil))
-
 (defn connected?
   "Check if connection to broker is established."
-  [] (and @conn (not (rmq/closed? @conn))))
+  [] (if (and @conn (not (rmq/closed? @conn))) true false))
 
 (defmacro with-connection
   [error-msg & body]
@@ -21,6 +19,7 @@
 
 
 ;; -----------------------------------------------------------------------------
+;; Connection-related
 
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
@@ -28,6 +27,26 @@
   [] (reset! conn (rmq/connect {:host (System/getenv "BROKER_HOST")
                                 :username (System/getenv "BROKER_USER")
                                 :password (System/getenv "BROKER_PASS")})))
+
+(defn init-connection!
+  "Initializes connection to broker and creates an exchange."
+  []
+  (create-connection!)
+  (log/debug "Connection to Message Broker established.")
+  (lib/return-ok "Connection established."))
+
+(defn close-connection!
+  "Close connection to message broker."
+  []
+  (with-connection "Connection could not be closed."
+    (rmq/close @conn)
+    (reset! conn nil)
+    (lib/return-ok "Connection closed.")))
+
+(def ^:private conn (atom (init-connection!)))
+
+;; -----------------------------------------------------------------------------
+;; For the communication with the broker
 
 (defn open-channel
   "Opens a channel for an existing connection to the broker."
@@ -66,21 +85,6 @@
   ([aggregator]
    (create-queue aggregator bconf/exchange bconf/default-route)))
 
-(defn init-connection!
-  "Initializes connection to broker and creates an exchange."
-  []
-  (create-connection!)
-  (log/debug "Connection to Message Broker established.")
-  (lib/return-ok "Connection established."))
-
-(defn close-connection!
-  "Close connection to message broker."
-  []
-  (with-connection "Connection could not be closed."
-    (rmq/close @conn)
-    (reset! conn nil)
-    (lib/return-ok "Connection closed.")))
-
 (defn queue-exists?
   "Check if queue exists. Returns a Boolean when connection is established."
   [queue]
@@ -110,4 +114,4 @@
   (create-queue "welt.de")
   (delete-queue "welt.dey")
   (close-connection!)
-)
+  )
