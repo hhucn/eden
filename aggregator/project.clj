@@ -26,7 +26,8 @@
   :plugins [[lein-kibit "0.1.5"]
             [lein-ancient "0.6.10"]
             [lein-ring "0.9.7"]
-            [lein-cloverage "1.0.9"]]
+            [lein-cloverage "1.0.9"]
+            [nightlight/lein-nightlight "1.7.2"]]
 
   :ring {:handler aggregator.api.routes/app}
 
