@@ -2,12 +2,15 @@
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [blank?]]
             [qbits.spandex :as sp]
-            [aggregator.utils.common :as lib]))
+            [aggregator.utils.common :as lib]
+            [taoensso.timbre :as log]))
 
 (defonce es-conn
-  (sp/client {:hosts ["http://search:9200"]
-              :http-client {:basic-auth {:user "elastic"
-                                         :password "changeme"}}}))
+  (let [conn (sp/client {:hosts ["http://search:9200"]
+                         :http-client {:basic-auth {:user "elastic"
+                                                    :password "changeme"}}})]
+    (log/debug "Connection to ElasticSearch established: " conn)
+    conn))
 
 (defn create-index
   "Create an index based on the provided string. Indexes are necessary to
@@ -15,12 +18,11 @@
   http://elasticsearch-cheatsheet.jolicode.com/#indexes"
   ([index-name settings mappings]
    (try
-     (->>
-      (sp/request es-conn {:url [(keyword index-name)]
-                           :method :put
-                           :body {:settings settings
-                                  :mappings mappings}})
-      (lib/return-ok "Index successfully created."))
+     (lib/return-ok "Index successfully created."
+                    (sp/request es-conn {:url [(keyword index-name)]
+                                         :method :put
+                                         :body {:settings settings
+                                                :mappings mappings}}))
      (catch Exception e
        (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
   ([index-name] (create-index index-name {} {})))
@@ -29,10 +31,9 @@
   "Deletes an index from elasticsearch."
   [index-name]
   (try
-    (->>
-     (sp/request es-conn {:url [(keyword index-name)]
-                          :method :delete})
-     (lib/return-ok "Index successfully deleted."))
+    (lib/return-ok "Index successfully deleted."
+                   (sp/request es-conn {:url [(keyword index-name)]
+                                        :method :delete}))
     (catch Exception e
       (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
 

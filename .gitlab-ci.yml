@@ -9,16 +9,20 @@ services:
     alias: db
   - name: rabbitmq:3.6-alpine
     alias: broker
+  - name: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
+    alias: search
 
 variables:
-  POSTGRES_DB: aggregator
+  POSTGRES_DB: aggregator            # Postgres
   POSTGRES_USER: aggregator
   POSTGRES_PASSWORD: "kI1BtN@rCbh2i6wg7EiEO*FwcdugST7s"
-  RABBITMQ_DEFAULT_USER: "groot"
+  RABBITMQ_DEFAULT_USER: "groot"     # RabbitMQ
   RABBITMQ_DEFAULT_PASS: "iamgroot"
   BROKER_HOST: "broker"
   BROKER_USER: "groot"
   BROKER_PASS: "iamgroot"
+  ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  transport.host: "127.0.0.1"
 
 cache:
   paths:
