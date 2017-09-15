@@ -21,6 +21,7 @@ services:
     links:
       - broker
       - db
+      - search
     environment:
       - "BROKER_HOST=${BROKER_HOST}"
       - "BROKER_USER=${BROKER_USER}"
@@ -37,3 +38,13 @@ services:
     environment:
       - "POSTGRES_USER=${DATABASE_USER}"
       - "POSTGRES_PASSWORD=${DATABASE_PASSWORD}"
+
+  search:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
+    ports:
+      - "9200:9200"
+    environment:
+      - "http.host=0.0.0.0"
+      - "transport.host=127.0.0.1"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
