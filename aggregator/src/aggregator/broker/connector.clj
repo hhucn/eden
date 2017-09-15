@@ -1,4 +1,5 @@
 (ns aggregator.broker.connector
+  "General function to establish a connection to the local broker."
   (:require [taoensso.timbre :as log]
             [langohr.core :as rmq]
             [langohr.channel :as lch]
@@ -73,11 +74,12 @@
    (with-connection "Could not create queue."
      (try
        (let [ch (open-channel)
-             queue-name aggregator]
-         (lq/declare ch queue-name {:arguments {"x-expires" (* 30 60 1000)}}) ;; expires in x ms
+             queue-name aggregator
+             expires-in-ms (* 30 60 1000)]
+         (lq/declare ch queue-name {:arguments {"x-expires" expires-in-ms}})
          (lq/bind ch queue-name exchange {:routing-key routing-key})
          (close-channel ch)
-         (lib/return-ok "Queue created."))
+         (lib/return-ok "Queue created." {:queue-name queue-name :expires-in-ms expires-in-ms}))
        (catch java.io.IOException e
          (lib/return-error "Could not create queue, caught IOException.")))))
   ([aggregator exchange]
@@ -88,7 +90,7 @@
 (defn queue-exists?
   "Check if queue exists. Returns a Boolean when connection is established."
   [queue]
-  (with-connection (format "Can't query existens of queue '%s'." queue)
+  (with-connection (format "Can't query existence of queue '%s'." queue)
     (try
       (let [ch (open-channel)]
         (lq/status ch queue)

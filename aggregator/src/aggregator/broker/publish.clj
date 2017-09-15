@@ -16,10 +16,8 @@
     (try
       (lb/publish ch bconf/exchange routing-key (json/write-str payload)
                   {:content-type "application/json" :type (name entity-type)})
-      (catch Throwable t
-        (.printStackTrace t))
-      (finally
-        (connector/close-channel ch)))))
+      (catch Throwable t (.printStackTrace t))
+      (finally (connector/close-channel ch)))))
 
 (defn publish-statement
   "Put a statement to the correct queue. Statement must conform spec to be
