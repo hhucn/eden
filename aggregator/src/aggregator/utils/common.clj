@@ -2,14 +2,11 @@
   "Common functions, which can be used in several namespaces."
   (:require [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
-            [taoensso.timbre :as log]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [taoensso.timbre :as log]))
 
 (defn valid?
   "Verify that data conforms to spec. Calls clojure.spec/explain-str to show a
-  useful error message. Prints output to logs and returns a boolean."
+  useful error message. Prints output to logs and returns a Boolean."
   [spec data]
   (if (s/valid? spec data)
     true
@@ -17,8 +14,8 @@
         false)))
 
 (defn json->edn
-  "Try to parse payload. Return EDN if payload is json. Else return
-   string as provided by postgres."
+  "Try to parse payload. Return EDN if payload is json. Else return String as
+  provided by postgres."
   [payload]
   (try
     (json/read-str payload :key-fn keyword)

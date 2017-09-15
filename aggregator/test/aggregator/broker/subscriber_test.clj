@@ -48,7 +48,8 @@
 
 (deftest subscribe-test
   (testing "Valid credentials should subscribe successfully"
-    (is (= :ok (:status (sub/subscribe handler queue broker)))))
+    (is (= :ok (:status (sub/subscribe handler queue broker))))
+    (is (= :ok (:status (sub/subscribe queue broker)))))
   (testing "Wrong host gives status :error"
     (is (= :error (:status
                    (sub/subscribe handler queue
