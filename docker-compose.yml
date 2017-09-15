@@ -21,6 +21,7 @@ services:
     links:
       - broker
       - db
+      - search
     environment:
       - "BROKER_HOST=${BROKER_HOST}"
       - "BROKER_USER=${BROKER_USER}"
