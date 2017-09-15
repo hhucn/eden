@@ -9,7 +9,7 @@ services:
     alias: db
   - name: rabbitmq:3.6-alpine
     alias: broker
-  - name: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
+  - name: $CI_REGISTRY/cn-tsn/general/elasticsearch-for-docker
     alias: search
 
 variables:
@@ -22,7 +22,6 @@ variables:
   BROKER_USER: "groot"
   BROKER_PASS: "iamgroot"
   ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-  transport.host: "127.0.0.1"
 
 cache:
   paths:
