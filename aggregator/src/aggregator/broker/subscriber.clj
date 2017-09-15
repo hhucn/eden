@@ -89,6 +89,6 @@
 
 (comment
   (connector/init-connection!)
-  (subscribe to-query "iamgro.ot" {:host "broker" :user "groot" :password "iamgroot"})
+  (subscribe to-query "welt.de" {:host "mayweather.cn.uni-duesseldorf.de" :user "groot" :password "iamgroot"})
   (subscribe "iamgro.ot" {:host "broker"})
   )

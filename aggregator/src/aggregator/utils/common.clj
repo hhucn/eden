@@ -29,16 +29,20 @@
 
 (defn- return-map
   "Construct map containing information for the caller."
-  [status message] {:status status :message message})
+  [status message data]
+  (let [m {:status status :message message}]
+    (if-not (nil? data) (merge {:data data} m) m)))
 
 (defn return-error
   "Sometimes you want to return an error message. This function packs it into a
   map."
-  [message] (return-map :error message))
+  [message] (return-map :error message nil))
 
 (defn return-ok
   "Return ok and a message."
-  [message] (return-map :ok message))
+  ([message] (return-map :ok message nil))
+  ([message data] (return-map :ok message data)))
+
 
 ;; -----------------------------------------------------------------------------
 ;; Specs
@@ -50,18 +54,27 @@
 (s/fdef uuid
         :ret uuid?)
 
+;; Return-maps
+(s/def ::status keyword?)
+(s/def ::message string?)
+(s/def ::data (s/or :data map? :no-data nil?))
+
+(s/def ::return-map (s/keys :req-un [::status ::message]
+                            :opt-un [::data]))
+
 (s/fdef return-map
-        :args (s/cat :status ::gspecs/status :message ::gspecs/message)
-        :ret ::gspecs/error
-        :fn #(and (= (-> % :args :message) (-> % :ret :message))
-                  (= (-> % :args :status) (-> % :ret :status))))
+        :args (s/cat :status ::status :message ::message :data ::data)
+        :ret ::return-map)
 
 (s/fdef return-error
-        :args (s/cat :message ::gspecs/message)
-        :ret ::gspecs/error
-        :fn #(= (-> % :args :message) (-> % :ret :message)))
+        :args (s/cat :message ::message)
+        :ret ::return-map
+        :fn #(and (= (-> % :args :message) (-> % :ret :message))
+                  (= (-> % :ret :status) :error)))
 
 (s/fdef return-ok
-        :args (s/cat :message ::gspecs/message)
-        :ret ::gspecs/error
-        :fn #(= (-> % :args :message) (-> % :ret :message)))
+        :args (s/or :msg-only (s/cat :message ::message)
+                    :with-data (s/cat :message ::message :data ::data))
+        :ret ::return-map
+        :fn #(and (= (-> % :args second :message) (-> % :ret :message))
+                  (= (-> % :ret :status) :ok)))
