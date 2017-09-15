@@ -27,7 +27,9 @@
   (is (s/valid? uuid? (lib/uuid))))
 
 (deftest return-error
-  (tlib/check' 'aggregator.utils.common/return-error))
+  (are [x y] (= x y)
+    [:status :message] (keys (lib/return-error "Message"))
+    {:status :error :message "Message" :data {:foo :bar}} (lib/return-error "Message" {:foo :bar})))
 
 (deftest return-ok
   (are [x y] (= x y)

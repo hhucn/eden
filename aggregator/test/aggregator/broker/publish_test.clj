@@ -1,8 +1,8 @@
 (ns aggregator.broker.publish-test
   (:require [clojure.test :refer [deftest is use-fixtures]]
+            [clojure.spec.alpha :as s]
             [aggregator.broker.publish :as pub]
             [aggregator.broker.connector :as connector]
-            [clojure.spec.alpha :as s]
             [aggregator.specs]))
 
 (alias 'gspecs 'aggregator.specs)
