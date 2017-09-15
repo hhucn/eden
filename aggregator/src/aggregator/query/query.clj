@@ -24,9 +24,8 @@
 (defn subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates."
   [queue host]
-  (sub/subscribe sub/to-query {:host host
-                               :user (System/getenv "BROKER_USER")
-                               :password (System/getenv "BROKER_PASS")}))
+  (let [queue-name (get-in queue [:data :queue-name])]
+    (sub/subscribe sub/to-query queue {:host host})))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
