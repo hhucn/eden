@@ -5,12 +5,24 @@
             [aggregator.utils.common :as lib]
             [taoensso.timbre :as log]))
 
-(defonce es-conn
-  (let [conn (sp/client {:hosts ["http://search:9200"]
-                         :http-client {:basic-auth {:user "elastic"
-                                                    :password "changeme"}}})]
-    (log/debug "Connection to ElasticSearch established: " conn)
-    conn))
+(def ^:private conn (atom nil))
+
+(defn- create-connection!
+  "Read variables from environment and establish connection to the message
+  broker."
+  [] (reset! conn (sp/client {:hosts ["http://search:9200"]
+                              :http-client {:basic-auth {:user "elastic"
+                                                         :password "changeme"}}})))
+
+(defn init-connection!
+  "Initializes connection to ElasticSearch."
+  []
+  (create-connection!)
+  (log/debug "Connection to ElasticSearch established.")
+  (lib/return-ok "Connection established." {:conn @conn}))
+
+
+;; -----------------------------------------------------------------------------
 
 (defn create-index
   "Create an index based on the provided string. Indexes are necessary to
@@ -19,10 +31,10 @@
   ([index-name settings mappings]
    (try
      (lib/return-ok "Index successfully created."
-                    (sp/request es-conn {:url [(keyword index-name)]
-                                         :method :put
-                                         :body {:settings settings
-                                                :mappings mappings}}))
+                    (sp/request @conn {:url [(keyword index-name)]
+                                       :method :put
+                                       :body {:settings settings
+                                              :mappings mappings}}))
      (catch Exception e
        (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
   ([index-name] (create-index index-name {} {})))
@@ -32,10 +44,18 @@
   [index-name]
   (try
     (lib/return-ok "Index successfully deleted."
-                   (sp/request es-conn {:url [(keyword index-name)]
-                                        :method :delete}))
+                   (sp/request @conn {:url [(keyword index-name)]
+                                      :method :delete}))
     (catch Exception e
       (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
+
+
+;; -----------------------------------------------------------------------------
+;; Entrypoint
+
+(defn entrypoint []
+  (init-connection!))
+(entrypoint)
 
 
 ;; -----------------------------------------------------------------------------
