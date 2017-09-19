@@ -15,6 +15,7 @@
 
 (defn fixtures [f]
   (search/add-statement statement)
+  (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
   (f)
   (search/delete-statement statement))
 (use-fixtures :once fixtures)
@@ -25,27 +26,37 @@
     (let [some-keyword :kangaroo]
       (are [x y] (= x y)
         :ok (:status (search/create-index some-keyword))
-        :error (:status (search/create-index some-keyword))
+        :error (:status (search/create-index some-keyword)))
+      (Thread/sleep 2000)
+      (are [x y] (= x y)
         :ok (:status (search/delete-index some-keyword))
         :error (:status (search/delete-index some-keyword))))))
 
 (deftest add-delete-statements
-  (testing "Adds new statements to the index and delete them again."
-    (let [stmt (first (last (s/exercise ::gspecs/statement)))]
-      (are [x y] (= x y)
-        :ok (:status (search/add-statement stmt))
-        :ok (:status (search/add-statement stmt))
-        :ok (:status (search/delete-statement stmt))
-        :error (:status (search/delete-statement stmt))))))
+  (let [stmt (first (last (s/exercise ::gspecs/statement)))
+        stmts (map first (s/exercise ::gspecs/statement))]
+    (testing "Add statements to index."
+      (is (= :ok (:status (search/add-statement stmt))))
+      (is (= :ok (:status (search/add-statement stmt))))
+      (is (every? #(= :ok %) (map :status (doall (map search/add-statement stmts))))))
+    (Thread/sleep 2000)
+    (testing "Now remove the generated statements from the index."
+      (is (= :ok (:status (search/delete-statement stmt))))
+      (is (= :error (:status (search/delete-statement stmt))))
+      (is (every? #(= :ok %) (map :status (doall (map search/delete-statement stmts))))))))
 
 (deftest add-delete-links
-  (testing "Adds new links to the index and delete them again."
-    (let [lnk (first (last (s/exercise ::gspecs/link)))]
-      (are [x y] (= x y)
-        :ok (:status (search/add-link lnk))
-        :ok (:status (search/add-link lnk))
-        :ok (:status (search/delete-link lnk))
-        :error (:status (search/delete-link lnk))))))
+  (let [lnk (first (last (s/exercise ::gspecs/link)))
+        lnks (map first (s/exercise ::gspecs/link))]
+    (testing "Add some links to the index."
+      (is (= :ok (:status (search/add-link lnk))))
+      (is (= :ok (:status (search/add-link lnk))))
+      (is (every? #(= :ok %) (map :status (doall (map search/add-link lnks))))))
+    (Thread/sleep 2000)
+    (testing "Now delete the recently added links."
+      (is (= :ok (:status (search/delete-link lnk))))
+      (is (= :error (:status (search/delete-link lnk))))
+      (is (every? #(= :ok %) (map :status (doall (map search/delete-link lnks))))))))
 
 (deftest search-by-fulltext
   (testing "Find by fulltext-search."
