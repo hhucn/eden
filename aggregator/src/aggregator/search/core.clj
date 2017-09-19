@@ -85,6 +85,37 @@
   "Deletes a link from ElasticSearch."
   [link] (delete :links link "Link deleted."))
 
+;; -----------------------------------------------------------------------------
+
+(defn- search-request
+  "Pass search-request to ElasticSearch."
+  [body-query]
+  (try
+    (let [req (sp/request @conn {:url [:_search] :method :get :body body-query})]
+      (lib/return-ok (str (get-in req [:body :hits :total]) " hit(s)")
+                     (get-in req [:body :hits])))
+    (catch Exception e
+      (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
+
+
+
+(defmulti search
+  "Multimethod to dispatch the different search types. Currently defaults to the
+  fulltext-search."
+  (fn [field _] field))
+
+(defmethod search :fulltext [_ query]
+  "Classic search-box style full-text query."
+  (search-request {:query {:query_string {:query query}}}))
+
+(defmethod search :fuzzy [_ query]
+  "Allow a bit of fuzziness, max. of two edits allowed."
+  (search-request {:query {:match {:_all {:query query
+                                          :fuzziness "AUTO"}}}}))
+
+(defmethod search :default [_ query]
+  (search :fulltext query))
+
 
 ;; -----------------------------------------------------------------------------
 ;; Entrypoint
@@ -143,9 +174,6 @@
         :args (s/cat :link ::gspecs/link)
         :ret :aggregator.utils.common/return-map)
 
-(comment
-  (-> `create-index s/get-spec :args s/exercise)
-  (s/exercise-fn `create-index)
-  (stest/check `create-index)
-  (s/valid? ::index-settings nil)
-  )
+(s/fdef search
+        :args (s/cat :type keyword? :query string?)
+        :ret :aggregator.utils.common/return-map)
