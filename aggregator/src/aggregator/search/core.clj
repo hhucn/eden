@@ -3,7 +3,8 @@
             [clojure.string :refer [blank?]]
             [qbits.spandex :as sp]
             [aggregator.utils.common :as lib]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [aggregator.specs :as gspecs]))
 
 (def ^:private conn (atom nil))
 
@@ -50,6 +51,26 @@
       (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
 
 
+(defn add-statement
+  "Add a statement to the statement-index."
+  [{:keys [aggregate-id entity-id] :as statement}]
+  (lib/return-ok "Added statement to index."
+                 (sp/request @conn {:url [:statements aggregate-id entity-id]
+                                    :method :put
+                                    :body statement})))
+
+(defn delete-statement
+  "Deletes a statement from the search-index."
+  [{:keys [aggregate-id entity-id]}]
+  (try
+    (lib/return-ok "Statement deleted."
+                   (sp/request @conn {:url [:statements aggregate-id entity-id]
+                                      :method :delete}))
+    (catch Exception e
+      (lib/return-error "Statement could not be deleted, because it was not found in the index."
+                        (ex-data e)))))
+
+
 ;; -----------------------------------------------------------------------------
 ;; Entrypoint
 
@@ -77,6 +98,14 @@
 
 (s/fdef delete-index
         :args (s/cat :index-name ::index-name)
+        :ret map?)
+
+(s/fdef add-statement
+        :args (s/cat :statement ::gspecs/statement)
+        :ret map?)
+
+(s/fdef delete-statement
+        :args (s/cat :statement ::gspecs/statement)
         :ret map?)
 
 (comment
