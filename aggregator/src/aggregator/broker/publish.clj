@@ -5,9 +5,7 @@
             [aggregator.broker.connector :as connector]
             [aggregator.utils.common :as lib]
             [aggregator.broker.config :as bconf]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (defn- publish
   "Create queue for entity and publish it on this queue."

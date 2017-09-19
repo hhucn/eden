@@ -25,7 +25,7 @@
 
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
-   broker."
+  broker."
   [] (reset! conn (rmq/connect {:host (System/getenv "BROKER_HOST")
                                 :username (System/getenv "BROKER_USER")
                                 :password (System/getenv "BROKER_PASS")})))

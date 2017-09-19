@@ -5,11 +5,9 @@
             [taoensso.timbre :as log]
             [aggregator.utils.common :as lib]
             [aggregator.query.update :as qupd]
-            [aggregator.specs]
+            [aggregator.specs :as gspecs]
             [clojure.spec.alpha :as s])
   (:import [com.rabbitmq.client AuthenticationFailureException]))
-
-(alias 'gspecs 'aggregator.specs)
 
 (def exceptions
   {:auth-ex "Subscription failed, wrong credentials."

@@ -3,10 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
             [aggregator.utils.common :as lib]
-            [aggregator.utils.testing :as tlib]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (def statement (second (last (s/exercise ::gspecs/statement))))
 
@@ -27,7 +24,9 @@
   (is (s/valid? uuid? (lib/uuid))))
 
 (deftest return-error
-  (tlib/check' 'aggregator.utils.common/return-error))
+  (are [x y] (= x y)
+    [:status :message] (keys (lib/return-error "Message"))
+    {:status :error :message "Message" :data {:foo :bar}} (lib/return-error "Message" {:foo :bar})))
 
 (deftest return-ok
   (are [x y] (= x y)

@@ -5,9 +5,7 @@
             [aggregator.broker.connector :as connector]
             [aggregator.utils.common :as lib]
             [clojure.spec.alpha :as s]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (def queue (str (lib/uuid)))
 (def queue-two (str (lib/uuid)))  ;; like Mewto, hihi

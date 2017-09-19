@@ -33,11 +33,12 @@
 (defn return-error
   "Sometimes you want to return an error message. This function packs it into a
   map."
-  [message] (return-map :error message nil))
+  ([message] (return-error message nil))
+  ([message data] (return-map :error message data)))
 
 (defn return-ok
   "Return ok and a message."
-  ([message] (return-map :ok message nil))
+  ([message] (return-ok message nil))
   ([message data] (return-map :ok message data)))
 
 
@@ -52,10 +53,13 @@
         :ret uuid?)
 
 ;; Return-maps
+(s/def ::return-map-args
+  (s/or :msg-only (s/cat :message ::message)
+        :with-data (s/cat :message ::message :data ::data)))
+
 (s/def ::status keyword?)
 (s/def ::message string?)
 (s/def ::data (s/or :data map? :no-data nil?))
-
 (s/def ::return-map (s/keys :req-un [::status ::message]
                             :opt-un [::data]))
 
@@ -64,14 +68,13 @@
         :ret ::return-map)
 
 (s/fdef return-error
-        :args (s/cat :message ::message)
+        :args ::return-map-args
         :ret ::return-map
         :fn #(and (= (-> % :args :message) (-> % :ret :message))
                   (= (-> % :ret :status) :error)))
 
 (s/fdef return-ok
-        :args (s/or :msg-only (s/cat :message ::message)
-                    :with-data (s/cat :message ::message :data ::data))
+        :args ::return-map-args
         :ret ::return-map
         :fn #(and (= (-> % :args second :message) (-> % :ret :message))
                   (= (-> % :ret :status) :ok)))
