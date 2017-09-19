@@ -3,9 +3,7 @@
             [clojure.spec.alpha :as s]
             [aggregator.broker.publish :as pub]
             [aggregator.broker.connector :as connector]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (defonce queue (first (last (s/exercise string?))))
 
@@ -35,4 +33,4 @@
   (is (every? #(= :ok %) (map :status (doall (map pub/publish-statement statements))))))
 
 (deftest publish-link
-  (is (every? #(= :ok %) (map :status (doall (map pub/publish-statement statements))))))
+  (is (every? #(= :ok %) (map :status (doall (map pub/publish-link links))))))

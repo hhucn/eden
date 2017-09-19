@@ -25,6 +25,29 @@
 
 ;; -----------------------------------------------------------------------------
 
+(defn- add
+  "Add new content to the index."
+  [index {:keys [aggregate-id entity-id] :as entity} msg]
+  (lib/return-ok msg
+                 (sp/request @conn {:url [index aggregate-id entity-id]
+                                    :method :put
+                                    :body entity})))
+
+(defn- delete
+  "Delete entity from ElasticSearch."
+  ([index-name msg] (delete index-name nil msg))
+  ([index-name {:keys [aggregate-id entity-id]} msg]
+   (let [deletion-path (vec (remove nil? (conj [(keyword index-name)] aggregate-id entity-id)))]
+     (try
+       (lib/return-ok msg
+                      (sp/request @conn {:url deletion-path
+                                         :method :delete}))
+       (catch Exception e
+         (lib/return-error (or (-> e ex-data :body :error :reason)
+                               "Entity not found.")
+                           (ex-data e)))))))
+
+
 (defn create-index
   "Create an index based on the provided string. Indexes are necessary to
   categorize the data. Valid settings can be found here:
@@ -42,33 +65,25 @@
 
 (defn delete-index
   "Deletes an index from elasticsearch."
-  [index-name]
-  (try
-    (lib/return-ok "Index successfully deleted."
-                   (sp/request @conn {:url [(keyword index-name)]
-                                      :method :delete}))
-    (catch Exception e
-      (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
-
+  [index-name] (delete index-name "Index successfully deleted."))
 
 (defn add-statement
-  "Add a statement to the statement-index."
-  [{:keys [aggregate-id entity-id] :as statement}]
-  (lib/return-ok "Added statement to index."
-                 (sp/request @conn {:url [:statements aggregate-id entity-id]
-                                    :method :put
-                                    :body statement})))
+  "Add a statement to the statement-index. Updates existing entities, identified
+  by aggregate-id and entity-id, and updates them if they already existed."
+  [statement] (add :statements statement "Added statement to index."))
 
 (defn delete-statement
   "Deletes a statement from the search-index."
-  [{:keys [aggregate-id entity-id]}]
-  (try
-    (lib/return-ok "Statement deleted."
-                   (sp/request @conn {:url [:statements aggregate-id entity-id]
-                                      :method :delete}))
-    (catch Exception e
-      (lib/return-error "Statement could not be deleted, because it was not found in the index."
-                        (ex-data e)))))
+  [statement] (delete :statements statement "Statement deleted."))
+
+(defn add-link
+  "Add a link to the link-index. Updates existing entities, identified
+  by aggregate-id and entity-id, and updates them if they already existed."
+  [link] (add :links link "Added link to index."))
+
+(defn delete-link
+  "Deletes a link from ElasticSearch."
+  [link] (delete :links link "Link deleted."))
 
 
 ;; -----------------------------------------------------------------------------
@@ -94,19 +109,39 @@
                                          ::analysis ::refresh_interval]))
 (s/fdef create-index
         :args (s/cat :index-name ::index-name :settings ::index-settings :mappings map?)
-        :ret map?)
+        :ret :aggregator.utils.common/return-map)
 
 (s/fdef delete-index
         :args (s/cat :index-name ::index-name)
-        :ret map?)
+        :ret :aggregator.utils.common/return-map)
+
+(s/fdef add
+        :args (s/cat :index ::index-name
+                     :entity (s/keys :req-un [::gspecs/aggregate-id ::gspecs/entity-id])
+                     :msg string?)
+        :ret :aggregator.utils.common/return-map)
+
+(s/fdef delete
+        :args (s/cat :index ::index-name
+                     :entity (s/keys :req-un [::gspecs/aggregate-id ::gspecs/entity-id])
+                     :msg string?)
+        :ret :aggregator.utils.common/return-map)
 
 (s/fdef add-statement
         :args (s/cat :statement ::gspecs/statement)
-        :ret map?)
+        :ret :aggregator.utils.common/return-map)
 
 (s/fdef delete-statement
         :args (s/cat :statement ::gspecs/statement)
-        :ret map?)
+        :ret :aggregator.utils.common/return-map)
+
+(s/fdef add-link
+        :args (s/cat :link ::gspecs/link)
+        :ret :aggregator.utils.common/return-map)
+
+(s/fdef delete-link
+        :args (s/cat :link ::gspecs/link)
+        :ret :aggregator.utils.common/return-map)
 
 (comment
   (-> `create-index s/get-spec :args s/exercise)
