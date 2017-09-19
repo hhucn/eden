@@ -3,10 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
             [aggregator.utils.common :as lib]
-            [aggregator.utils.testing :as tlib]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (def statement (second (last (s/exercise ::gspecs/statement))))
 
