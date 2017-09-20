@@ -2,7 +2,8 @@
   (:use [korma.db]
         [korma.core])
   (:require [clojure.string :as str]
-            [aggregator.query.utils :as utils]))
+            [aggregator.query.utils :as utils]
+            [aggregator.config :as config]))
 
 (defdb db (postgres {
                      :host "db"
@@ -90,3 +91,9 @@
   (select links (where {:to_aggregate_id target-aggregator
                         :to_entity_id target-entity
                         :to_version target-version})))
+
+(defn random-statements
+  "Return *num* random statements from the db."
+  [num]
+  (clojure.core/take
+   num (shuffle (select statements (where {:aggregate_id (rand-nth config/self-hostname)})))))

@@ -146,3 +146,8 @@
             db-result)))
       cached-link)))
 
+
+(defn starter-set
+  "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or databse."
+  []
+  (db/random-statements 10))
