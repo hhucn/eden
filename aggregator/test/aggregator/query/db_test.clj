@@ -38,4 +38,4 @@
 (deftest random-statements
   (let [results (db/random-statements 10)]
     (is (= (count results) 10))
-    (is (= (:aggregate_id (rand-nth results)) config/self-hostname))))
+    (is (= (:aggregate_id (rand-nth results)) config/aggregate-name))))

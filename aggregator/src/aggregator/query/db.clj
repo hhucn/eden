@@ -96,4 +96,4 @@
   "Return *num* random statements from the db."
   [num]
   (clojure.core/take
-   num (shuffle (select statements (where {:aggregate_id (rand-nth config/self-hostname)})))))
+   num (shuffle (select statements (where {:aggregate_id config/aggregate-name})))))
