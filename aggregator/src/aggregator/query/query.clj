@@ -4,6 +4,7 @@
             [aggregator.query.utils :as utils]
             [aggregator.query.update :as up]
             [aggregator.broker.subscriber :as sub]
+            [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
             [taoensso.timbre :as log]))
@@ -151,3 +152,11 @@
   "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or databse."
   []
   (db/random-statements 10))
+
+(defn remote-starter-set
+  "Retrieve remote starter sets and put them into the cache and db."
+  ([]
+   (doall (map (fn [aggregator] (remote-starter-set aggregator)) config/whitelist)))
+  ([aggregator]
+   (let [results (get-payload (str aggregator "/statements/starter-set"))]
+     (doall (map (fn [statement] (up/update-statement statement)) results)))))
