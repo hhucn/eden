@@ -1,7 +1,9 @@
 (ns aggregator.core
+  (:require [aggregator.query.retriever :as retriever])
   (:gen-class))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Bootstrap everything needed for the provider."
   [& args]
-  (println "Hello, World!"))
+  (retriever/bootstrap)
+  (println "Started all Services!"))
