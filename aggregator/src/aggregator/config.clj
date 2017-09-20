@@ -1,10 +1,13 @@
 (ns aggregator.config)
 
 (def whitelist
-  ["foo.bar"
-   "bar.baz"
-   "großeweiteweltderdiskussionen.de"])
+  #{"foo.bar"
+    "bar.baz"
+    "großeweiteweltderdiskussionen.de"})
 
+(def aggregate-name
+  "hhu.de") 
+(comment "All hostnames the provider can have.")
 
 ;; -----------------------------------------------------------------------------
 ;; Broker-Configuration

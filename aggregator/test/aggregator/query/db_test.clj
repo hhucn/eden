@@ -1,5 +1,6 @@
 (ns aggregator.query.db-test
   (:require [aggregator.query.db :as db]
+            [aggregator.config :as config]
             [clojure.test :refer :all]))
 
 
@@ -33,3 +34,8 @@
                    :to-entity-id "W_link_35" :aggregate-id "schneider.gg" :entity-id "link0r1337"})
   (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35"))
          "Wegi")))
+
+(deftest random-statements
+  (let [results (db/random-statements 10)]
+    (is (= (count results) 10))
+    (is (= (:aggregate_id (rand-nth results)) config/aggregate-name))))

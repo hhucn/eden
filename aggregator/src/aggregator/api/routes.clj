@@ -19,6 +19,10 @@
                                    (str (:entity params))
                                    {:opts [:no-remote]})
                          :queue (connector/create-queue server-name)}}))
+  (GET "/statements/starter-set" {:keys [server-name]}
+       (response {:status :ok
+                  :data {:payload (query/starter-set)
+                         :queue (connector/create-queue server-name)}}))
   (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved undercuts")
        (response {:status :ok
