@@ -7,7 +7,6 @@
 
 (def aggregate-name
   "hhu.de") 
-(comment "All hostnames the provider can have.")
 
 ;; -----------------------------------------------------------------------------
 ;; Broker-Configuration
