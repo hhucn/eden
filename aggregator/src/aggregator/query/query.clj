@@ -156,7 +156,7 @@
 (defn remote-starter-set
   "Retrieve remote starter sets and put them into the cache and db."
   ([]
-   (doall (map (fn [aggregator] (remote-starter-set aggregator)) config/whitelist)))
+   (doall (map remote-starter-set config/whitelist)))
   ([aggregator]
    (let [results (get-payload (str aggregator "/statements/starter-set"))]
      (doall (map (fn [statement] (up/update-statement statement)) results)))))
