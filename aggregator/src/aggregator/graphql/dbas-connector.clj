@@ -18,7 +18,7 @@
 
 (defn get-statements
   []
-  (let [result (query-db "query { statements { uid, textversions { content timestamp authorUid} }}")]
+  (let [result (query-db "query { statements { uid, textversions { content, timestamp, authorUid} }}")]
     (map (fn [statement] {:content (get-in statement [:statement :textversions :content])
                          :aggregate-id config/aggregate-name
                          :entity-id (get-in statement [:statement :uid])
@@ -29,18 +29,39 @@
                                       (get-in statement [:statement :textversions :authorUid]))})
          result)))
 
-(defn get-statement
-  [uid]
-  (query-db (format "query { statement(uid: %d) { textversions { content } }}" uid)))
+(defn link-type
+  [argument]
+  (let [supportive? (get-in argument [:argument :isSupportive])
+        conclusion-id (get-in argument [:argument :conclusionUid])]
+    (if supportive?
+      :support
+      (do (if conclusion-id
+            :attack
+            :undercut)))))
 
-(defn get-issues
+(defn get-links
   []
-  (query-db "query { issues { uid title }}"))
-
-(defn get-issue
-  [uid]
-  (query-db (format "query { issue(uid: %d) { title }}" uid)))
-
-(defn get-issue-graph
-  [uid]
-  (query-db (format "query{issue(uid: %d){statements {textversions{content authorUid}}}}" uid)))
+  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, timestamp, argumentUid, premisesgroupUid}}")]
+    (mapcat (fn [argument]
+              (let [group-uid (argument :premisesgroupUid)
+                    premises (query-db (format "query {premises(premisesgroupUid: %d) {statementUid }}") group-uid)
+                    link-type (link-type argument)]
+                (map (fn [premise]
+                       {:author (str config/aggregate-name " author#: "
+                                     (argument :authorUid))
+                        :type link-type
+                        :from-aggregate-id config/aggregate-name
+                        :from-entity-id (premise :statementUid)
+                        :from-version 1
+                        :to-aggregate-id config/aggregate-name
+                        :to-entity-id (if (= link-type :undercut)
+                                        (argument :argumentUid)
+                                        (argument :conclusionUid))
+                        :to-version (if (= link-type :undercut)
+                                      nil
+                                      1)
+                        :aggregate-id config/aggregate-name
+                        :entity-id (argument :uid)
+                        :created (argument :timestamp)})
+                     premises)))
+            result)))
