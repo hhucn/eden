@@ -35,16 +35,16 @@
         conclusion-id (get-in argument [:argument :conclusionUid])]
     (if supportive?
       :support
-      (do (if conclusion-id
-            :attack
-            :undercut)))))
+      (if conclusion-id
+        :attack
+        :undercut))))
 
 (defn get-links
   []
   (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, timestamp, argumentUid, premisesgroupUid}}")]
     (mapcat (fn [argument]
               (let [group-uid (argument :premisesgroupUid)
-                    premises (query-db (format "query {premises(premisesgroupUid: %d) {statementUid }}") group-uid)
+                    premises (query-db (format "query {premises(premisesgroupUid: %d) {statementUid }}" group-uid))
                     link-type (link-type argument)]
                 (map (fn [premise]
                        {:author (str config/aggregate-name " author#: "
