@@ -1,7 +1,7 @@
 (ns aggregator.query.db-test
   (:require [aggregator.query.db :as db]
             [aggregator.config :as config]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest is]]))
 
 
 (deftest statement-uri-retrieval-test
