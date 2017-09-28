@@ -1,8 +1,6 @@
 (ns aggregator.query.query-test
-  (:require [aggregator.query.cache :as cache]
-            [aggregator.query.db :as db]
-            [aggregator.query.query :as query]
-            [clojure.test :refer :all]))
+  (:require [aggregator.query.query :as query]
+            [clojure.test :refer [deftest is]]))
 
 ;; Here be tests
 

@@ -26,7 +26,7 @@
   "Uses the broker module to subscribe to a queue for updates."
   [queue host]
   (let [queue-name (get-in queue [:data :queue-name])]
-    (sub/subscribe sub/to-query queue {:host host})))
+    (sub/subscribe sub/to-query queue-name {:host host})))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
@@ -159,4 +159,4 @@
    (doall (map remote-starter-set config/whitelist)))
   ([aggregator]
    (let [results (get-payload (str aggregator "/statements/starter-set"))]
-     (doall (map (fn [statement] (up/update-statement statement)) results)))))
+     (doall (map up/update-statement results)))))
