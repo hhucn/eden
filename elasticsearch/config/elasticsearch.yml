@@ -54,6 +54,10 @@
 #
 http.host: "0.0.0.0"
 transport.host: "127.0.0.1"
+http.cors.enabled: true
+http.cors.allow-origin: /https?:\/\/localhost(:[0-9]+)?/
+http.cors.allow-credentials: true
+http.cors.allow-headers: "X-Requested-With, Content-Type, Content-Length, Authorization"
 #network.host: 192.168.0.1
 #
 # Set a custom port for HTTP:

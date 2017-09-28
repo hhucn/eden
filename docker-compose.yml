@@ -47,3 +47,24 @@ services:
       - "9200:9200"
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+  dbas:
+    image: gitlab.cs.uni-duesseldorf.de:5001/cn-tsn/project/dbas/dbas:development
+    ports:
+      - "4284:4284"
+    links:
+      - dbas-db:db
+    environment:
+      - "DBAS_DB_USER=${DBAS_DB_USER}"
+      - "DBAS_DB_PW=${DBAS_DB_PW}"
+      - "DBAS_DB_HOST=${DBAS_DB_HOST}"
+      - "DBAS_DB_PORT=${DBAS_DB_PORT}"
+      - "DBAS_AUTHN_SECRET=${DBAS_AUTHN_SECRET}"
+
+  dbas-db:
+    image: hhucn/dbas-database
+
+  dbas-notifications:
+    image: hhucn/dbas-notifications
+    ports:
+      - "5222:5222"
