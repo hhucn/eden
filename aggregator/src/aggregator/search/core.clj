@@ -97,8 +97,6 @@
     (catch Exception e
       (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
 
-
-
 (defmulti search
   "Multimethod to dispatch the different search types. Currently defaults to the
   fulltext-search."
@@ -116,6 +114,11 @@
 (defmethod search :default [_ query]
   (search :fulltext query))
 
+(defmethod search :entity [_ {:keys [aggregate-id entity-id]}]
+  "Search for an exactly matching entity."
+  (search-request {:query {:bool {:must [{:match {:aggregate-id aggregate-id}}
+                                         {:match {:entity-id entity-id}}]}}}))
+;; Dispatch between statement or link? (version)
 
 ;; -----------------------------------------------------------------------------
 ;; Entrypoint

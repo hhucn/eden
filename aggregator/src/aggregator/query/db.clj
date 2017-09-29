@@ -1,8 +1,27 @@
 (ns aggregator.query.db
+  (:use [korma.db]
+        [korma.core])
   (:require [clojure.string :as str]
             [aggregator.query.utils :as utils]
             [aggregator.config :as config]
             [aggregator.search.core :as elastic]))
+
+
+(defdb db (postgres {
+                     :host "db"
+                     :port "5432"
+                     :db "aggregator"
+                     :user (System/getenv "POSTGRES_USER")
+                     :password (System/getenv "POSTGRES_PASSWORD")
+                     :delimiters ""}))
+
+(defentity statements
+  (entity-fields :aggregate_id :entity_id :version :content :author :created :ancestor_aggregate_id
+                 :ancestor_entity_id :ancestor_version))
+
+(defentity links
+  (entity-fields :author :type :aggregate_id :entity_id :from_aggregate_id :from_entity_id :from_version
+                 :to_aggregate_id :to_entity_id :to_version :created))
 
 
 (defn part-uri

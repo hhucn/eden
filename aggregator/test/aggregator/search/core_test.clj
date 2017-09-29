@@ -98,3 +98,9 @@
       (search/search :fuzzy "")
       (search/search :fuzzy "*"))))
 
+
+(deftest search-entity
+  (testing "Test for exact entity"
+    (are [x] (pos? (get-in x [:data :total]))
+      (search/search :entity {:aggregate-id "huepfer.verlag"
+                              :entity-id "1"}))))
