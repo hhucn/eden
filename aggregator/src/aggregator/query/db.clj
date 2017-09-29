@@ -1,25 +1,9 @@
 (ns aggregator.query.db
-  (:use [korma.db]
-        [korma.core])
   (:require [clojure.string :as str]
             [aggregator.query.utils :as utils]
-            [aggregator.config :as config]))
+            [aggregator.config :as config]
+            [aggregator.search.core :as elastic]))
 
-(defdb db (postgres {
-                     :host "db"
-                     :port "5432"
-                     :db "aggregator"
-                     :user (System/getenv "POSTGRES_USER")
-                     :password (System/getenv "POSTGRES_PASSWORD")
-                     :delimiters ""}))
-
-(defentity statements
-  (entity-fields :aggregate_id :entity_id :version :content :author :created :ancestor_aggregate_id
-                 :ancestor_entity_id :ancestor_version))
-
-(defentity links
-  (entity-fields :author :type :aggregate_id :entity_id :from_aggregate_id :from_entity_id :from_version
-                 :to_aggregate_id :to_entity_id :to_version :created))
 
 (defn part-uri
   [uri]
@@ -62,8 +46,8 @@
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
-  [statement-map]
-  (insert statements (values (utils/underscore-keys statement-map))))
+  [statement]
+  (elastic/add-statement statement))
 
 (defn exact-link
   "Return the exact link and only that if possible."
@@ -75,8 +59,8 @@
 
 (defn insert-link
   "Requires a map conforming to the ::aggregator.specs/link as input. Inserts the statement into the database."
-  [link-map]
-  (insert links (values (utils/underscore-keys link-map))))
+  [link]
+  (elastic/add-link link))
 
 (defn get-undercuts
   "Returns all undercuts that point to target aggregator and entity-id."
