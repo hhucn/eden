@@ -28,7 +28,7 @@
 (defn statements-by-author
   "Return all statements with a certain author."
   [author]
-  (elastic/search :links {:author author}))
+  (elastic/search :statements {:author author}))
 
 (defn links-by-uri
   "Return all link-versions defined by the uri"
@@ -80,4 +80,4 @@
   "Return *num* random statements from the db."
   [num]
   (clojure.core/take
-   num (shuffle (elastic/search :statements {:aggregate-id config/aggregate-name}))))
+   num (shuffle (get-in (elastic/search :statements {:aggregate-id config/aggregate-name}) [:data :hits]))))

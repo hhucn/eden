@@ -10,7 +10,7 @@
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P13" :author "George" :content "shutting down University Park will save $100.000 a year" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P22" :author "AlterVerwalter" :content "the city is planing a new park in the upcoming month" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "7" :author "Bolek" :content "we should not abandon our town's core task" :version 1})
-  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P23" :author "XxxBaerchiDtoyerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P23" :author "XxxBaerchiDarkDestoyerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P232" :author "XxxBestoyerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P231" :author "XxxBoyerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P230" :author "XxxBayerxxX" :content "there is a smaller park in O-Town" :version 1})
@@ -57,4 +57,4 @@
 (deftest random-statements
   (let [results (db/random-statements 10)]
     (is (= (count results) 10))
-    (is (= (:aggregate_id (rand-nth results)) config/aggregate-name))))
+    (is (= (get-in (rand-nth results) [:_source :aggregate-id]) config/aggregate-name))))
