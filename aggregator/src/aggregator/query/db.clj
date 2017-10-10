@@ -38,10 +38,9 @@
 (defn exact-statement
   "Return the exact statement and only that if possible."
   [aggregate-id entity-id version]
-  (let [db-result (elastic/search :statements  {:aggregate-id aggregate-id
-                                                :entity-id entity-id
-                                                :version version})]
-    (first db-result)))
+  (elastic/search :statements {:aggregate-id aggregate-id
+                                           :entity-id entity-id
+                                           :version version}))
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
@@ -51,10 +50,12 @@
 (defn exact-link
   "Return the exact link and only that if possible."
   [from-aggregate from-entity from-version to-aggregate to-entity & [to-version]]
-  (let [db-result (elastic/search :links {:from-aggregate-id from-aggregate :from-entity-id from-entity
-                                          :from-version from-version :to-aggregate-id to-aggregate
-                                          :to-entity-id to-entity :to-version to-version})]
-    (first db-result)))
+  (let [query-map {:from-aggregate-id from-aggregate :from-entity-id from-entity
+                   :from-version from-version :to-aggregate-id to-aggregate
+                   :to-entity-id to-entity}
+        query (if to-version (assoc query-map :to-version to-version) query-map)
+        db-result (elastic/search :links query)]
+    db-result))
 
 (defn insert-link
   "Requires a map conforming to the ::aggregator.specs/link as input. Inserts the statement into the database."

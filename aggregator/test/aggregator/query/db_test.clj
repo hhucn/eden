@@ -26,7 +26,7 @@
   (db/insert-statement {:author "Wegi" :content "Test me baby one more time"
                         :aggregate-id "schneider.gg" :entity-id "W01" :version 1337})
   (Thread/sleep 2000)
-  (is (= (:content (db/exact-statement "schneider.gg" "W01" 1337))
+  (is (= (get-in (db/exact-statement "schneider.gg" "W01" 1337) [:data :hits 0 :_source :content])
          "Test me baby one more time")))
 
 (deftest insert-link-test
@@ -34,7 +34,8 @@
                    :from-entity-id "W01" :from-version 1337 :to-aggregate-id "schneider.gg"
                    :to-entity-id "W_link_35" :aggregate-id "schneider.gg" :entity-id "link0r1337"})
   (Thread/sleep 2000)
-  (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35"))
+  (is (= (get-in (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35")
+                 [:data :hits 0 :_source :author])
          "Wegi")))
 
 (deftest random-statements
