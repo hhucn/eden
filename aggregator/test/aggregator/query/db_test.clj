@@ -1,25 +1,41 @@
 (ns aggregator.query.db-test
   (:require [aggregator.query.db :as db]
             [aggregator.config :as config]
-            [clojure.test :refer [deftest is]]))
+            [aggregator.search.core :as search]
+            [clojure.test :refer [deftest is use-fixtures]]))
+
+(defn fixtures [f]
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "34" :author "Jorge" :content "money does not solve problems of our society" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P12" :author "George" :content "we should shut down University Park" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P13" :author "George" :content "shutting down University Park will save $100.000 a year" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P22" :author "AlterVerwalter" :content "the city is planing a new park in the upcoming month" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "7" :author "Bolek" :content "we should not abandon our town's core task" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P23" :author "XxxBaerchiDtoyerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P232" :author "XxxBestoyerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P231" :author "XxxBoyerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P230" :author "XxxBayerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (search/add-statement {:aggregate-id "hhu.de" :entity-id "P29" :author "XxxBaeryerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
+  (f))
+(use-fixtures :once fixtures)
 
 
 (deftest statement-uri-retrieval-test
-  (is (= (:version (first (db/statements-by-uri "hhu.de/34")))
+  (is (= (get-in (db/statements-by-uri "hhu.de/34") [:data :hits 0 :_source :version])
          1))
-  (is (= (:aggregate_id (first (db/statements-by-uri "hhu.de/P12")))
+  (is (= (get-in (db/statements-by-uri "hhu.de/P12") [:data :hits 0 :_source :aggregate-id])
          "hhu.de"))
-  (is (= (:entity_id (first (db/statements-by-uri "hhu.de/P13")))
+  (is (= (get-in (db/statements-by-uri "hhu.de/P13") [:data :hits 0 :_source :entity-id])
          "P13"))
-  (is (= (:content (first (db/statements-by-uri "hhu.de/P22")))
+  (is (= (get-in (db/statements-by-uri "hhu.de/P22") [:data :hits 0 :_source :content])
          "the city is planing a new park in the upcoming month"))
-  (is (= (:author (first (db/statements-by-uri "hhu.de/7")))
+  (is (= (get-in (db/statements-by-uri "hhu.de/7") [:data :hits 0 :_source :author])
          "Bolek")))
 
 (deftest statement-by-author-test
-  (is (= (count (db/statements-by-author "XxxBaerchiDarkDestoyerxxX"))
+  (is (= (count (get-in (db/statements-by-author "XxxBaerchiDarkDestoyerxxX") [:data :hits]))
          1))
-  (is (= (count (db/statements-by-author "George"))
+  (is (= (count (get-in (db/statements-by-author "George") [:data :hits]))
          2)))
 
 (deftest insert-statement-test
