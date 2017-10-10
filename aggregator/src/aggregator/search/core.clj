@@ -28,7 +28,7 @@
 (defn- construct-query
   "Construct a list for an elastic query with the arguments surrounded by :match hash-maps."
   [query]
-  (into [] (map (fn [[k v]] {:match {k v}}) query)))
+  (vec (map (fn [[k v]] {:match {k v}}) query)))
 
 (defn- add
   "Add new content to the index."

@@ -119,7 +119,7 @@
    (check-db uri {}))
   ([uri {:keys [opts]}]
    (let [possible-entity (db/statements-by-uri uri)]
-     (if (= (get-in possible-entity [:data :total]) 0)
+     (if (zero? (get-in possible-entity [:data :total]))
        (if (some #(= % :no-remote) opts)
          :not-found
          (retrieve-remote uri))
