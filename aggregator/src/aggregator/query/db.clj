@@ -43,9 +43,9 @@
 (defn exact-statement
   "Return the exact statement and only that if possible."
   [aggregate-id entity-id version]
-  (unpack-elastic (elastic/search :statements {:aggregate-id aggregate-id
-                                               :entity-id entity-id
-                                               :version version})))
+  (first (unpack-elastic (elastic/search :statements {:aggregate-id aggregate-id
+                                                      :entity-id entity-id
+                                                      :version version}))))
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
@@ -59,7 +59,7 @@
                    :from-version from-version :to-aggregate-id to-aggregate
                    :to-entity-id to-entity}
         query (if to-version (assoc query-map :to-version to-version) query-map)
-        db-result (unpack-elastic (elastic/search :links query))]
+        db-result (first (unpack-elastic (elastic/search :links query)))]
     db-result))
 
 (defn insert-link

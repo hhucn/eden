@@ -15,6 +15,9 @@
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P231" :author "XxxBoyerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P230" :author "XxxBayerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P29" :author "XxxBaeryerxxX" :content "there is a smaller park in O-Town" :version 1})
+  (db/insert-link {:author "Wegi" :type "undercut" :from-aggregate-id "schneider.gg"
+                   :from-entity-id "W01" :from-version 1337 :to-aggregate-id "schneider.gg"
+                   :to-entity-id "W_link_35" :aggregate-id "schneider.gg" :entity-id "link0r1337"})
   (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
   (f))
 (use-fixtures :once fixtures)
@@ -36,16 +39,13 @@
   (db/insert-statement {:author "Wegi" :content "Test me baby one more time"
                         :aggregate-id "schneider.gg" :entity-id "W01" :version 1337})
   (Thread/sleep 2000)
-  (is (= (:content (first (db/exact-statement "schneider.gg" "W01" 1337)))
+  (is (= (:content (db/exact-statement "schneider.gg" "W01" 1337))
          "Test me baby one more time")))
 
 (deftest insert-link-test
-  (db/insert-link {:author "Wegi" :type "undercut" :from-aggregate-id "schneider.gg"
-                   :from-entity-id "W01" :from-version 1337 :to-aggregate-id "schneider.gg"
-                   :to-entity-id "W_link_35" :aggregate-id "schneider.gg" :entity-id "link0r1337"})
-  (Thread/sleep 2000)
-  (is (= (:author (first (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35")))
-         "Wegi")))
+  (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35"))
+         "Wegi"))
+  (is (= "Wegi" (:author (first (db/links-by-uri "schneider.gg/link0r1337"))))))
 
 (deftest random-statements
   (let [results (db/random-statements 10)]
