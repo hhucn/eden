@@ -21,28 +21,22 @@
 
 
 (deftest statement-uri-retrieval-test
-  (is (= (get-in (db/statements-by-uri "hhu.de/34") [:data :hits 0 :_source :version])
-         1))
-  (is (= (get-in (db/statements-by-uri "hhu.de/P12") [:data :hits 0 :_source :aggregate-id])
-         "hhu.de"))
-  (is (= (get-in (db/statements-by-uri "hhu.de/P13") [:data :hits 0 :_source :entity-id])
-         "P13"))
-  (is (= (get-in (db/statements-by-uri "hhu.de/P22") [:data :hits 0 :_source :content])
+  (is (= (:version (first (db/statements-by-uri "hhu.de/34"))) 1))
+  (is (= (:aggregate-id (first (db/statements-by-uri "hhu.de/P12"))) "hhu.de"))
+  (is (= (:entity-id (first (db/statements-by-uri "hhu.de/P13"))) "P13"))
+  (is (= (:content (first (db/statements-by-uri "hhu.de/P22")))
          "the city is planing a new park in the upcoming month"))
-  (is (= (get-in (db/statements-by-uri "hhu.de/7") [:data :hits 0 :_source :author])
-         "Bolek")))
+  (is (= (:author (first (db/statements-by-uri "hhu.de/7"))) "Bolek")))
 
 (deftest statement-by-author-test
-  (is (= (count (get-in (db/statements-by-author "XxxBaerchiDarkDestoyerxxX") [:data :hits]))
-         1))
-  (is (= (count (get-in (db/statements-by-author "George") [:data :hits]))
-         2)))
+  (is (= (count (db/statements-by-author "XxxBaerchiDarkDestoyerxxX")) 1))
+  (is (= (count (db/statements-by-author "George")) 2)))
 
 (deftest insert-statement-test
   (db/insert-statement {:author "Wegi" :content "Test me baby one more time"
                         :aggregate-id "schneider.gg" :entity-id "W01" :version 1337})
   (Thread/sleep 2000)
-  (is (= (get-in (db/exact-statement "schneider.gg" "W01" 1337) [:data :hits 0 :_source :content])
+  (is (= (:content (first (db/exact-statement "schneider.gg" "W01" 1337)))
          "Test me baby one more time")))
 
 (deftest insert-link-test
@@ -50,11 +44,15 @@
                    :from-entity-id "W01" :from-version 1337 :to-aggregate-id "schneider.gg"
                    :to-entity-id "W_link_35" :aggregate-id "schneider.gg" :entity-id "link0r1337"})
   (Thread/sleep 2000)
-  (is (= (get-in (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35")
-                 [:data :hits 0 :_source :author])
+  (is (= (:author (first (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35")))
          "Wegi")))
 
 (deftest random-statements
   (let [results (db/random-statements 10)]
     (is (= (count results) 10))
-    (is (= (get-in (rand-nth results) [:_source :aggregate-id]) config/aggregate-name))))
+    (is (= (:aggregate-id (rand-nth results)) config/aggregate-name))))
+
+(deftest test-entity-by-uri
+  (let [results (db/entities-by-uri "hhu.de/34" :statements)]
+    (is (= 1 (count results)))
+    (is (= "Jorge" (:author (first results))))))
