@@ -76,10 +76,13 @@
 
 (defn links-by-target
   "Return all links with the corresponding target."
-  [target-aggregator target-entity target-version]
-  (unpack-elastic (elastic/search :links {:to-aggregate-id target-aggregator
-                                          :to-entity-id target-entity
-                                          :to-version target-version})))
+  ([target-aggregator target-entity]
+   (unpack-elastic (elastic/search :links {:to-aggregate-id target-aggregator
+                                           :to-entity-id target-entity})))
+  ([target-aggregator target-entity target-version]
+   (unpack-elastic (elastic/search :links {:to-aggregate-id target-aggregator
+                                           :to-entity-id target-entity
+                                           :to-version target-version}))))
 
 (defn random-statements
   "Return *num* random statements from the db."

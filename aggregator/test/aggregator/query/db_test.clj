@@ -56,3 +56,11 @@
   (let [results (db/entities-by-uri "hhu.de/34" :statements)]
     (is (= 1 (count results)))
     (is (= "Jorge" (:author (first results))))))
+
+(deftest test-undercuts
+  (let [results (db/get-undercuts "schneider.gg" "W_link_35")]
+    (is (= "link0r1337" (:entity-id (first results))))))
+
+(deftest test-links-by-target
+  (let [results (db/links-by-target "schneider.gg" "W_link_35")]
+    (is (= "link0r1337" (:entity-id (first results))))))
