@@ -13,7 +13,7 @@
 (defn unpack-elastic
   "Unpack an elasticsearch response to a list of entities."
   [response]
-  (map (fn [element] (:_source element)) (get-in response [:data :hits])))
+  (map :_source (get-in response [:data :hits])))
 
 (defn entities-by-uri
   "Returns all entities matched by the uri."
