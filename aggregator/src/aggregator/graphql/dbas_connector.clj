@@ -39,29 +39,35 @@
         :attack
         :undercut))))
 
+(defn links-from-argument
+  "Use the strange structure of DBAS-arguments to create links. Needs a connection to the local dbas instance."
+  [argument]
+  (let [group-uid (argument :premisesgroupUid)
+        premises (query-db (format
+                            "query {premises(premisesgroupUid: %d) {statementUid }}"
+                            group-uid))
+        link-type (link-type argument)]
+    (map (fn [premise]
+           {:author (str config/aggregate-name " author#: "
+                         (argument :authorUid))
+            :type link-type
+            :from-aggregate-id config/aggregate-name
+            :from-entity-id (premise :statementUid)
+            :from-version 1
+            :to-aggregate-id config/aggregate-name
+            :to-entity-id (if (= link-type :undercut)
+                            (argument :argumentUid)
+                            (argument :conclusionUid))
+            :to-version (if (= link-type :undercut)
+                          nil
+                          1)
+            :aggregate-id config/aggregate-name
+            :entity-id (argument :uid)
+            :created (argument :timestamp)})
+         premises)))
+
+
 (defn get-links
   []
   (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, timestamp, argumentUid, premisesgroupUid}}")]
-    (mapcat (fn [argument]
-              (let [group-uid (argument :premisesgroupUid)
-                    premises (query-db (format "query {premises(premisesgroupUid: %d) {statementUid }}" group-uid))
-                    link-type (link-type argument)]
-                (map (fn [premise]
-                       {:author (str config/aggregate-name " author#: "
-                                     (argument :authorUid))
-                        :type link-type
-                        :from-aggregate-id config/aggregate-name
-                        :from-entity-id (premise :statementUid)
-                        :from-version 1
-                        :to-aggregate-id config/aggregate-name
-                        :to-entity-id (if (= link-type :undercut)
-                                        (argument :argumentUid)
-                                        (argument :conclusionUid))
-                        :to-version (if (= link-type :undercut)
-                                      nil
-                                      1)
-                        :aggregate-id config/aggregate-name
-                        :entity-id (argument :uid)
-                        :created (argument :timestamp)})
-                     premises)))
-            result)))
+    (mapcat links-from-argument result)))

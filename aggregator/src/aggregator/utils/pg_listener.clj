@@ -1,7 +1,8 @@
 (ns aggregator.utils.pg-listener
   (:require [postgres-listener.core :as pgl]
             [aggregator.config :as config]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [aggregator.graphql.dbas-connector :refer [links-from-argument]]))
 
 
 (defn- handle-statements
@@ -22,7 +23,10 @@
 
 (defn- handle-arguments
   "Handle changes in arguments and update links correspondingly."
-  [argument])
+  [argument]
+  (let [data (:data argument)]
+    (log/debug "new argument: " data)
+    (links-from-argument data))) ;; List of links, thanks premisegroup
 
 (defn start-listeners
   "Start all important listeners."
