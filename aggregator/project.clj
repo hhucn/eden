@@ -20,7 +20,9 @@
                  [ring/ring-jetty-adapter "1.6.2"]
                  [clj-http "3.7.0"]]
 
-  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]]
+
+  :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
+                                  [nightlight "1.9.0"]]
                    :plugins [[cider/cider-nrepl "0.16.0-SNAPSHOT"]
                              [refactor-nrepl "2.4.0-SNAPSHOT"]]}
              :uberjar {:aot :all}}
@@ -29,7 +31,7 @@
             [lein-ancient "0.6.10"]
             [lein-ring "0.9.7"]
             [lein-cloverage "1.0.9"]
-            [nightlight/lein-nightlight "1.7.2"]]
+            [nightlight/lein-nightlight "1.9.0"]]
 
   :ring {:handler aggregator.api.routes/app
          :port 8888
