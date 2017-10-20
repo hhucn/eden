@@ -23,12 +23,14 @@ services:
       - db
       - search
       - dbas
+      - dbas-db
     environment:
       - "BROKER_HOST=${BROKER_HOST}"
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
-      - "POSTGRES_USER=${DATABASE_USER}"
-      - "POSTGRES_PASSWORD=${DATABASE_PASSWORD}"
+      - "DBAS_DB_USER=${DBAS_DB_USER}"
+      - "DBAS_DB_PW=${DBAS_DB_PW}"
+      - "DBAS_DB_PORT=${DBAS_DB_PORT}"
 
   db:
     image: postgres:9.6-alpine

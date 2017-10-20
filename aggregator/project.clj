@@ -3,7 +3,8 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.9.0-alpha20"]
+  :dependencies [[de.hhu.cn/postgres-listener "0.1.1"]
+                 [org.clojure/clojure "1.9.0-alpha20"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/core.cache "0.6.5"]
                  [org.clojure/core.async "0.3.443"]
@@ -19,9 +20,10 @@
                  [ring/ring-jetty-adapter "1.6.2"]
                  [clj-http "3.7.0"]]
 
+
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [nightlight "1.9.0"]]
-                   :plugins [[cider/cider-nrepl "0.15.1"]
+                   :plugins [[cider/cider-nrepl "0.16.0-SNAPSHOT"]
                              [refactor-nrepl "2.4.0-SNAPSHOT"]]}
              :uberjar {:aot :all}}
 

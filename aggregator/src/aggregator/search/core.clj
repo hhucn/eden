@@ -25,6 +25,11 @@
 
 ;; -----------------------------------------------------------------------------
 
+(defn- construct-query
+  "Construct a list for an elastic query with the arguments surrounded by :match hash-maps."
+  [query]
+  (vec (map (fn [[k v]] {:match {k v}}) query)))
+
 (defn- add
   "Add new content to the index."
   [index {:keys [aggregate-id entity-id] :as entity} msg]
@@ -89,15 +94,16 @@
 
 (defn- search-request
   "Pass search-request to ElasticSearch."
-  [body-query]
-  (try
-    (let [req (sp/request @conn {:url [:_search] :method :get :body body-query})]
-      (lib/return-ok (str (get-in req [:body :hits :total]) " hit(s)")
-                     (get-in req [:body :hits])))
-    (catch Exception e
-      (lib/return-error (-> e ex-data :body :error :reason) (ex-data e)))))
-
-
+  ([body-query]
+   (search-request body-query nil))
+  ([body-query index]
+   (try
+     (let [search-index (if index [index :_search] [:_search])
+           req (sp/request @conn {:url search-index :method :get :body body-query})]
+       (lib/return-ok (str (get-in req [:body :hits :total]) " hit(s)")
+                      (get-in req [:body :hits])))
+     (catch Exception e
+       (lib/return-error (-> e ex-data :body :error :reason) (ex-data e))))))
 
 (defmulti search
   "Multimethod to dispatch the different search types. Currently defaults to the
@@ -116,6 +122,14 @@
 (defmethod search :default [_ query]
   (search :fulltext query))
 
+(defmethod search :statements [_ query]
+  "Search for a matching entity (multiple versions possible)."
+  (search-request {:query {:bool {:must (construct-query query)}}} :statements))
+
+(defmethod search :links [_ query]
+  "Search for a matching entity (multiple versions possible)."
+  (search-request {:query {:bool {:must (construct-query query)}}} :links))
+;; Dispatch between statement or link? (version)
 
 ;; -----------------------------------------------------------------------------
 ;; Entrypoint
