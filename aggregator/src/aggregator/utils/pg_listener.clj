@@ -1,6 +1,7 @@
 (ns aggregator.utils.pg-listener
   (:require [postgres-listener.core :as pgl]
             [aggregator.config :as config]
+            [aggregator.query.update :as update]
             [taoensso.timbre :as log]
             [aggregator.graphql.dbas-connector :refer [links-from-argument]]))
 
@@ -14,19 +15,20 @@
   "Handle changes in the textversions. They belong to the statements."
   [textversion]
   (log/debug "new textversion: " (:data textversion))
-  {:author (get-in textversion [:data :author_uid])
-   :content (get-in textversion [:data :content])
-   :aggregate-id config/aggregate-name
-   :entity-id (get-in textversion [:data :uid])
-   :version 1
-   :created (get-in textversion [:data :timestamp])})
+  (update/update-statement
+   {:author (get-in textversion [:data :author_uid])
+    :content (get-in textversion [:data :content])
+    :aggregate-id config/aggregate-name
+    :entity-id (get-in textversion [:data :uid])
+    :version 1
+    :created (get-in textversion [:data :timestamp])}))
 
 (defn- handle-arguments
   "Handle changes in arguments and update links correspondingly."
   [argument]
   (let [data (:data argument)]
     (log/debug "new argument: " data)
-    (links-from-argument data))) ;; List of links, thanks premisegroup
+    (doall (map update/update-link (links-from-argument data)))))
 
 (defn start-listeners
   "Start all important listeners."
@@ -41,5 +43,6 @@
   (pgl/arm-listener handle-arguments "arguments_changes")
   (log/debug "Started listeners for DBAS-PG-DB"))
 
-(start-listeners)
+
+;;(start-listeners)
 
