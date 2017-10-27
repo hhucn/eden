@@ -8,7 +8,7 @@
   [query]
   (->
    ;; This needs a dbas instance running under the name dbas in the same docker network.
-   (client/get "dbas:4284/api/v2/query"
+   (client/get "http://dbas:4284/api/v2/query"
                {:query-params
                 {"q" query}})
    :body

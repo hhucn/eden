@@ -16,7 +16,7 @@
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
-  (bootstrap-dgep-data)
+  ;;(bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap)
   (println "Started all Services!")

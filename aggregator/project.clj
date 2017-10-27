@@ -34,6 +34,7 @@
             [nightlight/lein-nightlight "1.9.0"]]
 
   :ring {:handler aggregator.api.routes/app
+         :init aggregator.core/-main
          :port 8888
          :nrepl {:start? true
                  :port 7777

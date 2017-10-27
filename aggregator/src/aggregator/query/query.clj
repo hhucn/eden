@@ -9,13 +9,13 @@
             [clojure.string :as str]
             [taoensso.timbre :as log]))
 
-
 (defn get-data
   "Get data from a remote aggregator."
   [request-url]
-  (-> (client/get request-url  {:accept :json})
-      (utils/http-response->map)
-      :data))
+  (try
+    (:data(:body (client/get request-url {:as :json})))
+    (catch Exception e
+      {})))
 
 (defn get-payload
   "Helper to get the payload from a remote query."
@@ -158,5 +158,5 @@
   ([]
    (doall (map remote-starter-set config/whitelist)))
   ([aggregator]
-   (let [results (get-payload (str aggregator "/statements/starter-set"))]
+   (let [results (get-payload (str "http://" aggregator "/statements/starter-set"))]
      (doall (map up/update-statement results)))))
