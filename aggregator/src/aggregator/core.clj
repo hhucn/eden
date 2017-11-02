@@ -10,7 +10,7 @@
 (defn- bootstrap-dgep-data
   "Get an initial pull on the chosen DGEPs data."
   []
-  ;(doall (map update/update-statement (dbas-conn/get-statements)))
+  (doall (map update/update-statement (dbas-conn/get-statements)))
   (doall (map update/update-link (dbas-conn/get-links))))
 
 (defn -main

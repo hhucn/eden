@@ -19,16 +19,16 @@
 
 (defn get-statements
   []
-  (let [result (query-db "query { statements { uid, textversions { content, timestamp, authorUid} }}")]
-    (map (fn [statement] {:content (get-in statement [:statement :textversions :content])
+  (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
+    (map (fn [statement] {:content (get-in statement [:textversions :content])
                          :aggregate-id config/aggregate-name
-                         :entity-id (get-in statement [:statement :uid])
+                         :entity-id (:uid statement)
                          :version 1
-                         :created (get-in statement [:statement :textversions :timestamp])
+                         :created nil ;; dbas won't play
                          :author (str config/aggregate-name
                                       " author#: "
-                                      (get-in statement [:statement :textversions :authorUid]))})
-         result)))
+                                      (get-in statement [:textversions :authorUid]))})
+         (:statements result))))
 
 (defn link-type
   [argument]
