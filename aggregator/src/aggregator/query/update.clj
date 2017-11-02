@@ -19,7 +19,12 @@
 (defn update-link
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
   [link]
-  (let [db-result (db/exact-link (:aggregate-id link) (:entity-id link))]
+  (let [db-result (if (:to-version link)
+                    (db/exact-link (:aggregate-id link) (:entity-id link) (:from-version link)
+                                   (:to-aggregate-id link) (:to-entity-id link))
+                    (db/exact-link (:aggregate-id link) (:entity-id link) (:from-version link)
+                                   (:to-aggregate-id link) (:to-entity-id link)
+                                   (:to-version link)))]
     (when-not db-result
       (log/debug (format "[query] Added new link to db: %s" link))
       (cache/cache-miss-link (str (:aggregate-id link) "/" (:entity-id link)) link)

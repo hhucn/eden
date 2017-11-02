@@ -1,9 +1,9 @@
 (ns aggregator.config)
 
 (def whitelist
-  #{"foo.bar"
-    "bar.baz"
-    "großeweiteweltderdiskussionen.de"})
+  #{"hhu.de"
+    "schneider.gg"
+    "dbas"})
 
 (def aggregate-name
   "hhu.de") 

@@ -18,6 +18,6 @@
   [& args]
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
-  (retriever/bootstrap)
+  (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
   (println "Started all Services!")
   (log/debug "Main Bootstrap finished"))
