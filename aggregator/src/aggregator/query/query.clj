@@ -1,7 +1,6 @@
 (ns aggregator.query.query
   (:require [aggregator.query.cache :as cache]
             [aggregator.query.db :as db]
-            [aggregator.query.utils :as utils]
             [aggregator.query.update :as up]
             [aggregator.broker.subscriber :as sub]
             [aggregator.config :as config]

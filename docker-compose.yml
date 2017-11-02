@@ -20,7 +20,6 @@ services:
       - "8888:8888" # ring dev server
     links:
       - broker
-      - db
       - search
       - dbas
       - dbas-db
@@ -31,16 +30,6 @@ services:
       - "DBAS_DB_USER=${DBAS_DB_USER}"
       - "DBAS_DB_PW=${DBAS_DB_PW}"
       - "DBAS_DB_PORT=${DBAS_DB_PORT}"
-
-  db:
-    image: postgres:9.6-alpine
-    volumes:
-      - ./db/entrypoint:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"  # again, just for debugging
-    environment:
-      - "POSTGRES_USER=${DATABASE_USER}"
-      - "POSTGRES_PASSWORD=${DATABASE_PASSWORD}"
 
   search:
     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
