@@ -10,14 +10,14 @@
 (defn- bootstrap-dgep-data
   "Get an initial pull on the chosen DGEPs data."
   []
-  (doall (map update/update-statement (dbas-conn/get-statements)))
+  ;(doall (map update/update-statement (dbas-conn/get-statements)))
   (doall (map update/update-link (dbas-conn/get-links))))
 
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
-  ;;(bootstrap-dgep-data)
+  (bootstrap-dgep-data)
   (pg-listener/start-listeners)
-  (retriever/bootstrap)
+  (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
   (println "Started all Services!")
   (log/debug "Main Bootstrap finished"))
