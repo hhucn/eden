@@ -1,6 +1,6 @@
 [{:author "deka" :content "der Kampf unentschieden ausfällt" :aggregate-id "hhu.de" :entity-id "1" :version 1 :created nil}
  {:author "dekan" :content "der Kampf nicht unentschieden ausfallen kann. Zu irgend einem Zeitpunkt wird nur noch genau ein Tier leben. Dieses hat gewonnen" :aggregate-id "hhu.de" :entity-id "2" :version 1 :created nil}
- {:author "diepfe" :content "die Pferde fliegen und die meisten überleben werden" :aggregate-id "hhu.de" :entity-id "3" :version 1 :created nil}
+ {:author "diepfe" :content "die Pferde fliehen und die meisten überleben werden" :aggregate-id "hhu.de" :entity-id "3" :version 1 :created nil}
  {:author "woot" :content "sie ihre Energien aneinander aufrauchen werden und dann umfallen" :aggregate-id "hhu.de" :entity-id "4" :version 1 :created nil}
  {:author "diepfe" :content "die Pferde fliegen und die meisten somit überleben werden" :aggregate-id "hhu.de" :entity-id "5" :version 1 :created nil}
  {:author "Wendy" :content "wenn die Pferde fliehen, gibt es keinen Kampf. Nach Vorraussetzung der Frage findet aber ein Kampf statt" :aggregate-id "hhu.de" :entity-id "6" :version 1 :created nil}
