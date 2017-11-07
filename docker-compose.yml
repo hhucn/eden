@@ -15,6 +15,7 @@ services:
     volumes:
       - ~/.m2:/root/.m2  # cache leiningen dependencies
       - ./aggregator/:/code  # enable hot-code reloading
+      - ./db/entrypoint/set1/:/db/entrypoint # Testdata. Use the set you need
     ports:
       - "7777:7777"  # expose port to REPL
       - "8888:8888" # ring dev server
