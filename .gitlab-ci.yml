@@ -9,7 +9,7 @@ services:
     alias: db
   - name: rabbitmq:3.6-alpine
     alias: broker
-  - name: $CI_REGISTRY/cn-tsn/general/elasticsearch-for-docker
+  - name: $CI_REGISTRY/general/cn-tsn/elasticsearch-for-docker
     alias: search
 
 variables:
