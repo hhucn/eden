@@ -13,9 +13,17 @@
   (doall (map update/update-statement (dbas-conn/get-statements)))
   (doall (map update/update-link (dbas-conn/get-links))))
 
+(defn- load-test-data
+  "Loads the testdata inside the db/entrypoint folder. Presumes an arguments.edn and a links.edn is present."
+  []
+  (doall (map update/update-statement (read-string (slurp "/db/entrypoint/arguments.edn"))))
+  (doall (map update/update-link (read-string (slurp "/db/entrypoint/links.edn"))))
+  (log/debug "Read all testdata"))
+
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
+  (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
