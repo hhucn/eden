@@ -1,4 +1,5 @@
-[{:author "erazor" :content "die hundert Pferde gewinnen" :entity-id "1" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
+[{:author "system" :content "Bei einem Kampf zwischen einem Pferdegroßen Huhn und hundert huhngroßen Pferden: Wer würde gewinnen?" :entity-id "start-1" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
+ {:author "erazor" :content "die hundert Pferde gewinnen" :entity-id "1" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Feuerlöscher" :content "Als direkter Nachfahre der Dinosaurier sind Hühner schlicht der überlegene Gegner" :entity-id "2" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Freud" :content "Pferde sind leider zu doof" :entity-id "3" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Feuerlöscher" :content "Pferde im Vergleich zu Hühner ein ausgeprägtes Sozial- und Kommunikationsverhalten zeigen" :entity-id "4" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
@@ -16,7 +17,7 @@
  {:author "lolzor" :content "die Pferde das Huhn langsam zu tode trampeln" :entity-id "23" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Indiana Jones" :content "Die Mini-Pferde können Hühner einfach nur kitzeln. Mehr nicht" :entity-id "24" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Bombur" :content "vermutlich auch genug Pferde von dem übergroßen Huhn tod getrampelt werden" :entity-id "25" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
- {:author "McGockles" :content "das Huhn einfach gewinnen würde" :entity-id "50" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
+ {:author "McGockles" :content "das Huhn gewinnen würde" :entity-id "50" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Meter" :content "die Pferde nicht mal so groß sind wie die Beine des Huhns. -> Die Pferde können dem Huhn (fast) nichts tun" :entity-id "51" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Herbi" :content "es fliegen kann. So wird es für die Pferde schwer, das Huhn zu attackieren" :entity-id "52" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Feuerlöscher" :content "Hühner nicht fliegen können" :entity-id "53" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
