@@ -53,11 +53,15 @@ services:
       - "DBAS_DB_HOST=${DBAS_DB_HOST}"
       - "DBAS_DB_PORT=${DBAS_DB_PORT}"
       - "DBAS_AUTHN_SECRET=${DBAS_AUTHN_SECRET}"
+    volumes:
+      - ./dbas:/dbas
 
   dbas-db:
     image: postgres:10-alpine
     volumes:
       - ./dbas_db/entrypoint:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
 
   dbas-notifications:
     image: hhucn/dbas-notifications
