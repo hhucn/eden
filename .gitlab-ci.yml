@@ -45,14 +45,6 @@ cache:
 ################################################################################
 # Jobs
 
-up-to-date?:
-  image: clojure:alpine
-  stage: test
-  script:
-    - cd aggregator
-    - lein ancient
-  allow_failure: true
-
 idiomatic?:
   image: clojure:alpine
   stage: test

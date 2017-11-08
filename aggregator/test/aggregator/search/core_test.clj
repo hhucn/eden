@@ -11,6 +11,13 @@
                 :version 1
                 :created nil})
 
+(def statement2 {:author "penguin"
+                 :content "Teewurst"
+                 :aggregate-id "penguin.books"
+                 :entity-id "1"
+                 :version 1
+                 :created nil})
+
 (def link (first (last (s/exercise ::gspecs/link))))
 
 (defn fixtures [f]
@@ -19,7 +26,6 @@
   (f)
   (search/delete-statement statement))
 (use-fixtures :once fixtures)
-
 
 (deftest create-delete-index
   (testing "Only one index of the same kind is allowed."

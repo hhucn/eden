@@ -42,7 +42,7 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
 
   dbas:
-    image: gitlab.cs.uni-duesseldorf.de:5001/cn-tsn/project/dbas/dbas:development
+    build: dbas/
     ports:
       - "4284:4284"
     links:
@@ -53,9 +53,15 @@ services:
       - "DBAS_DB_HOST=${DBAS_DB_HOST}"
       - "DBAS_DB_PORT=${DBAS_DB_PORT}"
       - "DBAS_AUTHN_SECRET=${DBAS_AUTHN_SECRET}"
+    volumes:
+      - ./dbas:/dbas
 
   dbas-db:
-    image: hhucn/dbas-database
+    image: postgres:10-alpine
+    volumes:
+      - ./dbas_db/entrypoint:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
 
   dbas-notifications:
     image: hhucn/dbas-notifications
