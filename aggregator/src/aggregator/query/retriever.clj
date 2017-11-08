@@ -36,7 +36,7 @@
   [statement]
   (log/debug (format "[retriever] Starting to pull related data for %s" statement))
   (let [startlinks (query/links-to statement)]
-    (future (loop-next startlinks))))
+    (loop-next startlinks)))
 
 (defn automatic-retriever
   "Starts an automatic retriever that looks up statements and links related to things contained in the cache."
