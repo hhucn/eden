@@ -1,5 +1,4 @@
-[{:author "stat0r" :content "Bei einem Kampf zwischen einem pferdegroßen Huhn und hundert huhngroßen Pferden: Wer würde gewinnen?" :aggregate-id "hhu.de" :entity-id "start-1" :version 1 :created nil}
- {:author "deka" :content "der Kampf unentschieden ausfällt" :aggregate-id "hhu.de" :entity-id "1" :version 1 :created nil}
+[{:author "deka" :content "der Kampf unentschieden ausfällt" :aggregate-id "hhu.de" :entity-id "1" :version 1 :created nil}
  {:author "dekan" :content "der Kampf nicht unentschieden ausfallen kann. Zu irgend einem Zeitpunkt wird nur noch genau ein Tier leben. Dieses hat gewonnen" :aggregate-id "hhu.de" :entity-id "2" :version 1 :created nil}
  {:author "diepfe" :content "die Pferde fliehen und die meisten überleben werden" :aggregate-id "hhu.de" :entity-id "3" :version 1 :created nil}
  {:author "woot" :content "sie ihre Energien aneinander aufrauchen werden und dann umfallen" :aggregate-id "hhu.de" :entity-id "4" :version 1 :created nil}

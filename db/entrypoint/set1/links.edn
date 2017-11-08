@@ -1,11 +1,9 @@
-[{:author "deka" :type :link :aggregate-id "hhu.de" :entity-id "l1" :from-aggregate-id "hhu.de" :from-entity-id "1" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "start-1" :created nil :to-version 1}
- {:author "woot" :type :support :aggregate-id "hhu.de" :entity-id "l2" :from-aggregate-id "hhu.de" :from-entity-id "4" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "1" :created nil :to-version 1}
+[{:author "woot" :type :support :aggregate-id "hhu.de" :entity-id "l2" :from-aggregate-id "hhu.de" :from-entity-id "4" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "1" :created nil :to-version 1}
  {:author "dekan" :type :attack :aggregate-id "hhu.de" :entity-id "l3" :from-aggregate-id "hhu.de" :from-entity-id "2" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "1" :created nil :to-version 1}
  {:author "diepfe" :type :support :aggregate-id "hhu.de" :entity-id "l4" :from-aggregate-id "hhu.de" :from-entity-id "3" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "1" :created nil :to-version 1}
  {:author "diepfe" :type :attack :aggregate-id "hhu.de" :entity-id "l5" :from-aggregate-id "hhu.de" :from-entity-id "3" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "4" :created nil :to-version 1}
  {:author "diepfe" :type :support :aggregate-id "hhu.de" :entity-id "l6" :from-aggregate-id "hhu.de" :from-entity-id "5" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "1" :created nil :to-version 1}
  {:author "Wendy" :type :attack :aggregate-id "hhu.de" :entity-id "l7" :from-aggregate-id "hhu.de" :from-entity-id "6" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "5" :created nil :to-version 1}
- {:author "Reuter" :type :link :aggregate-id "hhu.de" :entity-id "l8" :from-aggregate-id "hhu.de" :from-entity-id "35" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "start-1" :created nil :to-version 1}
  {:author "Johnny" :type :attack :aggregate-id "hhu.de" :entity-id "l9" :from-aggregate-id "hhu.de" :from-entity-id "36" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "35" :created nil :to-version 1}
  {:author "Melvin" :type :attack :aggregate-id "hhu.de" :entity-id "l10" :from-aggregate-id "hhu.de" :from-entity-id "42" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "35" :created nil :to-version 1}
  {:author "Johnny" :type :support :aggregate-id "hhu.de" :entity-id "l11" :from-aggregate-id "hhu.de" :from-entity-id "40" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "35" :created nil :to-version 1}
@@ -14,7 +12,6 @@
  {:author "Susi" :type :undercut :aggregate-id "hhu.de" :entity-id "l14" :from-aggregate-id "hhu.de" :from-entity-id "44" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "l12" :created nil}
  {:author "Johnny" :type :attack :aggregate-id "hhu.de" :entity-id "l15" :from-aggregate-id "hhu.de" :from-entity-id "45" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "44" :created nil :to-version 1}
  {:author "Haniball" :type :undercut :aggregate-id "hhu.de" :entity-id "l16" :from-aggregate-id "hhu.de" :from-entity-id "46" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "l15" :created nil}
- {:author "Pazi" :type :link :aggregate-id "hhu.de" :entity-id "l17" :from-aggregate-id "hhu.de" :from-entity-id "10" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "start-1" :created nil :to-version 1}
  {:author "elkawe" :type :attack :aggregate-id "hhu.de" :entity-id "l18" :from-aggregate-id "hhu.de" :from-entity-id "11" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "10" :created nil :to-version 1}
  {:author "Adolf" :type :support :aggregate-id "hhu.de" :entity-id "l19" :from-aggregate-id "hhu.de" :from-entity-id "12" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "10" :created nil :to-version 1}
  {:author "Hans" :type :attack :aggregate-id "hhu.de" :entity-id "l20" :from-aggregate-id "hhu.de" :from-entity-id "14" :from-version 1 :to-aggregate-id "hhu.de" :to-entity-id "12" :created nil :to-version 1}

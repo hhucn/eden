@@ -1,5 +1,4 @@
-[{:author "system" :content "Bei einem Kampf zwischen einem Pferdegroßen Huhn und hundert huhngroßen Pferden: Wer würde gewinnen?" :entity-id "start-1" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
- {:author "erazor" :content "die hundert Pferde gewinnen" :entity-id "1" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
+[{:author "erazor" :content "die hundert Pferde gewinnen" :entity-id "1" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Feuerlöscher" :content "Als direkter Nachfahre der Dinosaurier sind Hühner schlicht der überlegene Gegner" :entity-id "2" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Freud" :content "Pferde sind leider zu doof" :entity-id "3" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
  {:author "Feuerlöscher" :content "Pferde im Vergleich zu Hühner ein ausgeprägtes Sozial- und Kommunikationsverhalten zeigen" :entity-id "4" :aggregate-id "cn.uni-duesseldorf.de" :version 1 :created nil}
