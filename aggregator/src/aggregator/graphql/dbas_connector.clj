@@ -17,16 +17,29 @@
    keywordize-keys
    ))
 
+(defn get-statement-origin
+  [statement-uid]
+  (let [result (query-db (format "query {statementOrigin(statementUid: %d) {entityId, aggregateId, author, version}}" statement-uid))]
+    (:statementOrigin result)))
+
 (defn get-statements
   []
   (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
-    (map (fn [statement] {:content (get-in statement [:textversions :content])
-                         :aggregate-id config/aggregate-name
-                         :entity-id (:uid statement)
-                         :version 1
-                         :created nil ;; dbas won't play
-                         :author (str "author#: "
-                                      (get-in statement [:textversions :authorUid]))})
+    (map (fn [statement]
+           (let [default-statement {:content (get-in statement [:textversions :content])
+                                    :aggregate-id config/aggregate-name
+                                    :entity-id (:uid statement)
+                                    :version 1
+                                    :created nil ;; dbas won't play
+                                    :author (str "author#: "
+                                                 (get-in statement [:textversions :authorUid]))}
+                 origin (get-statement-origin (:uid statement))]
+             (if origin
+               (assoc default-statement {:aggregate-id (:aggregateId origin)
+                                         :entity-id (:entityId origin)
+                                         :author (:author origin)
+                                         :version (:version origin)})
+               default-statement)))
          (:statements result))))
 
 (defn link-type
