@@ -19,7 +19,7 @@
 
 (defn get-statement-origin
   [statement-uid]
-  (let [result (query-db (format "query {statementOrigin(statementUid: %d) {entityId, aggregateId, author, version}}" statement-uid))]
+  (let [result (query-db (format "query {statementOrigin(statementUid: %s) {entityId, aggregateId, author, version}}" statement-uid))]
     (:statementOrigin result)))
 
 (defn get-statements
@@ -35,10 +35,11 @@
                                                  (get-in statement [:textversions :authorUid]))}
                  origin (get-statement-origin (:uid statement))]
              (if origin
-               (assoc default-statement {:aggregate-id (:aggregateId origin)
-                                         :entity-id (:entityId origin)
-                                         :author (:author origin)
-                                         :version (:version origin)})
+               (assoc default-statement
+                      :aggregate-id (:aggregate_id origin)
+                      :entity-id (:entity_id origin)
+                      :author (:author origin)
+                      :version (:version origin))
                default-statement)))
          (:statements result))))
 

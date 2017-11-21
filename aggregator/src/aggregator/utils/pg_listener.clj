@@ -3,7 +3,7 @@
             [aggregator.config :as config]
             [aggregator.query.update :as update]
             [taoensso.timbre :as log]
-            [aggregator.graphql.dbas-connector :refer [links-from-argument]]))
+            [aggregator.graphql.dbas-connector :refer [links-from-argument get-statement-origin]]))
 
 
 (defn- handle-statements
@@ -14,20 +14,27 @@
 (defn- handle-textversions
   "Handle changes in the textversions. They belong to the statements."
   [textversion]
-  (log/debug "new textversion: " (:data textversion))
-  (update/update-statement
-   {:author (get-in textversion [:data :author_uid])
-    :content (get-in textversion [:data :content])
-    :aggregate-id config/aggregate-name
-    :entity-id (get-in textversion [:data :uid])
-    :version 1
-    :created (get-in textversion [:data :timestamp])}))
+  (log/debug (str "new textversion: " (:data textversion)))
+  (let [statement {:author (get-in textversion [:data :author_uid])
+                   :content (get-in textversion [:data :content])
+                   :aggregate-id config/aggregate-name
+                   :entity-id (get-in textversion [:data :uid])
+                   :version 1
+                   :created nil}
+        origin (get-statement-origin (get-in textversion [:data :statement_uid]))]
+    (if origin
+      (update/update-statement (assoc statement
+                                      :aggregate-id (:aggregate_id origin)
+                                      :entity-id (:entity_id origin)
+                                      :author (:author origin)
+                                      :version (:version origin)))
+      (update/update-statement statement))))
 
 (defn- handle-arguments
   "Handle changes in arguments and update links correspondingly."
   [argument]
   (let [data (:data argument)]
-    (log/debug "new argument: " data)
+    (log/debug (str "new argument: " data))
     (doall (map update/update-link (links-from-argument data)))))
 
 (defn start-listeners
