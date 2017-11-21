@@ -25,8 +25,7 @@
                          :entity-id (:uid statement)
                          :version 1
                          :created nil ;; dbas won't play
-                         :author (str config/aggregate-name
-                                      " author#: "
+                         :author (str "author#: "
                                       (get-in statement [:textversions :authorUid]))})
          (:statements result))))
 
@@ -50,7 +49,7 @@
         link-type-val (link-type argument)]
     (map (fn [premise]
            (let [prepared-link 
-                 {:author (str config/aggregate-name " author#: "
+                 {:author (str "author#: "
                                (:authorUid argument))
                   :type link-type-val
                   :from-aggregate-id config/aggregate-name
