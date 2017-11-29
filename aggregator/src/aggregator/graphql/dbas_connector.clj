@@ -17,17 +17,30 @@
    keywordize-keys
    ))
 
+(defn get-statement-origin
+  [statement-uid]
+  (let [result (query-db (format "query {statementOrigin(statementUid: %s) {entityId, aggregateId, author, version}}" statement-uid))]
+    (:statementOrigin result)))
+
 (defn get-statements
   []
   (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
-    (map (fn [statement] {:content (get-in statement [:textversions :content])
-                         :aggregate-id config/aggregate-name
-                         :entity-id (:uid statement)
-                         :version 1
-                         :created nil ;; dbas won't play
-                         :author (str config/aggregate-name
-                                      " author#: "
-                                      (get-in statement [:textversions :authorUid]))})
+    (map (fn [statement]
+           (let [default-statement {:content (get-in statement [:textversions :content])
+                                    :aggregate-id config/aggregate-name
+                                    :entity-id (:uid statement)
+                                    :version 1
+                                    :created nil ;; dbas won't play
+                                    :author (str "author#: "
+                                                 (get-in statement [:textversions :authorUid]))}
+                 origin (get-statement-origin (:uid statement))]
+             (if origin
+               (assoc default-statement
+                      :aggregate-id (:aggregate_id origin)
+                      :entity-id (:entity_id origin)
+                      :author (:author origin)
+                      :version (:version origin))
+               default-statement)))
          (:statements result))))
 
 (defn link-type
@@ -50,7 +63,7 @@
         link-type-val (link-type argument)]
     (map (fn [premise]
            (let [prepared-link 
-                 {:author (str config/aggregate-name " author#: "
+                 {:author (str "author#: "
                                (:authorUid argument))
                   :type link-type-val
                   :from-aggregate-id config/aggregate-name
