@@ -49,7 +49,9 @@
       (recur (rand-nth (keys (cache/get-cached-statements)))))))
 
 (defn bootstrap
-  "Call this method when the aggregator starts. Pulls the whitelisted aggregators for a starting-set of arguments, puts them into the cache and then spins up the automatic retriever."
+  "Call this method when the aggregator starts. Pulls the whitelisted aggregators
+  for a starting-set of arguments, puts them into the cache and then spins up
+  the automatic retriever."
   []
   (query/remote-starter-set)
   (automatic-retriever))

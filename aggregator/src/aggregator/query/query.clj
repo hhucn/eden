@@ -12,7 +12,7 @@
   "Get data from a remote aggregator."
   [request-url]
   (try
-    (:data(:body (client/get request-url {:as :json})))
+    (:data (:body (client/get request-url {:as :json})))
     (catch Exception e
       {})))
 

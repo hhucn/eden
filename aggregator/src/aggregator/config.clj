@@ -1,12 +1,11 @@
 (ns aggregator.config)
 
 (def whitelist
-  #{"hhu.de"
-    "schneider.gg"
-    "dbas"})
+  #{"aggregator:8888" "aggregator_set2:8888"})
 
 (def aggregate-name
-  "hhu.de") 
+  "aggregator:8888")
+
 
 ;; -----------------------------------------------------------------------------
 ;; Broker-Configuration
