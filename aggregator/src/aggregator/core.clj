@@ -16,8 +16,8 @@
 (defn- load-test-data
   "Loads the testdata inside the db/entrypoint folder. Presumes an arguments.edn and a links.edn is present."
   []
-  (doall (map update/update-statement (read-string (slurp "/db/entrypoint/arguments.edn"))))
-  (doall (map update/update-link (read-string (slurp "/db/entrypoint/links.edn"))))
+  (doall (map update/update-statement (read-string (slurp "/code/db/entrypoint/arguments.edn"))))
+  (doall (map update/update-link (read-string (slurp "/code/db/entrypoint/links.edn"))))
   (log/debug "Read all testdata"))
 
 (defn -main
