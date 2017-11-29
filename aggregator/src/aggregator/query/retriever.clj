@@ -28,11 +28,11 @@
   [queue]
   (loop [q queue]
     (let [next-step (next-entity q)]
-      (when next-step
+      (when (seq next-step)
         (recur next-step)))))
 
 (defn lookup-related
-  "Lookup all related links and statements 'downstream' from the starting statement. Runs in a separate thread and returns the future. Warning: dereferencing the future might block the system if the lookup is still going on."
+  "Lookup all related links and statements 'downstream' from the starting statement."
   [statement]
   (log/debug (format "[retriever] Starting to pull related data for %s" statement))
   (let [startlinks (query/links-to statement)]
@@ -44,6 +44,7 @@
   (future
     (loop [starter (rand-nth (keys (cache/get-cached-statements)))]
       (lookup-related starter)
+      (log/debug "[retriever] sleeping")
       (Thread/sleep 60000)
       (log/debug "[retriever] Automatic search waking up.")
       (recur (rand-nth (keys (cache/get-cached-statements)))))))
@@ -54,4 +55,5 @@
   the automatic retriever."
   []
   (query/remote-starter-set)
+  (log/debug "Pulled a random starter set from whitelisted aggregators successfully.")
   (automatic-retriever))
