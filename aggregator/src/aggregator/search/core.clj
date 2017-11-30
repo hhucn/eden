@@ -11,9 +11,7 @@
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
   broker."
-  [] (reset! conn (sp/client {:hosts ["http://search:9200"]
-                              :http-client {:basic-auth {:user "elastic"
-                                                         :password "changeme"}}})))
+  [] (reset! conn (sp/client {:hosts ["http://search:9200"]})))
 
 (defn init-connection!
   "Initializes connection to ElasticSearch."
@@ -52,7 +50,6 @@
                                "Entity not found.")
                            (ex-data e)))))))
 
-
 (defn create-index
   "Create an index based on the provided string. Indexes are necessary to
   categorize the data. Valid settings can be found here:
@@ -89,6 +86,7 @@
 (defn delete-link
   "Deletes a link from ElasticSearch."
   [link] (delete :links link "Link deleted."))
+
 
 ;; -----------------------------------------------------------------------------
 
