@@ -30,7 +30,7 @@ services:
       - "DBAS_DB_PORT=${DBAS_DB_PORT}"
 
   search_set2:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.0.0
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     environment:
@@ -38,6 +38,7 @@ services:
 
   dbas_set2:
     build: dbas/
+    command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
     links:
       - dbas-db_set2:db
     environment:
@@ -50,13 +51,9 @@ services:
       - ./dbas:/dbas
 
   dbas-db_set2:
-    image: postgres:10-alpine
+    build: dbas/docker/db/
     volumes:
-      - ./dbas_db/entrypoint:/docker-entrypoint-initdb.d
-
-
-  dbas-notifications_set2:
-    image: hhucn/dbas-notifications
+      - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
 
 networks:
   default:
