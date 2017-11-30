@@ -67,25 +67,30 @@
 
 (defn delete-index
   "Deletes an index from elasticsearch."
-  [index-name] (delete index-name "Index successfully deleted."))
+  [index-name]
+  (delete index-name "Index successfully deleted."))
 
 (defn add-statement
   "Add a statement to the statement-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
-  [statement] (add :statements statement "Added statement to index."))
+  [statement]
+  (add :statements statement "Added statement to index."))
 
 (defn delete-statement
   "Deletes a statement from the search-index."
-  [statement] (delete :statements statement "Statement deleted."))
+  [statement]
+  (delete :statements statement "Statement deleted."))
 
 (defn add-link
   "Add a link to the link-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
-  [link] (add :links link "Added link to index."))
+  [link]
+  (add :links link "Added link to index."))
 
 (defn delete-link
   "Deletes a link from ElasticSearch."
-  [link] (delete :links link "Link deleted."))
+  [link]
+  (delete :links link "Link deleted."))
 
 
 ;; -----------------------------------------------------------------------------
