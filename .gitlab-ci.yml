@@ -10,6 +10,9 @@ cache:
     - /root/.m2
   untracked: true
 
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
 
 ################################################################################
 # Job-Templates
