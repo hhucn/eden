@@ -7,6 +7,7 @@
 (defn update-statement
   "Update a database-entry for a statement. Typically inserts an entry if not in DB yet."
   [statement]
+  (log/debug "[DEBUG] Statement to query: " statement)
   (let [db-result (db/exact-statement (:aggregate-id statement) (:entity-id statement)
                                       (:version statement))]
     (when-not db-result

@@ -54,6 +54,7 @@
   for a starting-set of arguments, puts them into the cache and then spins up
   the automatic retriever."
   []
+  (log/debug "PULLING related starter-set")
   (query/remote-starter-set)
   (log/debug "Pulled a random starter set from whitelisted aggregators successfully.")
   (automatic-retriever))
