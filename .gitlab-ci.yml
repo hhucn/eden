@@ -46,6 +46,8 @@ variables:
 build_test_images:
   image: docker
   stage: build
+  tags:
+    - 40c
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     # Build aggregator
@@ -65,7 +67,7 @@ idiomatic?:
   image: clojure:alpine
   stage: test
   script:
-    - cd aggregator
+    - cd /code
     - lein kibit
   allow_failure: true
 
@@ -75,4 +77,5 @@ test:
   tags:
     - 40c
   script:
+    - cd /code
     - lein cloverage
