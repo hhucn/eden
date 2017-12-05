@@ -22,12 +22,14 @@
 
 (defn fixtures [f]
   (search/add-statement statement)
+  (search/add-statement statement2)
   (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
   (f)
-  (search/delete-statement statement))
+  (search/delete-statement statement)
+  (search/delete-statement statement2))
 (use-fixtures :once fixtures)
 
-(deftest create-delete-index
+(deftest create-delete-index-test
   (testing "Only one index of the same kind is allowed."
     (let [some-keyword :kangaroo]
       (are [x y] (= x y)
@@ -38,7 +40,7 @@
         :ok (:status (search/delete-index some-keyword))
         :error (:status (search/delete-index some-keyword))))))
 
-(deftest add-delete-statements
+(deftest add-delete-statements-test
   (let [stmt (first (last (s/exercise ::gspecs/statement)))
         stmts (map first (s/exercise ::gspecs/statement))]
     (testing "Add statements to index."
@@ -51,7 +53,7 @@
       (is (= :error (:status (search/delete-statement stmt))))
       (is (every? #(= :ok %) (map :status (doall (map search/delete-statement stmts))))))))
 
-(deftest add-delete-links
+(deftest add-delete-links-test
   (let [lnk (first (last (s/exercise ::gspecs/link)))
         lnks (map first (s/exercise ::gspecs/link))]
     (testing "Add some links to the index."
@@ -64,7 +66,7 @@
       (is (= :error (:status (search/delete-link lnk))))
       (is (every? #(= :ok %) (map :status (doall (map search/delete-link lnks))))))))
 
-(deftest search-by-fulltext
+(deftest search-by-fulltext-test
   (testing "Find by fulltext-search."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :fulltext "kangar*")
@@ -73,10 +75,10 @@
       (search/search :fulltext "*"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fulltext "kangarooy")
-      (search/search :fulltext "penguin")
+      (search/search :fulltext "hatchingpenguineggs")
       (search/search :fulltext ""))))
 
-(deftest search-default
+(deftest search-default-test
   (testing "The default search is currently the same as :fulltext."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :default "kangar*")
@@ -85,10 +87,10 @@
       (search/search :default "*"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :default "kangarooy")
-      (search/search :fulltext "penguin")
-      (search/search :fulltext ""))))
+      (search/search :default "penguinswillruletheworld")
+      (search/search :default ""))))
 
-(deftest search-with-fuzziness
+(deftest search-with-fuzziness-test
   (testing "Do some fuzzy search."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :fuzzy "kangarooyy")
@@ -104,9 +106,8 @@
       (search/search :fuzzy "")
       (search/search :fuzzy "*"))))
 
-
-(deftest search-entity
+(deftest search-entity-test
   (testing "Test for exact entity"
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :statements {:aggregate-id "huepfer.verlag"
-                                 :entity-id "1"}))))
+                                  :entity-id "1"}))))
