@@ -1,12 +1,19 @@
 (ns aggregator.search.core
   (:require [clojure.spec.alpha :as s]
             [clojure.string :refer [blank?]]
+            [clojure.data.json :as json]
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.string :as string]
             [qbits.spandex :as sp]
             [aggregator.utils.common :as lib]
             [taoensso.timbre :as log]
-            [aggregator.specs :as gspecs]))
+            [aggregator.specs :as gspecs]
+            [clj-http.client :as client]
+            [aggregator.search.core :as search]))
 
 (def ^:private conn (atom nil))
+
+(def host "http://search:9200")
 
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
@@ -101,10 +108,12 @@
    (search-request body-query nil))
   ([body-query index]
    (try
-     (let [search-index (if index [index :_search] [:_search])
-           req (sp/request @conn {:url search-index :method :get :body body-query})]
-       (lib/return-ok (str (get-in req [:body :hits :total]) " hit(s)")
-                      (get-in req [:body :hits])))
+     (let [res (client/get (string/join "/" [host index "_search"])
+                           {:body (json/write-str body-query)
+                            :content-type :json})
+           res-edn (-> res :body json/read-str keywordize-keys)]
+       (lib/return-ok (str (get-in res-edn [:hits :total]) " hit(s)")
+                      (:hits res-edn)))
      (catch Exception e
        (lib/return-error (-> e ex-data :body :error :reason) (ex-data e))))))
 
