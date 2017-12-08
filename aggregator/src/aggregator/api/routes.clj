@@ -12,16 +12,18 @@
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
+  (GET "/statements/starter-set" {:keys [server-name]}
+       (response {:status :ok
+                  :data {:payload (query/starter-set)
+                         :queue (connector/create-queue server-name)}}))
+  ;; The Order of those GET Requests is important!
+  ;; The other way around starter-set will be interpreted as an entity.
   (GET "/statements/:entity{.+}" {:keys [params server-name]}
        (log/debug "[REST] Someone just retrieved statements")
        (response {:status :ok
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))
                                    {:opts [:no-remote]})
-                         :queue (connector/create-queue server-name)}}))
-  (GET "/statements/starter-set" {:keys [server-name]}
-       (response {:status :ok
-                  :data {:payload (query/starter-set)
                          :queue (connector/create-queue server-name)}}))
   (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved undercuts")

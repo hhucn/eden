@@ -54,6 +54,7 @@
 #
 http.host: "0.0.0.0"
 transport.host: "127.0.0.1"
+xpack.security.enabled: "false"
 http.cors.enabled: true
 http.cors.allow-origin: /https?:\/\/localhost(:[0-9]+)?/
 http.cors.allow-credentials: true

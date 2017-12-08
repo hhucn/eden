@@ -1,19 +1,22 @@
 (ns aggregator.search.core
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :refer [blank?]]
+            [clojure.data.json :as json]
+            [clojure.walk :refer [keywordize-keys]]
+            [clojure.string :as string]
             [qbits.spandex :as sp]
             [aggregator.utils.common :as lib]
             [taoensso.timbre :as log]
-            [aggregator.specs :as gspecs]))
+            [aggregator.specs :as gspecs]
+            [clj-http.client :as client]))
 
 (def ^:private conn (atom nil))
+
+(def host "http://search:9200")
 
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
   broker."
-  [] (reset! conn (sp/client {:hosts ["http://search:9200"]
-                              :http-client {:basic-auth {:user "elastic"
-                                                         :password "changeme"}}})))
+  [] (reset! conn (sp/client {:hosts [host]})))
 
 (defn init-connection!
   "Initializes connection to ElasticSearch."
@@ -52,7 +55,6 @@
                                "Entity not found.")
                            (ex-data e)))))))
 
-
 (defn create-index
   "Create an index based on the provided string. Indexes are necessary to
   categorize the data. Valid settings can be found here:
@@ -70,25 +72,31 @@
 
 (defn delete-index
   "Deletes an index from elasticsearch."
-  [index-name] (delete index-name "Index successfully deleted."))
+  [index-name]
+  (delete index-name "Index successfully deleted."))
 
 (defn add-statement
   "Add a statement to the statement-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
-  [statement] (add :statements statement "Added statement to index."))
+  [statement]
+  (add :statements statement "Added statement to index."))
 
 (defn delete-statement
   "Deletes a statement from the search-index."
-  [statement] (delete :statements statement "Statement deleted."))
+  [statement]
+  (delete :statements statement "Statement deleted."))
 
 (defn add-link
   "Add a link to the link-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
-  [link] (add :links link "Added link to index."))
+  [link]
+  (add :links link "Added link to index."))
 
 (defn delete-link
   "Deletes a link from ElasticSearch."
-  [link] (delete :links link "Link deleted."))
+  [link]
+  (delete :links link "Link deleted."))
+
 
 ;; -----------------------------------------------------------------------------
 
@@ -98,10 +106,13 @@
    (search-request body-query nil))
   ([body-query index]
    (try
-     (let [search-index (if index [index :_search] [:_search])
-           req (sp/request @conn {:url search-index :method :get :body body-query})]
-       (lib/return-ok (str (get-in req [:body :hits :total]) " hit(s)")
-                      (get-in req [:body :hits])))
+     (let [index-path (if index [host (name index) "_search"] [host "_search"])
+           res (client/get (string/join "/" index-path)
+                           {:body (json/write-str body-query)
+                            :content-type :json})
+           res-edn (-> res :body json/read-str keywordize-keys)]
+       (lib/return-ok (str (get-in res-edn [:hits :total]) " hit(s)")
+                      (:hits res-edn)))
      (catch Exception e
        (lib/return-error (-> e ex-data :body :error :reason) (ex-data e))))))
 
@@ -145,7 +156,7 @@
 (s/def ::index-name (s/and (s/or :keyword keyword? :string string?)
                            #(nil? (re-find #"\ |\"|\*|\\|<|\||,|>|/|\?"
                                            (name (second %))))
-                           #(not (blank? (name (second %))))))
+                           #(not (string/blank? (name (second %))))))
 (s/def ::number_of_replicas integer?)
 (s/def ::number_of_shards integer?)
 (s/def ::analysis map?)

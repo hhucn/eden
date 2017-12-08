@@ -1,0 +1,26 @@
+[{:author "deka" :content "der Kampf unentschieden ausfällt" :aggregate-id "aggregator:8888" :entity-id "1" :version 1 :created nil}
+ {:author "dekan" :content "der Kampf nicht unentschieden ausfallen kann. Zu irgend einem Zeitpunkt wird nur noch genau ein Tier leben. Dieses hat gewonnen" :aggregate-id "aggregator:8888" :entity-id "2" :version 1 :created nil}
+ {:author "diepfe" :content "die Pferde fliehen und die meisten überleben werden" :aggregate-id "aggregator:8888" :entity-id "3" :version 1 :created nil}
+ {:author "woot" :content "sie ihre Energien aneinander aufrauchen werden und dann umfallen" :aggregate-id "aggregator:8888" :entity-id "4" :version 1 :created nil}
+ {:author "diepfe" :content "die Pferde fliehen und die meisten somit überleben werden" :aggregate-id "aggregator:8888" :entity-id "5" :version 1 :created nil}
+ {:author "Wendy" :content "wenn die Pferde fliehen, gibt es keinen Kampf. Nach Vorraussetzung der Frage findet aber ein Kampf statt" :aggregate-id "aggregator:8888" :entity-id "6" :version 1 :created nil}
+ {:author "Pazi" :content "man alles dran setzen sollte, den ewigen Konflikt zu beenden" :aggregate-id "aggregator:8888" :entity-id "10" :version 1 :created nil}
+ {:author "elkawe" :content "der Kampf ein wundervolles Entertainment ist" :aggregate-id "aggregator:8888" :entity-id "11" :version 1 :created nil}
+ {:author "Adolf" :content "beide Abnormitäten aus dem Genpool entfernt werden sollten" :aggregate-id "aggregator:8888" :entity-id "12" :version 1 :created nil}
+ {:author "Hans" :content "diese Abnormitäten sich durchaus behaupten können" :aggregate-id "aggregator:8888" :entity-id "14" :version 1 :created nil}
+ {:author "Peta" :content "Tiere nur aussterben sollten, wenn sie sich nicht behaupten können" :aggregate-id "aggregator:8888" :entity-id "16" :version 1 :created nil}
+ {:author "Piece" :content "Frieden das beste für unsere Welt ist" :aggregate-id "aggregator:8888" :entity-id "17" :version 1 :created nil}
+ {:author "!Leroy" :content "es besser ist, wenn sich diese aggressiven Tiere sich gegenseitig beschäftigen" :aggregate-id "aggregator:8888" :entity-id "18" :version 1 :created nil}
+ {:author "LongJohn" :content "sie sich im Frieden verbünden könnten. Anschließend könnten wir die gejagten sein. Eine neue Ära der Unterdrückung unter Herrschaft von tyrannischen Hühnern und grausamen Pferdchen erwartet uns" :aggregate-id "aggregator:8888" :entity-id "20" :version 1 :created nil}
+ {:author "Johnny" :content "Und wen grillen wir, wenn sich die Viecher nicht gegenseitig abmurksen" :aggregate-id "aggregator:8888" :entity-id "21" :version 1 :created nil}
+ {:author "elkawe" :content "Frieden zwischen Riesenhühnern und Mini-Pferden sehr langweilig ist" :aggregate-id "aggregator:8888" :entity-id "22" :version 1 :created nil}
+ {:author "Piece" :content "Frieden unser größtes Ziel sein sollte :)" :aggregate-id "aggregator:8888" :entity-id "23" :version 1 :created nil}
+ {:author "Reuter" :content "einem egal sein sollte wer von beiden Verliert" :aggregate-id "aggregator:8888" :entity-id "35" :version 1 :created nil}
+ {:author "Johnny" :content "wenn alle leben, kann man alle Essen! Lecker Lasagne" :aggregate-id "aggregator:8888" :entity-id "36" :version 1 :created nil}
+ {:author "Johnny" :content "Lasagne schmeckt immer gut! Mjam Mjam Mjam" :aggregate-id "aggregator:8888" :entity-id "40" :version 1 :created nil}
+ {:author "Menschenfreund" :content "Es ist besser Nutztiere zu halten als die Ausrottung einer potenziell köstlichen Nahrungsquelle zu riskieren. Lasagne" :aggregate-id "aggregator:8888" :entity-id "41" :version 1 :created nil}
+ {:author "Melvin" :content "wir dann möglicherweise zu wenig Daten generieren" :aggregate-id "aggregator:8888" :entity-id "42" :version 1 :created nil}
+ {:author "Haniball" :content "Fleisch ist Fleisch" :aggregate-id "aggregator:8888" :entity-id "43" :version 1 :created nil}
+ {:author "Susi" :content "die 100 Pferde deutlich aufwendiger zuzubereiten sind" :aggregate-id "aggregator:8888" :entity-id "44" :version 1 :created nil}
+ {:author "Johnny" :content "Das Riesen Huhn brät ewig auf dem Grill" :aggregate-id "aggregator:8888" :entity-id "45" :version 1 :created nil}
+ {:author "Haniball" :content "das Huhn natürlich (mit geringem Aufwand) vorher zerlegt werden muss" :aggregate-id "aggregator:8888" :entity-id "46" :version 1 :created nil}]

@@ -1,29 +1,26 @@
 version: "3.1"
 
 services:
-  broker:
+  broker_set2:
     image: rabbitmq:3.6-management-alpine
-    ports:
-      - "15672:15672"  # web-access to management console
-      - "5671-5672:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
     environment:
       - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
       - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
 
-  aggregator:
+  aggregator_set2:
     build: aggregator/
     volumes:
       - ~/.m2:/root/.m2  # cache leiningen dependencies
       - ./aggregator/:/code  # enable hot-code reloading
-      - ./aggregator/db/set1/:/code/db/entrypoint # Testdata. Use the set you need
+      - ./aggregator/db/set2/:/code/db/entrypoint # Testdata. Use the set you need
     ports:
-      - "7777:7777"  # expose port to REPL
-      - "8888:8888" # ring dev server
+      - "7778:7777"  # expose port to REPL
+      - "8889:8888" # ring dev server
     links:
-      - broker
-      - search
-      - dbas
-      - dbas-db
+      - broker_set2:broker
+      - search_set2:search
+      - dbas_set2:dbas
+      - dbas-db_set2:dbas-db
     environment:
       - "BROKER_HOST=${BROKER_HOST}"
       - "BROKER_USER=${BROKER_USER}"
@@ -32,22 +29,18 @@ services:
       - "DBAS_DB_PW=${DBAS_DB_PW}"
       - "DBAS_DB_PORT=${DBAS_DB_PORT}"
 
-  search:
+  search_set2:
     build: elasticsearch/
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-    ports:
-      - "9200:9200"
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
 
-  dbas:
+  dbas_set2:
     build: dbas/
     command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
-    ports:
-      - "4284:4284"
     links:
-      - dbas-db:db
+      - dbas-db_set2:db
     environment:
       - "DBAS_DB_USER=${DBAS_DB_USER}"
       - "DBAS_DB_PW=${DBAS_DB_PW}"
@@ -57,14 +50,12 @@ services:
     volumes:
       - ./dbas:/dbas
 
-  dbas-db:
+  dbas-db_set2:
     build: dbas/docker/db/
     volumes:
       - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
 
-  dbas-notifications:
-    image: hhucn/dbas-notifications
-    ports:
-      - "5222:5222"
+networks:
+  default:
+    external:
+      name: aggregator_default

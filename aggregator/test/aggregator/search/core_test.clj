@@ -4,30 +4,41 @@
             [clojure.spec.alpha :as s]
             [aggregator.specs :as gspecs]))
 
-(def statement {:author "kangaroo"
-                :content "Schnapspralinen"
-                :aggregate-id "huepfer.verlag"
-                :entity-id "1"
-                :version 1
-                :created nil})
+(def kangaroo {:author "kangaroo"
+               :content "Schnapspralinen"
+               :aggregate-id "huepfer.verlag"
+               :entity-id "1"
+               :version 1
+               :created nil})
 
-(def statement2 {:author "penguin"
-                 :content "Teewurst"
-                 :aggregate-id "penguin.books"
-                 :entity-id "1"
-                 :version 1
-                 :created nil})
+(def penguin {:author "penguin"
+              :content "Teewurst"
+              :aggregate-id "penguin.books:8080"
+              :entity-id "1"
+              :version 1
+              :created nil})
+
+(def penguin2 {:author "penguin"
+               :content "Teewurst 2: Die Rache der Teewurst"
+               :aggregate-id "penguin.books:8080"
+               :entity-id "2"
+               :version 1
+               :created nil})
 
 (def link (first (last (s/exercise ::gspecs/link))))
 
 (defn fixtures [f]
-  (search/add-statement statement)
+  (search/add-statement kangaroo)
+  (search/add-statement penguin)
+  (search/add-statement penguin2)
   (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
   (f)
-  (search/delete-statement statement))
+  (search/delete-statement kangaroo)
+  (search/delete-statement penguin)
+  (search/delete-statement penguin2))
 (use-fixtures :once fixtures)
 
-(deftest create-delete-index
+(deftest create-delete-index-test
   (testing "Only one index of the same kind is allowed."
     (let [some-keyword :kangaroo]
       (are [x y] (= x y)
@@ -38,7 +49,7 @@
         :ok (:status (search/delete-index some-keyword))
         :error (:status (search/delete-index some-keyword))))))
 
-(deftest add-delete-statements
+(deftest add-delete-statements-test
   (let [stmt (first (last (s/exercise ::gspecs/statement)))
         stmts (map first (s/exercise ::gspecs/statement))]
     (testing "Add statements to index."
@@ -51,7 +62,7 @@
       (is (= :error (:status (search/delete-statement stmt))))
       (is (every? #(= :ok %) (map :status (doall (map search/delete-statement stmts))))))))
 
-(deftest add-delete-links
+(deftest add-delete-links-test
   (let [lnk (first (last (s/exercise ::gspecs/link)))
         lnks (map first (s/exercise ::gspecs/link))]
     (testing "Add some links to the index."
@@ -64,7 +75,7 @@
       (is (= :error (:status (search/delete-link lnk))))
       (is (every? #(= :ok %) (map :status (doall (map search/delete-link lnks))))))))
 
-(deftest search-by-fulltext
+(deftest search-by-fulltext-test
   (testing "Find by fulltext-search."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :fulltext "kangar*")
@@ -73,22 +84,22 @@
       (search/search :fulltext "*"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fulltext "kangarooy")
-      (search/search :fulltext "penguin")
+      (search/search :fulltext "hatchingpenguineggs")
       (search/search :fulltext ""))))
 
-(deftest search-default
+(deftest search-default-test
   (testing "The default search is currently the same as :fulltext."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :default "kangar*")
-      (search/search :default "huepfer*")
+      (search/search :default "huepfer.ver*")
       (search/search :default "huepfer.verlag")
       (search/search :default "*"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :default "kangarooy")
-      (search/search :fulltext "penguin")
-      (search/search :fulltext ""))))
+      (search/search :default "penguinswillruletheworld")
+      (search/search :default ""))))
 
-(deftest search-with-fuzziness
+(deftest search-with-fuzziness-test
   (testing "Do some fuzzy search."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :fuzzy "kangarooyy")
@@ -104,9 +115,16 @@
       (search/search :fuzzy "")
       (search/search :fuzzy "*"))))
 
-
-(deftest search-entity
+(deftest search-entity-test
   (testing "Test for exact entity"
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :statements {:aggregate-id "huepfer.verlag"
-                                 :entity-id "1"}))))
+                                  :entity-id "1"})
+      (search/search :statements {:aggregate-id "penguin.books:8080"
+                                  :entity-id "1"}))))
+
+(deftest search-statements-by-aggregate-id-test
+  (testing "Query by aggregate-id to retrieve all matched statements."
+    (are [min-results response] (<= min-results (get-in response [:data :total]))
+      1 (search/search :statements {:aggregate-id "huepfer.verlag"})
+      2 (search/search :statements {:aggregate-id "penguin.books:8080"}))))

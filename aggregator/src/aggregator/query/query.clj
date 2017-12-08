@@ -12,7 +12,7 @@
   "Get data from a remote aggregator."
   [request-url]
   (try
-    (:data(:body (client/get request-url {:as :json})))
+    (:data (:body (client/get request-url {:as :json})))
     (catch Exception e
       {})))
 
@@ -158,4 +158,5 @@
    (doall (map remote-starter-set config/whitelist)))
   ([aggregator]
    (let [results (get-payload (str "http://" aggregator "/statements/starter-set"))]
-     (doall (map up/update-statement results)))))
+     (when (and results (not= results "not-found"))
+       (doall (map up/update-statement results))))))
