@@ -4,29 +4,38 @@
             [clojure.spec.alpha :as s]
             [aggregator.specs :as gspecs]))
 
-(def statement {:author "kangaroo"
-                :content "Schnapspralinen"
-                :aggregate-id "huepfer.verlag"
-                :entity-id "1"
-                :version 1
-                :created nil})
+(def kangaroo {:author "kangaroo"
+               :content "Schnapspralinen"
+               :aggregate-id "huepfer.verlag"
+               :entity-id "1"
+               :version 1
+               :created nil})
 
-(def statement2 {:author "penguin"
-                 :content "Teewurst"
-                 :aggregate-id "penguin.books"
-                 :entity-id "1"
-                 :version 1
-                 :created nil})
+(def penguin {:author "penguin"
+              :content "Teewurst"
+              :aggregate-id "penguin.books:8080"
+              :entity-id "1"
+              :version 1
+              :created nil})
+
+(def penguin2 {:author "penguin"
+               :content "Teewurst 2: Die Rache der Teewurst"
+               :aggregate-id "penguin.books:8080"
+               :entity-id "2"
+               :version 1
+               :created nil})
 
 (def link (first (last (s/exercise ::gspecs/link))))
 
 (defn fixtures [f]
-  (search/add-statement statement)
-  (search/add-statement statement2)
+  (search/add-statement kangaroo)
+  (search/add-statement penguin)
+  (search/add-statement penguin2)
   (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
   (f)
-  (search/delete-statement statement)
-  (search/delete-statement statement2))
+  (search/delete-statement kangaroo)
+  (search/delete-statement penguin)
+  (search/delete-statement penguin2))
 (use-fixtures :once fixtures)
 
 (deftest create-delete-index-test
@@ -110,4 +119,12 @@
   (testing "Test for exact entity"
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :statements {:aggregate-id "huepfer.verlag"
+                                  :entity-id "1"})
+      (search/search :statements {:aggregate-id "penguin.books:8080"
                                   :entity-id "1"}))))
+
+(deftest search-statements-by-aggregate-id-test
+  (testing "Query by aggregate-id to retrieve all matched statements."
+    (are [min-results response] (<= min-results (get-in response [:data :total]))
+      1 (search/search :statements {:aggregate-id "huepfer.verlag"})
+      2 (search/search :statements {:aggregate-id "penguin.books:8080"}))))
