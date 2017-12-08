@@ -82,7 +82,7 @@
   (testing "The default search is currently the same as :fulltext."
     (are [x] (pos? (get-in x [:data :total]))
       (search/search :default "kangar*")
-      (search/search :default "huepfer*")
+      (search/search :default "huepfer.ver*")
       (search/search :default "huepfer.verlag")
       (search/search :default "*"))
     (are [x] (zero? (get-in x [:data :total]))

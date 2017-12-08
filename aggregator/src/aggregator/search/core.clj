@@ -106,7 +106,8 @@
    (search-request body-query nil))
   ([body-query index]
    (try
-     (let [res (client/get (string/join "/" [host index "_search"])
+     (let [index-path (if index [host (name index) "_search"] [host "_search"])
+           res (client/get (string/join "/" index-path)
                            {:body (json/write-str body-query)
                             :content-type :json})
            res-edn (-> res :body json/read-str keywordize-keys)]
