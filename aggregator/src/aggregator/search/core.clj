@@ -1,6 +1,5 @@
 (ns aggregator.search.core
   (:require [clojure.spec.alpha :as s]
-            [clojure.string :refer [blank?]]
             [clojure.data.json :as json]
             [clojure.walk :refer [keywordize-keys]]
             [clojure.string :as string]
@@ -8,8 +7,7 @@
             [aggregator.utils.common :as lib]
             [taoensso.timbre :as log]
             [aggregator.specs :as gspecs]
-            [clj-http.client :as client]
-            [aggregator.search.core :as search]))
+            [clj-http.client :as client]))
 
 (def ^:private conn (atom nil))
 
@@ -18,7 +16,7 @@
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
   broker."
-  [] (reset! conn (sp/client {:hosts ["http://search:9200"]})))
+  [] (reset! conn (sp/client {:hosts [host]})))
 
 (defn init-connection!
   "Initializes connection to ElasticSearch."
@@ -157,7 +155,7 @@
 (s/def ::index-name (s/and (s/or :keyword keyword? :string string?)
                            #(nil? (re-find #"\ |\"|\*|\\|<|\||,|>|/|\?"
                                            (name (second %))))
-                           #(not (blank? (name (second %))))))
+                           #(not (string/blank? (name (second %))))))
 (s/def ::number_of_replicas integer?)
 (s/def ::number_of_shards integer?)
 (s/def ::analysis map?)
