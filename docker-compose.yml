@@ -25,6 +25,7 @@ services:
       - dbas
       - dbas-db
     environment:
+      - "ELASTICSEARCH_URL=http://search:9200"
       - "BROKER_HOST=${BROKER_HOST}"
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
@@ -47,7 +48,6 @@ services:
       ELASTICSEARCH_URL: http://search:9200
     ports:
       - "5601:5601"
-
 
   dbas:
     build: dbas/
