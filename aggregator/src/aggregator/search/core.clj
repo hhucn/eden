@@ -108,7 +108,7 @@
    (try
      (let [index-path (if index [host (name index) "_search"] [host "_search"])
            res (client/get (string/join "/" index-path)
-                           {:body (json/write-str body-query)
+                           {:body (json/write-str body-query :escape-slash false)
                             :content-type :json})
            res-edn (-> res :body json/read-str keywordize-keys)]
        (lib/return-ok (str (get-in res-edn [:hits :total]) " hit(s)")
