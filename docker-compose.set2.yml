@@ -34,6 +34,8 @@ services:
     build: elasticsearch/
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9201:9200"
     environment:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
 
@@ -47,6 +49,8 @@ services:
   dbas_set2:
     build: dbas/
     command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
+    ports:
+      - "4285:4284"
     links:
       - dbas-db_set2:db
     environment:
