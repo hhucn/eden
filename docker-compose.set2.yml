@@ -29,6 +29,7 @@ services:
       - "DBAS_DB_USER=${DBAS_DB_USER}"
       - "DBAS_DB_PW=${DBAS_DB_PW}"
       - "DBAS_DB_PORT=${DBAS_DB_PORT}"
+      - "AGGREGATOR_NAME=aggregator_set2:8888"
 
   search_set2:
     build: elasticsearch/
