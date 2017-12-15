@@ -160,3 +160,21 @@
    (let [results (get-payload (str "http://" aggregator "/statements/starter-set"))]
      (when (and results (not= results "not-found"))
        (doall (map up/update-statement results))))))
+
+(defn all-local-statements
+  "Retrieve all locally saved statements belonging to the aggregator."
+  []
+  (db/all-statements))
+
+(defn all-remote-statements
+  "Retrieve all statements from remote aggregator"
+  ([]
+   (doseq [aggregator config/whitelist]
+     (when (not= aggregator config/aggregate-name)
+       (all-remote-statements aggregator))))
+  ([aggregator]
+   (let [results (get-payload (str "http://" aggregator "/statements"))]
+     (when (not= results "not-found")
+       (doseq [statement results]
+         (up/update-statement statement))))))
+

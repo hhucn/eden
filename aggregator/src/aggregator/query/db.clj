@@ -47,6 +47,10 @@
                                                       :entity-id entity-id
                                                       :version version}))))
 
+(defn all-statements
+  []
+  (unpack-elastic (elastic/search :all-statements config/aggregate-name)))
+
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
   [statement]

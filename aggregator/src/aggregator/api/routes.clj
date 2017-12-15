@@ -12,6 +12,10 @@
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
+  (GET "/statements" {:keys [server-name]}
+       (response {:status :ok
+                  :data {:payload (query/all-local-statements) 
+                         :queue (connector/create-queue server-name)}}))
   (GET "/statements/starter-set" {:keys [server-name]}
        (response {:status :ok
                   :data {:payload (query/starter-set)
