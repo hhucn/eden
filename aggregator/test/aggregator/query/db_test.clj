@@ -16,7 +16,6 @@
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P231" :author "XxxBoyerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P230" :author "XxxBayerxxX" :content "there is a smaller park in O-Town" :version 1})
   (search/add-statement {:aggregate-id "hhu.de" :entity-id "P29" :author "XxxBaeryerxxX" :content "there is a smaller park in O-Town" :version 1})
-  (log/debug "####  " config/aggregate-name)
   (search/add-statement {:aggregate-id config/aggregate-name :entity-id "P29" :author "XxxBaeryerxxX" :content "there is a smaller park in O-Town" :version 1})
   (db/insert-link {:author "Wegi" :type "undercut" :from-aggregate-id "schneider.gg"
                    :from-entity-id "W01" :from-version 1337 :to-aggregate-id "schneider.gg"
