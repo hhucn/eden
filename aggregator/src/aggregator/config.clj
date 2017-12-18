@@ -4,7 +4,7 @@
   #{"aggregator:8888" "aggregator_set2:8888"})
 
 (def aggregate-name
-  (System/getenv "AGGREGATOR-NAME"))
+  (System/getenv "AGGREGATOR_NAME"))
 
 
 ;; -----------------------------------------------------------------------------

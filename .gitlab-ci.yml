@@ -38,6 +38,7 @@ variables:
     BROKER_USER: "groot"
     BROKER_PASS: "iamgroot"
     ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    AGGREGATOR_NAME: "aggregator:8888"
 
 
 ################################################################################

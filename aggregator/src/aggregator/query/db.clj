@@ -1,6 +1,4 @@
 (ns aggregator.query.db
-  (:use [korma.db]
-        [korma.core])
   (:require [clojure.string :as str]
             [aggregator.config :as config]
             [aggregator.search.core :as elastic]))
@@ -50,6 +48,10 @@
 (defn all-statements
   []
   (unpack-elastic (elastic/search :all-statements config/aggregate-name)))
+
+(defn all-links
+  []
+  (unpack-elastic (elastic/search :all-links config/aggregate-name)))
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."

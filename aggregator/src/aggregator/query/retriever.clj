@@ -45,8 +45,9 @@
     (loop [starter (rand-nth (keys (cache/get-cached-statements)))]
       (lookup-related starter)
       (log/debug "[retriever] sleeping")
-      (Thread/sleep 10000)
+      (Thread/sleep 60000)
       (log/debug "[retriever] Automatic search waking up.")
+      (query/remote-starter-set)
       (recur (rand-nth (keys (cache/get-cached-statements)))))))
 
 (defn bootstrap
@@ -56,5 +57,6 @@
   []
   (log/debug "PULLING related starter-set")
   (query/all-remote-statements)
+  (query/all-remote-links)
   (log/debug "Pulled a random starter set from whitelisted aggregators successfully.")
   (automatic-retriever))
