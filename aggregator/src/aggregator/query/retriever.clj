@@ -56,5 +56,6 @@
   []
   (log/debug "PULLING related starter-set")
   (query/all-remote-statements)
+  (query/all-remote-links)
   (log/debug "Pulled a random starter set from whitelisted aggregators successfully.")
   (automatic-retriever))

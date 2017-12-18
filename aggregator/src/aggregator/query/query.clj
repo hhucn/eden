@@ -167,7 +167,7 @@
   (db/all-statements))
 
 (defn all-remote-statements
-  "Retrieve all statements from remote aggregator"
+  "Retrieve all statements from a remote aggregator."
   ([]
    (doseq [aggregator config/whitelist]
      (when (not= aggregator config/aggregate-name)
@@ -178,3 +178,19 @@
        (doseq [statement results]
          (up/update-statement statement))))))
 
+(defn all-local-links
+  "Retrieve all locally saved statements belonging to the aggregator."
+  []
+  (db/all-links))
+
+(defn all-remote-links
+  "Retrieve all links from a remote aggregator."
+  ([]
+   (doseq [aggregator config/whitelist]
+     (when (not= aggregator config/aggregate-name)
+       (all-remote-links aggregator))))
+  ([aggregator]
+   (let [results (get-payload (str "http://" aggregator "/links"))]
+     (when (not= results "not-found")
+       (doseq [link results]
+         (up/update-link link))))))
