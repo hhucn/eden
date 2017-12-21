@@ -84,8 +84,8 @@
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fulltext "kangarooy")
       (search/search :fulltext "hatchingpenguineggs")
-      (search/search :fulltext "")
-      (search/search :fulltext "*"))))
+      (search/search :fulltext "*")
+      (search/search :fulltext ""))))
 
 (deftest search-default-test
   (testing "The default search is currently the same as :fulltext."
@@ -96,8 +96,8 @@
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :default "kangarooy")
       (search/search :default "penguinswillruletheworld")
-      (search/search :default "")
-      (search/search :default "*"))))
+      (search/search :default "*")
+      (search/search :default ""))))
 
 (deftest search-with-fuzziness-test
   (testing "Do some fuzzy search."
@@ -112,8 +112,8 @@
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fuzzy "kangarooyyy")
       (search/search :fuzzy "kengar0")
-      (search/search :fuzzy "")
-      (search/search :fuzzy "*"))))
+      (search/search :fuzzy "*")
+      (search/search :fuzzy ""))))
 
 (deftest search-entity-test
   (testing "Test for exact entity"

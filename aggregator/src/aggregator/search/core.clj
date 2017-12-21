@@ -27,11 +27,20 @@
 
 
 ;; -----------------------------------------------------------------------------
+;; Helper functions
+
+(defn- append-star-if-not-empty [querystring]
+  (let [escaped-query (string/escape querystring lib/es-special-characters)]
+    (if-not (empty? escaped-query)
+      (str escaped-query "*")
+      "")))
 
 (defn- construct-query
   "Construct a list for an elastic query with the arguments surrounded by :match hash-maps."
   [querymap]
   (vec (map (fn [[k v]] {:match {k v}}) querymap)))
+
+;; -----------------------------------------------------------------------------
 
 (defn- add
   "Add new content to the index."
@@ -126,7 +135,7 @@
   (search-request
    {:query
     {:query_string
-     {:query (str (string/escape querystring lib/es-special-characters) "*")}}}))
+     {:query (append-star-if-not-empty querystring)}}}))
 
 (defmethod search :fuzzy [_ querystring]
   "Allow a bit of fuzziness, max. of two edits allowed."
@@ -134,7 +143,7 @@
    {:query
     {:match
      {:_all
-      {:query (str (string/escape querystring lib/es-special-characters) "*")
+      {:query (append-star-if-not-empty querystring)
        :fuzziness "AUTO"}}}}))
 
 (defmethod search :default [_ querystring]
@@ -211,6 +220,10 @@
 (s/fdef delete-link
         :args (s/cat :link ::gspecs/link)
         :ret :aggregator.utils.common/return-map)
+
+(s/fdef append-star-if-not-empty
+        :args (s/cat :querystring string?)
+        :ret string?)
 
 (s/fdef construct-query
         :args (s/cat :querymap map?))
