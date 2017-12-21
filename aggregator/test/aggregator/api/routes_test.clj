@@ -5,22 +5,21 @@
             [aggregator.broker.connector :as connector]
             [ring.mock.request :as mock]))
 
-
 (defn fixtures [f]
   (connector/init-connection!)
   (f)
   (connector/close-connection!))
 (use-fixtures :once fixtures)
 
-(defn routestest-helper
+(defn- routestest-helper
   "Delivers the result-map and handles the default mock-request."
   [route]
   (utils/http-response->map (routes/app (mock/request :get route))))
 
 (deftest handler-test
-  (is (= (:status (routestest-helper "/"))
-         "ok")))
+  (is (= "ok"
+         (:status (routestest-helper "/")))))
 
 (deftest statement-retrieval-test
-  (is (= (get-in (routestest-helper "/statements/fantasy.dork/non-existent-id") [:data :payload])
-         "not-found")))
+  (is (= "not-found"
+         (get-in (routestest-helper "/statements/fantasy.dork/non-existent-id") [:data :payload]))))

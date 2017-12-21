@@ -4,6 +4,18 @@
             [clojure.data.json :as json]
             [taoensso.timbre :as log]))
 
+(def es-special-characters
+  "These are the special characters from elasticsearch and their fitting escaped
+  versions in Clojure. They are used to escape query strings when querying the
+  database."
+  {\+ "\\*", \- "\\-", \& "\\&", \| "\\|", \! "\\!",
+   \( "\\(", \) "\\)", \{ "\\{", \} "\\}",
+   \[ "\\[", \] "\\]", \^ "\\^", \" "\\\"",
+   \~ "\\~", \* "\\*", \? "\\?", \: "\\:"})
+
+
+;; -----------------------------------------------------------------------------
+
 (defn valid?
   "Verify that data conforms to spec. Calls clojure.spec/explain-str to show a
   useful error message. Prints output to logs and returns a Boolean."

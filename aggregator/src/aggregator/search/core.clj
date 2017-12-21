@@ -27,11 +27,20 @@
 
 
 ;; -----------------------------------------------------------------------------
+;; Helper functions
+
+(defn- append-star-if-not-empty [querystring]
+  (let [escaped-query (string/escape querystring lib/es-special-characters)]
+    (if-not (empty? escaped-query)
+      (str escaped-query "*")
+      "")))
 
 (defn- construct-query
   "Construct a list for an elastic query with the arguments surrounded by :match hash-maps."
-  [query]
-  (vec (map (fn [[k v]] {:match {k v}}) query)))
+  [querymap]
+  (vec (map (fn [[k v]] {:match {k v}}) querymap)))
+
+;; -----------------------------------------------------------------------------
 
 (defn- add
   "Add new content to the index."
@@ -108,7 +117,7 @@
    (try
      (let [index-path (if index [host (name index) "_search"] [host "_search"])
            res (client/get (string/join "/" index-path)
-                           {:body (json/write-str body-query :escape-slash false)
+                           {:body (json/write-str body-query)
                             :content-type :json})
            res-edn (-> res :body json/read-str keywordize-keys)]
        (lib/return-ok (str (get-in res-edn [:hits :total]) " hit(s)")
@@ -121,25 +130,38 @@
   fulltext-search."
   (fn [field _] field))
 
-(defmethod search :fulltext [_ query]
+(defmethod search :fulltext [_ querystring]
   "Classic search-box style full-text query."
-  (search-request {:query {:query_string {:query query}}}))
+  (search-request
+   {:query
+    {:query_string
+     {:query (append-star-if-not-empty querystring)}}}))
 
-(defmethod search :fuzzy [_ query]
+(defmethod search :fuzzy [_ querystring]
   "Allow a bit of fuzziness, max. of two edits allowed."
-  (search-request {:query {:match {:_all {:query query
-                                          :fuzziness "AUTO"}}}}))
+  (search-request
+   {:query
+    {:match
+     {:_all
+      {:query (append-star-if-not-empty querystring)
+       :fuzziness "AUTO"}}}}))
 
-(defmethod search :default [_ query]
-  (search :fulltext query))
+(defmethod search :default [_ querystring]
+  (search :fulltext querystring))
 
-(defmethod search :statements [_ query]
+(defmethod search :statements [_ querymap]
   "Search for a matching entity (multiple versions possible)."
-  (search-request {:query {:bool {:must (construct-query query)}}} :statements))
+  (search-request {:query {:bool {:must (construct-query querymap)}}} :statements))
 
-(defmethod search :links [_ query]
+(defmethod search :all-statements [_ aggregate-id]
+  "Return the first 10.000 results of the statements from a specified
+  aggregate-id. Returns the first 10k statements on the queried host if an empty
+  aggregate-id is provided."
+  (search-request {:from 0 :size 10000} (str "statements/" aggregate-id)))
+
+(defmethod search :links [_ querymap]
   "Search for a matching entity (multiple versions possible)."
-  (search-request {:query {:bool {:must (construct-query query)}}} :links))
+  (search-request {:query {:bool {:must (construct-query querymap)}}} :links))
 ;; Dispatch between statement or link? (version)
 
 ;; -----------------------------------------------------------------------------
@@ -165,40 +187,47 @@
                                          ::analysis ::refresh_interval]))
 (s/fdef create-index
         :args (s/cat :index-name ::index-name :settings ::index-settings :mappings map?)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete-index
         :args (s/cat :index-name ::index-name)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef add
         :args (s/cat :index ::index-name
                      :entity (s/keys :req-un [::gspecs/aggregate-id ::gspecs/entity-id])
                      :msg string?)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete
         :args (s/cat :index ::index-name
                      :entity (s/keys :req-un [::gspecs/aggregate-id ::gspecs/entity-id])
                      :msg string?)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef add-statement
         :args (s/cat :statement ::gspecs/statement)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete-statement
         :args (s/cat :statement ::gspecs/statement)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef add-link
         :args (s/cat :link ::gspecs/link)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete-link
         :args (s/cat :link ::gspecs/link)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
+
+(s/fdef append-star-if-not-empty
+        :args (s/cat :querystring string?)
+        :ret string?)
+
+(s/fdef construct-query
+        :args (s/cat :querymap map?))
 
 (s/fdef search
-        :args (s/cat :type keyword? :query string?)
-        :ret :aggregator.utils.common/return-map)
+        :args (s/cat :type keyword? :query (s/or :string string? :map map?))
+        :ret ::lib/return-map)

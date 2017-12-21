@@ -78,25 +78,25 @@
 (deftest search-by-fulltext-test
   (testing "Find by fulltext-search."
     (are [x] (pos? (get-in x [:data :total]))
-      (search/search :fulltext "kangar*")
-      (search/search :fulltext "huepfer*")
-      (search/search :fulltext "huepfer.verlag")
-      (search/search :fulltext "*"))
+      (search/search :fulltext "kangar")
+      (search/search :fulltext "huepfer")
+      (search/search :fulltext "huepfer.verlag"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fulltext "kangarooy")
       (search/search :fulltext "hatchingpenguineggs")
+      (search/search :fulltext "*")
       (search/search :fulltext ""))))
 
 (deftest search-default-test
   (testing "The default search is currently the same as :fulltext."
     (are [x] (pos? (get-in x [:data :total]))
-      (search/search :default "kangar*")
-      (search/search :default "huepfer.ver*")
-      (search/search :default "huepfer.verlag")
-      (search/search :default "*"))
+      (search/search :default "kangar")
+      (search/search :default "huepfer.ver")
+      (search/search :default "huepfer.verlag"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :default "kangarooy")
       (search/search :default "penguinswillruletheworld")
+      (search/search :default "*")
       (search/search :default ""))))
 
 (deftest search-with-fuzziness-test
@@ -112,8 +112,8 @@
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fuzzy "kangarooyyy")
       (search/search :fuzzy "kengar0")
-      (search/search :fuzzy "")
-      (search/search :fuzzy "*"))))
+      (search/search :fuzzy "*")
+      (search/search :fuzzy ""))))
 
 (deftest search-entity-test
   (testing "Test for exact entity"
@@ -128,3 +128,12 @@
     (are [min-results response] (<= min-results (get-in response [:data :total]))
       1 (search/search :statements {:aggregate-id "huepfer.verlag"})
       2 (search/search :statements {:aggregate-id "penguin.books:8080"}))))
+
+(deftest return-all-statements-for-aggregator-test
+  (testing "Given an aggregator, return the first 10.000 statements in his index."
+    (are [min-results response] (<= min-results (get-in response [:data :total]))
+      0 (search/search :all-statements "razupaltuff-it-is-a-non-existent-index")
+      1 (search/search :all-statements "huepfer.verlag")
+      2 (search/search :all-statements "penguin.books:8080")
+      3 (search/search :all-statements nil))))
+
