@@ -187,39 +187,39 @@
                                          ::analysis ::refresh_interval]))
 (s/fdef create-index
         :args (s/cat :index-name ::index-name :settings ::index-settings :mappings map?)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete-index
         :args (s/cat :index-name ::index-name)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef add
         :args (s/cat :index ::index-name
                      :entity (s/keys :req-un [::gspecs/aggregate-id ::gspecs/entity-id])
                      :msg string?)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete
         :args (s/cat :index ::index-name
                      :entity (s/keys :req-un [::gspecs/aggregate-id ::gspecs/entity-id])
                      :msg string?)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef add-statement
         :args (s/cat :statement ::gspecs/statement)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete-statement
         :args (s/cat :statement ::gspecs/statement)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef add-link
         :args (s/cat :link ::gspecs/link)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef delete-link
         :args (s/cat :link ::gspecs/link)
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
 
 (s/fdef append-star-if-not-empty
         :args (s/cat :querystring string?)
@@ -230,4 +230,4 @@
 
 (s/fdef search
         :args (s/cat :type keyword? :query (s/or :string string? :map map?))
-        :ret :aggregator.utils.common/return-map)
+        :ret ::lib/return-map)
