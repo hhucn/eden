@@ -128,3 +128,12 @@
     (are [min-results response] (<= min-results (get-in response [:data :total]))
       1 (search/search :statements {:aggregate-id "huepfer.verlag"})
       2 (search/search :statements {:aggregate-id "penguin.books:8080"}))))
+
+(deftest return-all-statements-for-aggregator-test
+  (testing "Given an aggregator, return the first 10.000 statements in his index."
+    (are [min-results response] (<= min-results (get-in response [:data :total]))
+      0 (search/search :all-statements "razupaltuff-it-is-a-non-existent-index")
+      1 (search/search :all-statements "huepfer.verlag")
+      2 (search/search :all-statements "penguin.books:8080")
+      3 (search/search :all-statements nil))))
+

@@ -31,7 +31,7 @@
 (defn- construct-query
   "Construct a list for an elastic query with the arguments surrounded by :match hash-maps."
   [query]
-  (vec (map (fn [[k v]] {:match {k v}}) query)))
+  (vec (map (fn [[k v]] {:match {k v}}) (string/escape query lib/es-special-characters))))
 
 (defn- add
   "Add new content to the index."
@@ -108,7 +108,7 @@
    (try
      (let [index-path (if index [host (name index) "_search"] [host "_search"])
            res (client/get (string/join "/" index-path)
-                           {:body (json/write-str body-query :escape-slash false)
+                           {:body (json/write-str body-query)
                             :content-type :json})
            res-edn (-> res :body json/read-str keywordize-keys)]
        (lib/return-ok (str (get-in res-edn [:hits :total]) " hit(s)")
@@ -123,11 +123,11 @@
 
 (defmethod search :fulltext [_ query]
   "Classic search-box style full-text query."
-  (search-request {:query {:query_string {:query query}}}))
+  (search-request {:query {:query_string {:query (string/escape query lib/es-special-characters)}}}))
 
 (defmethod search :fuzzy [_ query]
   "Allow a bit of fuzziness, max. of two edits allowed."
-  (search-request {:query {:match {:_all {:query query
+  (search-request {:query {:match {:_all {:query (string/escape query lib/es-special-characters)
                                           :fuzziness "AUTO"}}}}))
 
 (defmethod search :default [_ query]
@@ -136,6 +136,12 @@
 (defmethod search :statements [_ query]
   "Search for a matching entity (multiple versions possible)."
   (search-request {:query {:bool {:must (construct-query query)}}} :statements))
+
+(defmethod search :all-statements [_ aggregate-id]
+  "Return the first 10.000 results of the statements from a specified
+  aggregate-id. Returns the first 10k statements on the queried host if an empty
+  aggregate-id is provided."
+  (search-request {:from 0 :size 10000} (str "statements/" aggregate-id)))
 
 (defmethod search :links [_ query]
   "Search for a matching entity (multiple versions possible)."
