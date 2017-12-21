@@ -30,8 +30,8 @@
 
 (defn- construct-query
   "Construct a list for an elastic query with the arguments surrounded by :match hash-maps."
-  [query]
-  (vec (map (fn [[k v]] {:match {k v}}) (string/escape query lib/es-special-characters))))
+  [querymap]
+  (vec (map (fn [[k v]] {:match {k v}}) querymap)))
 
 (defn- add
   "Add new content to the index."
@@ -121,21 +121,21 @@
   fulltext-search."
   (fn [field _] field))
 
-(defmethod search :fulltext [_ query]
+(defmethod search :fulltext [_ querystring]
   "Classic search-box style full-text query."
-  (search-request {:query {:query_string {:query (string/escape query lib/es-special-characters)}}}))
+  (search-request {:query {:query_string {:query (string/escape querystring lib/es-special-characters)}}}))
 
-(defmethod search :fuzzy [_ query]
+(defmethod search :fuzzy [_ querystring]
   "Allow a bit of fuzziness, max. of two edits allowed."
-  (search-request {:query {:match {:_all {:query (string/escape query lib/es-special-characters)
+  (search-request {:query {:match {:_all {:query (string/escape querystring lib/es-special-characters)
                                           :fuzziness "AUTO"}}}}))
 
-(defmethod search :default [_ query]
-  (search :fulltext query))
+(defmethod search :default [_ querystring]
+  (search :fulltext querystring))
 
-(defmethod search :statements [_ query]
+(defmethod search :statements [_ querymap]
   "Search for a matching entity (multiple versions possible)."
-  (search-request {:query {:bool {:must (construct-query query)}}} :statements))
+  (search-request {:query {:bool {:must (construct-query querymap)}}} :statements))
 
 (defmethod search :all-statements [_ aggregate-id]
   "Return the first 10.000 results of the statements from a specified
@@ -143,9 +143,9 @@
   aggregate-id is provided."
   (search-request {:from 0 :size 10000} (str "statements/" aggregate-id)))
 
-(defmethod search :links [_ query]
+(defmethod search :links [_ querymap]
   "Search for a matching entity (multiple versions possible)."
-  (search-request {:query {:bool {:must (construct-query query)}}} :links))
+  (search-request {:query {:bool {:must (construct-query querymap)}}} :links))
 ;; Dispatch between statement or link? (version)
 
 ;; -----------------------------------------------------------------------------
@@ -205,6 +205,9 @@
         :args (s/cat :link ::gspecs/link)
         :ret :aggregator.utils.common/return-map)
 
+(s/fdef construct-query
+        :args (s/cat :querymap map?))
+
 (s/fdef search
-        :args (s/cat :type keyword? :query string?)
+        :args (s/cat :type keyword? :query (s/or :string string? :map map?))
         :ret :aggregator.utils.common/return-map)
