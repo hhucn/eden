@@ -159,6 +159,12 @@
   aggregate-id is provided."
   (search-request {:from 0 :size 10000} (str "statements/" aggregate-id)))
 
+(defmethod search :all-links [_ aggregate-id]
+  "Return the first 10.000 results of the statement from a specified
+   aggregate-id. Returns the first 10k statements on the queried host
+   if an empty aggregate-id is provided."
+  (search-request {:from 0 :size 10000} (str "links/" aggregate-id)))
+
 (defmethod search :links [_ querymap]
   "Search for a matching entity (multiple versions possible)."
   (search-request {:query {:bool {:must (construct-query querymap)}}} :links))
