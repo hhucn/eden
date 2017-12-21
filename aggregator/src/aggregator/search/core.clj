@@ -123,12 +123,19 @@
 
 (defmethod search :fulltext [_ querystring]
   "Classic search-box style full-text query."
-  (search-request {:query {:query_string {:query (string/escape querystring lib/es-special-characters)}}}))
+  (search-request
+   {:query
+    {:query_string
+     {:query (str (string/escape querystring lib/es-special-characters) "*")}}}))
 
 (defmethod search :fuzzy [_ querystring]
   "Allow a bit of fuzziness, max. of two edits allowed."
-  (search-request {:query {:match {:_all {:query (string/escape querystring lib/es-special-characters)
-                                          :fuzziness "AUTO"}}}}))
+  (search-request
+   {:query
+    {:match
+     {:_all
+      {:query (str (string/escape querystring lib/es-special-characters) "*")
+       :fuzziness "AUTO"}}}}))
 
 (defmethod search :default [_ querystring]
   (search :fulltext querystring))

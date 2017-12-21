@@ -78,26 +78,26 @@
 (deftest search-by-fulltext-test
   (testing "Find by fulltext-search."
     (are [x] (pos? (get-in x [:data :total]))
-      (search/search :fulltext "kangar*")
-      (search/search :fulltext "huepfer*")
-      (search/search :fulltext "huepfer.verlag")
-      (search/search :fulltext "*"))
+      (search/search :fulltext "kangar")
+      (search/search :fulltext "huepfer")
+      (search/search :fulltext "huepfer.verlag"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :fulltext "kangarooy")
       (search/search :fulltext "hatchingpenguineggs")
-      (search/search :fulltext ""))))
+      (search/search :fulltext "")
+      (search/search :fulltext "*"))))
 
 (deftest search-default-test
   (testing "The default search is currently the same as :fulltext."
     (are [x] (pos? (get-in x [:data :total]))
-      (search/search :default "kangar*")
-      (search/search :default "huepfer.ver*")
-      (search/search :default "huepfer.verlag")
-      (search/search :default "*"))
+      (search/search :default "kangar")
+      (search/search :default "huepfer.ver")
+      (search/search :default "huepfer.verlag"))
     (are [x] (zero? (get-in x [:data :total]))
       (search/search :default "kangarooy")
       (search/search :default "penguinswillruletheworld")
-      (search/search :default ""))))
+      (search/search :default "")
+      (search/search :default "*"))))
 
 (deftest search-with-fuzziness-test
   (testing "Do some fuzzy search."
