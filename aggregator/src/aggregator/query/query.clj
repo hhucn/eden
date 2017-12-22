@@ -22,10 +22,11 @@
   (:payload (get-data request-url)))
 
 (defn subscribe-to-queue
-  "Uses the broker module to subscribe to a queue for updates."
+  "Uses the broker module to subscribe to a queue for updates. Sanitizes the host if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
-  (let [queue-name (get-in queue [:data :queue-name])]
-    (sub/subscribe sub/to-query queue-name {:host host})))
+  (let [queue-name (get-in queue [:data :queue-name])
+        cleaned-host (first (str/split host #":"))]
+    (sub/subscribe sub/to-query queue-name {:host cleaned-host})))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
