@@ -1,5 +1,9 @@
 #!/bin/bash
 
+echo ":: Pulling latest images..."
+docker-compose pull
+docker-compose -f docker-compose.set2.yml pull
+
 echo ":: Starting first set..."
 docker-compose up -d
 
