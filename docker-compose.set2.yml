@@ -3,6 +3,9 @@ version: "3.1"
 services:
   broker_set2:
     image: rabbitmq:3.6-management-alpine
+    ports:
+      - "15673:15672"  # web-access to management console
+      - "5673-5674:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
     environment:
       - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
       - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
