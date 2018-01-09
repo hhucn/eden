@@ -7,30 +7,30 @@
                  [org.clojure/clojure "1.9.0"]
                  [org.clojure/data.json "0.2.6"]
                  [org.clojure/core.cache "0.6.5"]
-                 [org.clojure/core.async "0.3.443"]
+                 [org.clojure/core.async "0.4.474"]
                  [org.postgresql/postgresql "42.1.4"]
-                 [com.novemberain/langohr "4.1.0"]
+                 [com.novemberain/langohr "4.2.0"]
                  [com.taoensso/timbre "4.10.0"]  ;; logging lib
-                 [cc.qbits/spandex "0.5.2"] ;; query-lib for elasticsearch
+                 [cc.qbits/spandex "0.5.5"] ;; query-lib for elasticsearch
                  [korma "0.4.3"]
                  [compojure "1.6.0"]
                  [ring/ring-defaults "0.3.1"]
                  [ring/ring-json "0.4.0"]
-                 [ring/ring-mock "0.3.1"]
-                 [ring/ring-jetty-adapter "1.6.2"]
+                 [ring/ring-mock "0.3.2"]
+                 [ring/ring-jetty-adapter "1.6.3"]
                  [clj-http "3.7.0"]]
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
-                                  [nightlight "1.9.0"]]
+                                  [nightlight "2.1.1"]]
                    :plugins [[cider/cider-nrepl "0.16.0-SNAPSHOT"]
                              [refactor-nrepl "2.4.0-SNAPSHOT"]]}
              :uberjar {:aot :all}}
 
-  :plugins [[lein-kibit "0.1.5"]
-            [lein-ancient "0.6.10"]
-            [lein-ring "0.9.7"]
-            [lein-cloverage "1.0.9"]
-            [nightlight/lein-nightlight "1.9.0"]]
+  :plugins [[lein-kibit "0.1.6"]
+            [lein-ancient "0.6.15"]
+            [lein-ring "0.12.3"]
+            [lein-cloverage "1.0.10"]
+            [nightlight/lein-nightlight "2.1.1"]]
 
   :ring {:handler aggregator.api.routes/app
          :init aggregator.core/-main
