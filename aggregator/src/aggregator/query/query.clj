@@ -21,7 +21,7 @@
   [request-url]
   (:payload (get-data request-url)))
 
-(defn subscribe-to-queue
+(defn- subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
   (let [queue-name (get-in queue [:data :queue-name])
@@ -42,17 +42,15 @@
 
 (defn local-undercuts
   "Retrieve all links from the db that undercut the link passed as argument."
-  [link]
-  (let [aggregate (:aggregate-id link)
-        entity-id (:entity-id link)]
-    (db/get-undercuts aggregate entity-id)))
+  [{:keys [aggregate-id entity-id]}]
+  (db/get-undercuts aggregate-id entity-id))
 
 (defn links-by-target
   "Retrieve all local links in db pointing to the target statement."
   [target]
   (db/links-by-target (:aggregate-id target)
                       (:entity-id target)
-                      (:version  target)))
+                      (:version target)))
 
 (defn retrieve-remote
   "Try to retrieve a statement from a remote aggregator. The host part is treated as the webhost."
@@ -64,7 +62,7 @@
         results (:payload result-data)
         queue (:queue result-data)]
     (subscribe-to-queue queue aggregate)
-    (doall (map up/update-statement results))
+    (doseq [statement results] (up/update-statement statement))
     results))
 
 (defn retrieve-exact-statement
@@ -97,7 +95,7 @@
           entity-id (:entity-id link)
           request-url (str "http://" aggregate "/link/undercuts/" aggregate "/" entity-id)
           results (get-payload request-url)]
-      (doall (map up/update-link results))
+      (doseq [link results] (up/update-link link))
       results)))
 
 (defn links-to
@@ -110,7 +108,7 @@
           version (:version statement)
           request-url (str "http://" aggregate "/link/to/" aggregate "/" entity-id "/" version)
           results (get-payload request-url)]
-      (doall (map up/update-link results))
+      (doseq [link results] (up/update-link link))
       results)))
 
 (defn check-db
@@ -129,7 +127,7 @@
   "Check whether the Cache contains the desired entity. If not delegate to DB and remote acquisition."
   ([uri]
    (tiered-retrieval uri {}))
-  ([uri options] 
+  ([uri options]
    (let [cached-entity (cache/retrieve uri)]
      (if (= cached-entity :missing)
        (check-db uri options)
@@ -156,11 +154,11 @@
 (defn remote-starter-set
   "Retrieve remote starter sets and put them into the cache and db."
   ([]
-   (doall (map remote-starter-set config/whitelist)))
+   (doseq [host config/whitelist] (remote-starter-set host)))
   ([aggregator]
    (let [results (get-payload (str "http://" aggregator "/statements/starter-set"))]
      (when (and results (not= results "not-found"))
-       (doall (map up/update-statement results))))))
+       (doseq [stmt results] (up/update-statement stmt))))))
 
 (defn all-local-statements
   "Retrieve all locally saved statements belonging to the aggregator."
