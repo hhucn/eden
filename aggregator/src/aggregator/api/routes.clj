@@ -5,34 +5,29 @@
             [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
             [ring.util.response :refer [response]]
             [aggregator.query.query :as query]
-            [taoensso.timbre :as log]
-            [aggregator.broker.connector :as connector]))
+            [taoensso.timbre :as log]))
 
 (defroutes app-routes
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/statements" {:keys [server-name]}
+  (GET "/statements" _request
        (response {:status :ok
-                  :data {:payload (query/all-local-statements)
-                         :queue (connector/create-queue server-name)}}))
-  (GET "/statements/starter-set" {:keys [server-name]}
+                  :data {:payload (query/all-local-statements)}}))
+  (GET "/statements/starter-set" _request
        (response {:status :ok
-                  :data {:payload (query/starter-set)
-                         :queue (connector/create-queue server-name)}}))
+                  :data {:payload (query/starter-set)}}))
   ;; The Order of those GET Requests is important!
   ;; The other way around starter-set will be interpreted as an entity.
-  (GET "/statements/:entity{.+}" {:keys [params server-name]}
+  (GET "/statements/:entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved statements")
        (response {:status :ok
                   :data {:payload (query/tiered-retrieval
                                    (str (:entity params))
-                                   {:opts [:no-remote]})
-                         :queue (connector/create-queue server-name)}}))
-  (GET "/links" {:keys [server-name]}
+                                   {:opts [:no-remote]})}}))
+  (GET "/links" _request
        (response {:status :ok
-                  :data {:payload (query/all-local-links)
-                         :queue (connector/create-queue server-name)}}))
+                  :data {:payload (query/all-local-links)}}))
   (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved undercuts")
        (response {:status :ok
@@ -47,13 +42,12 @@
        (log/debug "[REST] Someone just retrieved a link")
        (response {:status :ok
                   :data {:payload (query/retrieve-link (str (:entity params)))}}))
-  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params server-name]}
+  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved a specific statement")
        (response {:status :ok
                   :data {:payload (query/exact-statement (:aggregate params)
                                                          (:entity params)
-                                                         (read-string (:version params)))
-                         :queue (connector/create-queue server-name)}})))
+                                                         (read-string (:version params)))}})))
 
 (def app
   (-> app-routes
