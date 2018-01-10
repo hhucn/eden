@@ -41,9 +41,8 @@
   "Subscribe to queue and call a function f with meta-information and payload.
 
   Example:
-  (subscribe (fn [meta payload] [meta payload]) \"hhu.de\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})
-  (subscribe \"hhu.de\" {:host \"broker\"})
-  "
+  (subscribe (fn [meta payload] [meta payload]) \"statements\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})
+  (subscribe \"statements\" {:host \"broker\"})"
   ([f queue {:keys [host user password]}]
    (try
      (let [conn (rmq/connect
@@ -52,7 +51,7 @@
                   :password (or password (System/getenv "BROKER_PASS"))})
            ch (lch/open conn)]
        (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
-       (log/debug "Connected. Channel id:" (.getChannelNumber ch))
+       (log/debug (format "Connected to queue %s. Channel id: %s" queue (.getChannelNumber ch)))
        (lib/return-ok "Connection to message queue established."))
      (catch AuthenticationFailureException e
        (log/debug (:auth-ex exceptions))
@@ -87,6 +86,6 @@
 
 (comment
   (connector/init-connection!)
-  (subscribe to-query "welt.de" {:host "mayweather.cn.uni-duesseldorf.de" :user "groot" :password "iamgroot"})
-  (subscribe "iamgro.ot" {:host "broker"})
+  (subscribe to-query "statements" {:host "mayweather.cn.uni-duesseldorf.de" :user "groot" :password "iamgroot"})
+  (subscribe "statements" {:host "broker"})
   )
