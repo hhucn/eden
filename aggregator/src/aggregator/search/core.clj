@@ -44,17 +44,19 @@
 
 (defn- add
   "Add new content to the index."
-  [index {:keys [aggregate-id entity-id] :as entity} msg]
+  [index type {:keys [aggregate-id entity-id] :as entity} msg]
   (lib/return-ok msg
-                 (sp/request @conn {:url [index aggregate-id entity-id]
+                 (sp/request @conn {:url [index type (str aggregate-id "_" entity-id)]
                                     :method :put
                                     :body entity})))
 
 (defn- delete
   "Delete entity from ElasticSearch."
   ([index-name msg] (delete index-name nil msg))
-  ([index-name {:keys [aggregate-id entity-id]} msg]
-   (let [deletion-path (vec (remove nil? (conj [(keyword index-name)] aggregate-id entity-id)))]
+  ([index-name type {:keys [aggregate-id entity-id]} msg]
+   (let [deletion-path (vec (remove nil? (conj [(keyword index-name)]
+                                               type
+                                               (aggregate-id "_" entity-id))))]
      (try
        (lib/return-ok msg
                       (sp/request @conn {:url deletion-path
@@ -88,23 +90,23 @@
   "Add a statement to the statement-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
   [statement]
-  (add :statements statement "Added statement to index."))
+  (add :statements :statement statement "Added statement to index."))
 
 (defn delete-statement
   "Deletes a statement from the search-index."
   [statement]
-  (delete :statements statement "Statement deleted."))
+  (delete :statements :statement statement "Statement deleted."))
 
 (defn add-link
   "Add a link to the link-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
   [link]
-  (add :links link "Added link to index."))
+  (add :links :link link "Added link to index."))
 
 (defn delete-link
   "Deletes a link from ElasticSearch."
   [link]
-  (delete :links link "Link deleted."))
+  (delete :links :link link "Link deleted."))
 
 
 ;; -----------------------------------------------------------------------------
@@ -174,7 +176,11 @@
 ;; Entrypoint
 
 (defn entrypoint []
-  (init-connection!))
+  (init-connection!)
+  (create-index "statements" {} {:statement {:properties {:aggregate-id {:type :keyword}
+                                                          :entity-id {:type :keyword}}}})
+  (create-index "links" {} {:link {:properties {:aggregate-id {:type :keyword}
+                                                :entity-id {:type :keyword}}}}))
 (entrypoint)
 
 
