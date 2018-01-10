@@ -70,22 +70,20 @@
 
   Example:
   (create-queue \"statements\")"
-  ([queue-name exchange routing-key]
+  ([queue-name exchange]
    (with-connection "Could not create queue."
      (try
        (let [ch (open-channel)
              queue-name queue-name
              expires-in-ms (* 30 60 1000)]
          (lq/declare ch queue-name {:arguments {"x-expires" expires-in-ms}})
-         (lq/bind ch queue-name exchange {:routing-key routing-key})
+         (lq/bind ch queue-name exchange {:routing-key queue-name})
          (close-channel ch)
          (lib/return-ok "Queue created." {:queue-name queue-name :expires-in-ms expires-in-ms}))
        (catch java.io.IOException e
          (lib/return-error "Could not create queue, caught IOException.")))))
-  ([queue-name exchange]
-   (create-queue queue-name exchange bconf/default-route))
   ([queue-name]
-   (create-queue queue-name bconf/exchange bconf/default-route)))
+   (create-queue queue-name bconf/exchange)))
 
 (defn queue-exists?
   "Check if queue exists. Returns a Boolean when connection is established."
