@@ -36,9 +36,9 @@
     (if (and (not= cached-statement :missing)
              (= (:version cached-statement) version))
       cached-statement
-      (if-let [maybe-statement (get-in (db/exact-statement aggregate-id entity-id version) [:data :hits 0 :_source])]
+      (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
         (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
-            (log/debug "[query] Return statement from db.")
+            (log/debug "[query] Found exact statement in DB")
             maybe-statement)))))
 
 (defn local-undercuts
