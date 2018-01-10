@@ -26,7 +26,7 @@ services:
       - dbas-db
     environment:
       - "ELASTICSEARCH_URL=http://search:9200"
-      - "BROKER_HOST=${BROKER_HOST}"
+      - "BROKER_HOST=broker"
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
       - "DBAS_DB_USER=${DBAS_DB_USER}"

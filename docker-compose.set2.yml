@@ -20,13 +20,13 @@ services:
       - "7778:7777"  # expose port to REPL
       - "8889:8888" # ring dev server
     links:
-      - broker_set2:broker
+      - broker_set2
       - search_set2:search
       - dbas_set2:dbas
       - dbas-db_set2:dbas-db
     environment:
       - "ELASTICSEARCH_URL=http://search_set2:9200"
-      - "BROKER_HOST=${BROKER_HOST}"
+      - "BROKER_HOST=broker_set2"
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
       - "DBAS_DB_USER=${DBAS_DB_USER}"
