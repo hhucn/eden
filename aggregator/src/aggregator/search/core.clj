@@ -44,20 +44,24 @@
 
 (defn- add
   "Add new content to the index."
-  [index {:keys [aggregate-id entity-id] :as entity} msg]
+  [index type {:keys [aggregate-id entity-id] :as entity} msg]
   (lib/return-ok msg
-                 (sp/request @conn {:url [index aggregate-id entity-id]
+                 (sp/request @conn {:url [index type (str aggregate-id "_" entity-id)]
                                     :method :put
                                     :body entity})))
 
 (defn- delete
   "Delete entity from ElasticSearch."
-  ([index-name msg] (delete index-name nil msg))
-  ([index-name {:keys [aggregate-id entity-id]} msg]
-   (let [deletion-path (vec (remove nil? (conj [(keyword index-name)] aggregate-id entity-id)))]
+  ([index-name msg] (delete index-name  nil nil msg))
+  ([index-name type {:keys [aggregate-id entity-id]} msg]
+   (let [deletion-path (vec (remove nil? (conj [(keyword index-name)]
+                                               type)))
+         final-path (if (and aggregate-id entity-id)
+                      (vec (conj deletion-path (str aggregate-id "_" entity-id)))
+                      deletion-path)]
      (try
        (lib/return-ok msg
-                      (sp/request @conn {:url deletion-path
+                      (sp/request @conn {:url final-path
                                          :method :delete}))
        (catch Exception e
          (lib/return-error (or (-> e ex-data :body :error :reason)
@@ -88,23 +92,23 @@
   "Add a statement to the statement-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
   [statement]
-  (add :statements statement "Added statement to index."))
+  (add :statements :statement statement "Added statement to index."))
 
 (defn delete-statement
   "Deletes a statement from the search-index."
   [statement]
-  (delete :statements statement "Statement deleted."))
+  (delete :statements :statement statement "Statement deleted."))
 
 (defn add-link
   "Add a link to the link-index. Updates existing entities, identified
   by aggregate-id and entity-id, and updates them if they already existed."
   [link]
-  (add :links link "Added link to index."))
+  (add :links :link link "Added link to index."))
 
 (defn delete-link
   "Deletes a link from ElasticSearch."
   [link]
-  (delete :links link "Link deleted."))
+  (delete :links :link link "Link deleted."))
 
 
 ;; -----------------------------------------------------------------------------
@@ -157,13 +161,21 @@
   "Return the first 10.000 results of the statements from a specified
   aggregate-id. Returns the first 10k statements on the queried host if an empty
   aggregate-id is provided."
-  (search-request {:from 0 :size 10000} (str "statements/" aggregate-id)))
+  (if aggregate-id
+    (search-request {:from 0
+                     :size 10000
+                     :query {:bool {:must {:match {:aggregate-id aggregate-id}}}}} :statements)
+    (search-request {:from 0 :size 10000} (str "statements/"))))
 
 (defmethod search :all-links [_ aggregate-id]
   "Return the first 10.000 results of the statement from a specified
    aggregate-id. Returns the first 10k statements on the queried host
    if an empty aggregate-id is provided."
-  (search-request {:from 0 :size 10000} (str "links/" aggregate-id)))
+  (if aggregate-id
+    (search-request {:from 0
+                     :size 10000
+                     :query {:bool {:must {:match {:aggregate-id aggregate-id}}}}} :links)
+    (search-request {:from 0 :size 10000} (str "links/"))))
 
 (defmethod search :links [_ querymap]
   "Search for a matching entity (multiple versions possible)."
@@ -174,7 +186,11 @@
 ;; Entrypoint
 
 (defn entrypoint []
-  (init-connection!))
+  (init-connection!)
+  (create-index "statements" {} {:statement {:properties {:aggregate-id {:type :keyword}
+                                                          :entity-id {:type :keyword}}}})
+  (create-index "links" {} {:link {:properties {:aggregate-id {:type :keyword}
+                                                :entity-id {:type :keyword}}}}))
 (entrypoint)
 
 
