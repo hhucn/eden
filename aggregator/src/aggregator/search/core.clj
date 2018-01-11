@@ -55,11 +55,13 @@
   ([index-name msg] (delete index-name  nil nil msg))
   ([index-name type {:keys [aggregate-id entity-id]} msg]
    (let [deletion-path (vec (remove nil? (conj [(keyword index-name)]
-                                               type
-                                               (str aggregate-id "_" entity-id))))]
+                                               type)))
+         final-path (if (and aggregate-id entity-id)
+                      (vec (conj deletion-path (str aggregate-id "_" entity-id)))
+                      deletion-path)]
      (try
        (lib/return-ok msg
-                      (sp/request @conn {:url deletion-path
+                      (sp/request @conn {:url final-path
                                          :method :delete}))
        (catch Exception e
          (lib/return-error (or (-> e ex-data :body :error :reason)
