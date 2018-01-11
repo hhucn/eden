@@ -15,8 +15,8 @@
       (log/debug (format "[UPDATE] Added new statement to db: %s " statement))
       (when (= (:aggregate-id statement) config/aggregate-name)
         (pub/publish-statement statement))
-      (cache/cache-miss (str (:aggregate-id statement) "/" (:entity-id statement)) statement)
-      (db/insert-statement statement))))
+      (db/insert-statement statement))
+    (cache/cache-miss (str (:aggregate-id statement) "/" (:entity-id statement)) statement)))
 
 (defn update-link
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
