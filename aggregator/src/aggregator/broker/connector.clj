@@ -79,8 +79,10 @@
          (lq/declare ch queue-name {:arguments {"x-expires" expires-in-ms}})
          (lq/bind ch queue-name exchange {:routing-key queue-name})
          (close-channel ch)
+         (log/debug "Created queue:" queue-name)
          (lib/return-ok "Queue created." {:queue-name queue-name :expires-in-ms expires-in-ms}))
-       (catch java.io.IOException e
+       (catch java.io.IOException _e
+         (log/error "Could not create queue" queue-name)
          (lib/return-error "Could not create queue, caught IOException.")))))
   ([queue-name]
    (create-queue queue-name bconf/exchange)))

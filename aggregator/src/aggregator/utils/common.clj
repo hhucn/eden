@@ -46,7 +46,8 @@
   "Sometimes you want to return an error message. This function packs it into a
   map."
   ([message] (return-error message nil))
-  ([message data] (return-map :error message data)))
+  ([message data]
+   (return-map :error message data)))
 
 (defn return-ok
   "Return ok and a message."
