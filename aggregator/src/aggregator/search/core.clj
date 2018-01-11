@@ -52,11 +52,11 @@
 
 (defn- delete
   "Delete entity from ElasticSearch."
-  ([index-name msg] (delete index-name nil msg))
+  ([index-name msg] (delete index-name  nil nil msg))
   ([index-name type {:keys [aggregate-id entity-id]} msg]
    (let [deletion-path (vec (remove nil? (conj [(keyword index-name)]
                                                type
-                                               (aggregate-id "_" entity-id))))]
+                                               (str aggregate-id "_" entity-id))))]
      (try
        (lib/return-ok msg
                       (sp/request @conn {:url deletion-path
@@ -159,13 +159,21 @@
   "Return the first 10.000 results of the statements from a specified
   aggregate-id. Returns the first 10k statements on the queried host if an empty
   aggregate-id is provided."
-  (search-request {:from 0 :size 10000} (str "statements/" aggregate-id)))
+  (if aggregate-id
+    (search-request {:from 0
+                     :size 10000
+                     :query {:bool {:must {:match {:aggregate-id aggregate-id}}}}} :statements)
+    (search-request {:from 0 :size 10000} (str "statements/"))))
 
 (defmethod search :all-links [_ aggregate-id]
   "Return the first 10.000 results of the statement from a specified
    aggregate-id. Returns the first 10k statements on the queried host
    if an empty aggregate-id is provided."
-  (search-request {:from 0 :size 10000} (str "links/" aggregate-id)))
+  (if aggregate-id
+    (search-request {:from 0
+                     :size 10000
+                     :query {:bool {:must {:match {:aggregate-id aggregate-id}}}}} :links)
+    (search-request {:from 0 :size 10000} (str "links/"))))
 
 (defmethod search :links [_ querymap]
   "Search for a matching entity (multiple versions possible)."
