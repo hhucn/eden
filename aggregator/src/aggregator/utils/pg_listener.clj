@@ -9,12 +9,12 @@
 (defn- handle-statements
   "Handle changes in statements"
   [statement]
-  (log/debug (str "new statement: " statement)))
+  (log/debug (format "Received new statement from D-BAS: %s" statement)))
 
 (defn- handle-textversions
   "Handle changes in the textversions. They belong to the statements."
   [textversion]
-  (log/debug (str "new textversion: " (:data textversion)))
+  (log/debug (format "Received new textversion from D-BAS: %s" (:data textversion)))
   (let [statement {:author (get-in textversion [:data :author_uid])
                    :content (get-in textversion [:data :content])
                    :aggregate-id config/aggregate-name
@@ -45,11 +45,10 @@
                 :database "discussion"
                 :user (System/getenv "DBAS_DB_USER")
                 :password (System/getenv "DBAS_DB_PW")})
-  (pgl/arm-listener handle-statements "statements_changes")
-  (pgl/arm-listener handle-textversions "textversions_changes")
-  (pgl/arm-listener handle-arguments "arguments_changes")
+  (doall
+   [(pgl/arm-listener handle-statements "statements_changes")
+    (pgl/arm-listener handle-textversions "textversions_changes")
+    (pgl/arm-listener handle-arguments "arguments_changes")])
   (log/debug "Started listeners for DBAS-PG-DB"))
 
-
 ;;(start-listeners)
-

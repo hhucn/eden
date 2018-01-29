@@ -22,7 +22,7 @@
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [nightlight "2.1.1"]]
-                   :plugins [[cider/cider-nrepl "0.16.0-SNAPSHOT"]
+                   :plugins [[cider/cider-nrepl "0.17.0-SNAPSHOT"]
                              [refactor-nrepl "2.4.0-SNAPSHOT"]]}
              :uberjar {:aot :all}}
 
