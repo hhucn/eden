@@ -22,11 +22,12 @@
   (:payload (get-data request-url)))
 
 (defn- subscribe-to-queue
-  "Uses the broker module to subscribe to a queue for updates. Sanitizes the host if a port is appended. Example: example.com:8888 is treated as example.com."
+  "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
+  if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
   (let [queue-name (get-in queue [:data :queue-name])
         cleaned-host (first (str/split host #":"))]
-    (sub/subscribe sub/to-query queue-name {:host cleaned-host})))
+    (sub/subscribe queue-name {:host cleaned-host})))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
@@ -59,9 +60,9 @@
         aggregate (first split-uri)
         request-url (str "http://" aggregate "/statements/" uri)
         result-data (get-data request-url)
-        results (:payload result-data)
-        queue (:queue result-data)]
-    (subscribe-to-queue queue aggregate)
+        results (:payload result-data)]
+    (subscribe-to-queue "statements" aggregate)
+    (subscribe-to-queue "links" aggregate)
     (doseq [statement results] (up/update-statement statement))
     results))
 
@@ -72,9 +73,7 @@
     local-statement
     (let [request-url (str "http://" aggregate "/statement/" aggregate "/" entity "/" version)
           result-data (get-data request-url)
-          result (:payload result-data)
-          queue (:queue result-data)]
-      (subscribe-to-queue queue aggregate)
+          result (:payload result-data)]
       (up/update-statement result)
       result)))
 

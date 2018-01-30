@@ -69,23 +69,23 @@
   aggregator is the hostname of the aggregator.
 
   Example:
-  (create-queue \"hhu.de\")"
-  ([aggregator exchange routing-key]
+  (create-queue \"statements\")"
+  ([queue-name exchange]
    (with-connection "Could not create queue."
      (try
        (let [ch (open-channel)
-             queue-name aggregator
+             queue-name queue-name
              expires-in-ms (* 30 60 1000)]
          (lq/declare ch queue-name {:arguments {"x-expires" expires-in-ms}})
-         (lq/bind ch queue-name exchange {:routing-key routing-key})
+         (lq/bind ch queue-name exchange {:routing-key queue-name})
          (close-channel ch)
+         (log/debug "Created queue:" queue-name)
          (lib/return-ok "Queue created." {:queue-name queue-name :expires-in-ms expires-in-ms}))
-       (catch java.io.IOException e
+       (catch java.io.IOException _e
+         (log/error "Could not create queue" queue-name)
          (lib/return-error "Could not create queue, caught IOException.")))))
-  ([aggregator exchange]
-   (create-queue aggregator exchange bconf/default-route))
-  ([aggregator]
-   (create-queue aggregator bconf/exchange bconf/default-route)))
+  ([queue-name]
+   (create-queue queue-name bconf/exchange)))
 
 (defn queue-exists?
   "Check if queue exists. Returns a Boolean when connection is established."
@@ -113,7 +113,9 @@
 ;; Entrypoint
 
 (defn entrypoint []
-  (init-connection!))
+  (init-connection!)
+  (create-queue "statements")
+  (create-queue "links"))
 (entrypoint)
 
 
@@ -122,7 +124,8 @@
 
 (comment
   (init-connection!)
-  (create-queue "welt.de")
-  (delete-queue "welt.dey")
+  (create-queue "statements")
+  (create-queue "links")
+  (delete-queue "links")
   (close-connection!)
   )
