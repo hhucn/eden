@@ -5,11 +5,10 @@
             [taoensso.timbre :as log]
             [aggregator.graphql.dbas-connector :refer [links-from-argument get-statement-origin]]))
 
-
 (defn- handle-statements
   "Handle changes in statements"
   [statement]
-  (log/debug (format "Received new statement from D-BAS: %s" statement)))
+  (log/debug (format "[not implemented] Received new statement from D-BAS: %s" statement)))
 
 (defn- handle-textversions
   "Handle changes in the textversions. They belong to the statements."
@@ -45,10 +44,9 @@
                 :database "discussion"
                 :user (System/getenv "DBAS_DB_USER")
                 :password (System/getenv "DBAS_DB_PW")})
-  (doall
-   [(pgl/arm-listener handle-statements "statements_changes")
-    (pgl/arm-listener handle-textversions "textversions_changes")
-    (pgl/arm-listener handle-arguments "arguments_changes")])
-  (log/debug "Started listeners for DBAS-PG-DB"))
-
-;;(start-listeners)
+  (doseq [[f event] [[handle-textversions "textversions_changes"]
+                     [handle-statements "statements_changes"]
+                     [handle-arguments "arguments_changes"]]]
+    (pgl/arm-listener f event)
+    (log/debug (format "Listener for event %s started." event)))
+  (log/debug "Started all listeners for DBAS-PG-DB"))
