@@ -1,5 +1,25 @@
 # Aggregator
 
+## Quick-Start
+
+To start a working version with a preconfigured testinterface execute
+	
+	docker-compose -f docker-compose.production.yml up
+
+This will start a docker-container with several programs of which you will see output to the console:
+ * A discuss interface
+ * A D-BAS instance that will be used as DGEP
+ * A elasticsearch database
+ * A kibana instance, which can be used to interact with elasticsearch
+ * A RabbitMQ instance called broker
+ * An aggregator instance, which coordinates the information-flow
+
+ *You can direct your browser to http://localhost:8080 to open the interface.*
+
+ If you desire to start a second instance which starts automatically exchanging arguments with the main instance execute:
+
+	docker-compose -f docker-compose.set2.yml up
+
 
 ## Setup
 
