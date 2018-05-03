@@ -12,7 +12,8 @@
 (s/def ::aggregate-id ::no-slash)
 (s/def ::entity-id ::no-slash)
 (s/def ::version pos-int?)
-(s/def ::identifier ::aggregate-id ::entity-id ::version)
+(s/def ::identifier
+  (s/keys :req-un [::aggregate-id ::entity-id ::version]))
 
 (s/def ::predecessors (s/coll-of ::identifier))
 (s/def ::delete-flag boolean?)
