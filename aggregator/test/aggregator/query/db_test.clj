@@ -5,72 +5,72 @@
 
 (defn fixtures [f]
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
-                         :content {:author "Jorge"
-                                   :content-string "money does not solve problems of our society"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "Jorge"
+                                  :content-string "money does not solve problems of our society"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P12" :version 1}
-                         :content {:author "George"
-                                   :content-string "we should shut down University Park"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "George"
+                                  :content-string "we should shut down University Park"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P13" :version 1}
-                         :content {:author "George"
-                                   :content-string "shutting down University Park will save $100.000 a year"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "George"
+                                  :content-string "shutting down University Park will save $100.000 a year"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P22" :version 1}
-                         :content {:author "AlterVerwalter"
-                                   :content-string "the city is planing a new park in the upcoming month"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "AlterVerwalter"
+                                  :content-string "the city is planing a new park in the upcoming month"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "7" :version 1}
-                         :content {:author "Bolek"
-                                   :content-string "we should not abandon our town's core task"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "Bolek"
+                                  :content-string "we should not abandon our town's core task"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P23" :version 1}
-                         :content {:author "XxxBaerchiDarkDestoyerxxX"
-                                   :content-string "there is a smaller park in O-Town"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "XxxBaerchiDarkDestoyerxxX"
+                                  :content-string "there is a smaller park in O-Town"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P232" :version 1}
-                         :content {:author "XxxBestoyerxxX"
-                                   :content-string "there is a smaller park in O-Town"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "XxxBestoyerxxX"
+                                  :content-string "there is a smaller park in O-Town"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P231" :version 1}
-                         :content {:author "XxxBoyerxxX"
-                                   :content-string "there is a smaller park in O-Town"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "XxxBoyerxxX"
+                                  :content-string "there is a smaller park in O-Town"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P230" :version 1}
-                         :content {:author "XxxBayerxxX"
-                                   :content-string "there is a smaller park in O-Town"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "XxxBayerxxX"
+                                  :content-string "there is a smaller park in O-Town"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P29" :version 1}
-                         :content {:author "XxxBaeryerxxX"
-                                   :content-string "there is a smaller park in O-Town"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
+                        :content {:author "XxxBaeryerxxX"
+                                  :content-string "there is a smaller park in O-Town"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
-                         :content {:author "XxxBaeryerxxX"
-                                   :content-string "there is a smaller park in O-Town"
-                                   :created nil}
-                         :predecessors {}
-                         :delete-flag false})
-
+                        :content {:author "XxxBaeryerxxX"
+                                  :content-string "there is a smaller park in O-Town"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
+  
   (db/insert-link {:author "Wegi" :created nil :type "undercut"
                    :source {:from-aggregate-id "schneider.gg"
                             :from-entity-id "W01" :from-version 1337}
@@ -96,8 +96,12 @@
   (is (= (count (db/statements-by-author "George")) 2)))
 
 (deftest insert-statement-test
-  (db/insert-statement {:author "Wegi" :content "Test me baby one more time"
-                        :aggregate-id "schneider.gg" :entity-id "W01" :version 1337})
+  (db/insert-statement {:content
+                        {:author "Wegi" :content-string "Test me baby one more time" :created nil}
+                        :identifier
+                        {:aggregate-id "schneider.gg" :entity-id "W01" :version 1337}
+                        :delete-flag false
+                        :predecessors {}})
   (Thread/sleep 2000)
   (is (= (:content (db/exact-statement "schneider.gg" "W01" 1337))
          "Test me baby one more time")))

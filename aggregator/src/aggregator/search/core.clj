@@ -45,6 +45,7 @@
 (defn- add
   "Add new content to the index."
   [index type {:keys [identifier] :as entity} msg]
+  (print "IDENTIFIEEEER: " (:aggregate-id identifier) "\n")
   (lib/return-ok msg
                  (sp/request @conn {:url [index type (str (:aggregate-id identifier)
                                                           "_"

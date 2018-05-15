@@ -14,20 +14,24 @@
   "Handle changes in the textversions. They belong to the statements."
   [textversion]
   (log/debug (format "Received new textversion from D-BAS: %s" (:data textversion)))
-  (let [statement {:author (get-in textversion [:data :author_uid])
-                   :content (get-in textversion [:data :content])
-                   :aggregate-id config/aggregate-name
-                   :entity-id (get-in textversion [:data :uid])
-                   :version 1
-                   :created nil}
+  (let [statement {:content {:author (get-in textversion [:data :author_uid])
+                             :content-string (get-in textversion [:data :content])
+                             :created nil}
+                   :identifier {:aggregate-id config/aggregate-name
+                                :entity-id (get-in textversion [:data :uid])
+                                :version 1}
+                   :delete-flag false
+                   :predecessor {}}
         origin (get-statement-origin (get-in textversion [:data :statement_uid]))]
     (if origin
-      (update/update-statement (assoc statement
-                                      :aggregate-id (:aggregate_id origin)
-                                      :entity-id (:entity_id origin)
-                                      :author (:author origin)
-                                      :version (:version origin)))
+      (update/update-statement
+       (assoc-in (assoc statement
+                        :identifier {:aggregate-id (:aggregate_id origin)
+                                     :entity-id (:entity_id origin)
+                                     :version (:version origin)})
+                 [:content :author] (:author origin)))
       (update/update-statement statement))))
+
 
 (defn- handle-arguments
   "Handle changes in arguments and update links correspondingly."
