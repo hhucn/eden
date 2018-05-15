@@ -17,8 +17,9 @@
   "Returns all entities matched by the uri."
   [uri entity-type]
   (let [uri-info (part-uri uri)
-        query-values (unpack-elastic (elastic/search entity-type {:aggregate-id (first uri-info)
-                                                                  :entity-id (second uri-info)}))]
+        query-values (unpack-elastic (elastic/search entity-type {:identifier
+                                                                  {:aggregate-id (first uri-info)
+                                                                   :entity-id (second uri-info)}}))]
     (if (= '() query-values)
       :missing
       query-values)))

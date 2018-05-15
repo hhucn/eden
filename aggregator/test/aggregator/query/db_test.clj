@@ -1,72 +1,70 @@
 (ns aggregator.query.db-test
   (:require [aggregator.query.db :as db]
             [aggregator.config :as config]
-            [aggregator.search.core :as search]
-            [taoensso.timbre :as log]
             [clojure.test :refer [deftest is use-fixtures]]))
 
 (defn fixtures [f]
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
                          :content {:author "Jorge"
                                    :content-string "money does not solve problems of our society"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P12" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P12" :version 1}
                          :content {:author "George"
                                    :content-string "we should shut down University Park"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P13" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P13" :version 1}
                          :content {:author "George"
                                    :content-string "shutting down University Park will save $100.000 a year"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P22" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P22" :version 1}
                          :content {:author "AlterVerwalter"
                                    :content-string "the city is planing a new park in the upcoming month"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "7" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "7" :version 1}
                          :content {:author "Bolek"
                                    :content-string "we should not abandon our town's core task"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P23" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P23" :version 1}
                          :content {:author "XxxBaerchiDarkDestoyerxxX"
                                    :content-string "there is a smaller park in O-Town"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P232" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P232" :version 1}
                          :content {:author "XxxBestoyerxxX"
                                    :content-string "there is a smaller park in O-Town"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P231" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P231" :version 1}
                          :content {:author "XxxBoyerxxX"
                                    :content-string "there is a smaller park in O-Town"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P230" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P230" :version 1}
                          :content {:author "XxxBayerxxX"
                                    :content-string "there is a smaller park in O-Town"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P29" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P29" :version 1}
                          :content {:author "XxxBaeryerxxX"
                                    :content-string "there is a smaller park in O-Town"
                                    :created nil}
                          :predecessors {}
                          :delete-flag false})
-  (search/add-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
+  (db/insert-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
                          :content {:author "XxxBaeryerxxX"
                                    :content-string "there is a smaller park in O-Town"
                                    :created nil}
@@ -86,12 +84,12 @@
 
 
 (deftest statement-uri-retrieval-test
-  (is (= (:version (first (db/statements-by-uri "hhu.de/34"))) 1))
-  (is (= (:aggregate-id (first (db/statements-by-uri "hhu.de/P12"))) "hhu.de"))
-  (is (= (:entity-id (first (db/statements-by-uri "hhu.de/P13"))) "P13"))
-  (is (= (:content (first (db/statements-by-uri "hhu.de/P22")))
+  (is (= (get-in (first (db/statements-by-uri "hhu.de/34")) [:identifier :version]) 1))
+  (is (= (get-in (first (db/statements-by-uri "hhu.de/P12")) [:identifier :aggregate-id]) "hhu.de"))
+  (is (= (get-in (first (db/statements-by-uri "hhu.de/P13")) [:identifier :entity-id]) "P13"))
+  (is (= (get-in (first (db/statements-by-uri "hhu.de/P22")) [:content :content-string])
          "the city is planing a new park in the upcoming month"))
-  (is (= (:author (first (db/statements-by-uri "hhu.de/7"))) "Bolek")))
+  (is (= (get-in (first (db/statements-by-uri "hhu.de/7")) [:content :author]) "Bolek")))
 
 (deftest statement-by-author-test
   (is (= (count (db/statements-by-author "XxxBaerchiDarkDestoyerxxX")) 1))
