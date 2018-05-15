@@ -4,26 +4,33 @@
             [clojure.spec.alpha :as s]
             [aggregator.specs :as gspecs]))
 
-(def kangaroo {:author "kangaroo"
-               :content "Schnapspralinen"
-               :aggregate-id "huepfer.verlag"
-               :entity-id "1"
-               :version 1
-               :created nil})
+(def kangaroo {:content {:content-string "Schnapspralinen"
+                         :author "kangaroo"
+                         :created nil}
+               :identifier {:aggregate-id "huepfer.verlag"
+                            :entity-id "1"
+                            :version 1}
+               :predecessors {}
+               :delete-flag false})
 
-(def penguin {:author "penguin"
-              :content "Teewurst"
-              :aggregate-id "penguin.books:8080"
-              :entity-id "1"
-              :version 1
-              :created nil})
+(def penguin {:content {:content-string "Teewurst"
+                         :author "penguin"
+                         :created nil}
+               :identifier {:aggregate-id "penguin.books:8080"
+                            :entity-id "1"
+                            :version 1}
+               :predecessors {}
+              :delete-flag false})
 
-(def penguin2 {:author "penguin"
-               :content "Teewurst 2: Die Rache der Teewurst"
-               :aggregate-id "penguin.books:8080"
-               :entity-id "2"
-               :version 1
-               :created nil})
+(def penguin2 {:content {:content-string "Teewurst 2: Die Rache der Teewurst"
+                         :author "penguin"
+                         :created nil}
+               :identifier {:aggregate-id "penguin.books:8080"
+                            :entity-id "2"
+                            :version 1}
+               :predecessors {}
+               :delete-flag false})
+
 
 (def link (first (last (s/exercise ::gspecs/link))))
 

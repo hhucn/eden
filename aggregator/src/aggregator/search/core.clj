@@ -44,20 +44,24 @@
 
 (defn- add
   "Add new content to the index."
-  [index type {:keys [aggregate-id entity-id] :as entity} msg]
+  [index type {:keys [identifier] :as entity} msg]
   (lib/return-ok msg
-                 (sp/request @conn {:url [index type (str aggregate-id "_" entity-id)]
+                 (sp/request @conn {:url [index type (str (:aggregate-id identifier)
+                                                          "_"
+                                                          (:entity-id identifier))]
                                     :method :put
                                     :body entity})))
 
 (defn- delete
   "Delete entity from ElasticSearch."
   ([index-name msg] (delete index-name  nil nil msg))
-  ([index-name type {:keys [aggregate-id entity-id]} msg]
+  ([index-name type {:keys [identifier]} msg]
    (let [deletion-path (vec (remove nil? (conj [(keyword index-name)]
                                                type)))
-         final-path (if (and aggregate-id entity-id)
-                      (vec (conj deletion-path (str aggregate-id "_" entity-id)))
+         final-path (if identifier
+                      (vec (conj deletion-path (str (:aggregate-id identifier)
+                                                    "_"
+                                                    (:entity-id identifier))))
                       deletion-path)]
      (try
        (lib/return-ok msg

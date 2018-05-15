@@ -29,6 +29,6 @@
 (s/def ::link
   (s/keys :req-un [::type
                    ::source ::destination
-                   ::identifier]
+                   ::identifier ::delete-flag]
           :opt-un [::created ::author]))
 ;; (s/exercise ::link)
