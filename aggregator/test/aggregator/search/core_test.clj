@@ -125,16 +125,16 @@
 (deftest search-entity-test
   (testing "Test for exact entity"
     (are [x] (pos? (get-in x [:data :total]))
-      (search/search :statements {:aggregate-id "huepfer.verlag"
-                                  :entity-id "1"})
-      (search/search :statements {:aggregate-id "penguin.books:8080"
-                                  :entity-id "1"}))))
+      (search/search :statements {:identifier {:aggregate-id "huepfer.verlag"
+                                               :entity-id "1"}})
+      (search/search :statements {:identifier {:aggregate-id "penguin.books:8080"
+                                               :entity-id "1"}}))))
 
 (deftest search-statements-by-aggregate-id-test
   (testing "Query by aggregate-id to retrieve all matched statements."
     (are [min-results response] (<= min-results (get-in response [:data :total]))
-      1 (search/search :statements {:aggregate-id "huepfer.verlag"})
-      2 (search/search :statements {:aggregate-id "penguin.books:8080"}))))
+      1 (search/search :statements {:identifier {:aggregate-id "huepfer.verlag"}})
+      2 (search/search :statements {:identifier {:aggregate-id "penguin.books:8080"}}))))
 
 (deftest return-all-statements-for-aggregator-test
   (testing "Given an aggregator, return the first 10.000 statements in his index."
