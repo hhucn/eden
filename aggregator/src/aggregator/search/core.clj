@@ -192,10 +192,10 @@
 
 (defn entrypoint []
   (init-connection!)
-  (create-index "statements" {} {:statement {:properties {:aggregate-id {:type :keyword}
-                                                          :entity-id {:type :keyword}}}})
-  (create-index "links" {} {:link {:properties {:aggregate-id {:type :keyword}
-                                                :entity-id {:type :keyword}}}}))
+  (create-index "statements" {} {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
+                                                           :identifier.entity-id {:type :keyword}}}})
+  (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
+                                                :identifier.entity-id {:type :keyword}}}}))
 (entrypoint)
 
 

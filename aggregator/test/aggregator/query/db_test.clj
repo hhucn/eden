@@ -72,10 +72,10 @@
                         :delete-flag false})
   
   (db/insert-link {:author "Wegi" :created nil :type "undercut"
-                   :source {:from-aggregate-id "schneider.gg"
-                            :from-entity-id "W01" :from-version 1337}
-                   :destination {:to-aggregate-id "schneider.gg"
-                                 :to-entity-id "W_link_35" :to-version 1}
+                   :source {:aggregate-id "schneider.gg"
+                            :entity-id "W01" :version 1337}
+                   :destination {:aggregate-id "schneider.gg"
+                                 :entity-id "W_link_35" :version 1}
                    :identifier {:aggregate-id "schneider.gg" :entity-id "link0r1337" :version 1}
                    :delete-flag false})
   (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
@@ -107,14 +107,14 @@
          "Test me baby one more time")))
 
 (deftest insert-link-test
-  (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35"))
+  (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35" 1))
          "Wegi"))
   (is (= "Wegi" (:author (first (db/links-by-uri "schneider.gg/link0r1337"))))))
 
 (deftest random-statements
   (let [results (db/random-statements 1)]
     (is (= (count results) 1))
-    (is (= (:aggregate-id (rand-nth results)) config/aggregate-name))))
+    (is (= (get-in (rand-nth results) [:identifier :aggregate-id]) config/aggregate-name))))
 
 (deftest test-entity-by-uri
   (let [results (db/entities-by-uri "hhu.de/34" :statements)]

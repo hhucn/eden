@@ -17,9 +17,9 @@
   "Returns all entities matched by the uri."
   [uri entity-type]
   (let [uri-info (part-uri uri)
-        query-values (unpack-elastic (elastic/search entity-type {:identifier
-                                                                  {:aggregate-id (first uri-info)
-                                                                   :entity-id (second uri-info)}}))]
+        query-values (unpack-elastic (elastic/search entity-type 
+                                                     {:identifier.aggregate-id (first uri-info)
+                                                      :identifier.entity-id (second uri-info)}))]
     (if (= '() query-values)
       :missing
       query-values)))
@@ -61,13 +61,11 @@
 
 (defn exact-link
   "Return the exact link and only that if possible."
-  [from-aggregate from-entity from-version to-aggregate to-entity & [to-version]]
-  (let [query-map {:from-aggregate-id from-aggregate :from-entity-id from-entity
-                   :from-version from-version :to-aggregate-id to-aggregate
-                   :to-entity-id to-entity}
-        query (if to-version (assoc query-map :to-version to-version) query-map)
-        db-result (first (unpack-elastic (elastic/search :links query)))]
-    db-result))
+  [from-aggregate from-entity from-version to-aggregate to-entity to-version]
+  (let [query-map {:source.aggregate-id from-aggregate :source.entity-id from-entity
+                   :source.version from-version :destination.aggregate-id to-aggregate
+                   :destination.entity-id to-entity :destination.version to-version}]
+    (first (unpack-elastic (elastic/search :links query-map)))))
 
 (defn insert-link
   "Requires a map conforming to the ::aggregator.specs/link as input. Inserts the statement into the database."
@@ -95,4 +93,6 @@
   "Return *num* random statements from the db."
   [num]
   (clojure.core/take
-   num (shuffle (unpack-elastic (elastic/search :statements {:aggregate-id config/aggregate-name})))))
+   num (shuffle (unpack-elastic
+                 (elastic/search :statements
+                                 {:identifier.aggregate-id config/aggregate-name})))))
