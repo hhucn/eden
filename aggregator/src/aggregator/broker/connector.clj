@@ -116,7 +116,7 @@
   (init-connection!)
   (create-queue "statements")
   (create-queue "links"))
-(entrypoint)
+;;(entrypoint)
 
 
 ;; -----------------------------------------------------------------------------

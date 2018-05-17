@@ -32,7 +32,7 @@
 (defn statements-by-author
   "Return all statements with a certain author."
   [author]
-  (unpack-elastic (elastic/search :statements {:author author})))
+  (unpack-elastic (elastic/search :statements {:content.author author})))
 
 (defn links-by-uri
   "Return all link-versions defined by the uri"
@@ -42,9 +42,9 @@
 (defn exact-statement
   "Return the exact statement and only that if possible."
   [aggregate-id entity-id version]
-  (first (unpack-elastic (elastic/search :statements {:aggregate-id aggregate-id
-                                                      :entity-id entity-id
-                                                      :version version}))))
+  (first (unpack-elastic (elastic/search :statements {:identifier.aggregate-id aggregate-id
+                                                      :identifier.entity-id entity-id
+                                                      :identifier.version version}))))
 
 (defn all-statements
   []
@@ -76,18 +76,15 @@
   "Returns all undercuts that point to target aggregator and entity-id."
   [target-aggregator target-entity-id]
   (unpack-elastic (elastic/search :links {:type "undercut"
-                                          :to-aggregate-id target-aggregator
-                                          :to-entity-id target-entity-id})))
+                                          :destination.aggregate-id target-aggregator
+                                          :destination.entity-id target-entity-id})))
 
 (defn links-by-target
   "Return all links with the corresponding target."
-  ([target-aggregator target-entity]
-   (unpack-elastic (elastic/search :links {:to-aggregate-id target-aggregator
-                                           :to-entity-id target-entity})))
-  ([target-aggregator target-entity target-version]
-   (unpack-elastic (elastic/search :links {:to-aggregate-id target-aggregator
-                                           :to-entity-id target-entity
-                                           :to-version target-version}))))
+  [target-aggregator target-entity target-version]
+  (unpack-elastic (elastic/search :links {:destination.aggregate-id target-aggregator
+                                          :destinaiton.entity-id target-entity
+                                          :destination.version target-version})))
 
 (defn random-statements
   "Return *num* random statements from the db."

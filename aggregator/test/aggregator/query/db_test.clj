@@ -71,7 +71,7 @@
                         :predecessors {}
                         :delete-flag false})
   
-  (db/insert-link {:author "Wegi" :created nil :type "undercut"
+  (db/insert-link {:author "Wegi" :created nil :type :undercut
                    :source {:aggregate-id "schneider.gg"
                             :entity-id "W01" :version 1337}
                    :destination {:aggregate-id "schneider.gg"
