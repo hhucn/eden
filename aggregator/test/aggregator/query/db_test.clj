@@ -103,7 +103,7 @@
                         :delete-flag false
                         :predecessors {}})
   (Thread/sleep 2000)
-  (is (= (:content (db/exact-statement "schneider.gg" "W01" 1337))
+  (is (= (get-in (db/exact-statement "schneider.gg" "W01" 1337) [:content :content-string])
          "Test me baby one more time")))
 
 (deftest insert-link-test
@@ -123,8 +123,8 @@
 
 (deftest test-undercuts
   (let [results (db/get-undercuts "schneider.gg" "W_link_35")]
-    (is (= "link0r1337" (:entity-id (first results))))))
+    (is (= "link0r1337" (get-in (first results) [:identifier :entity-id])))))
 
 (deftest test-links-by-target
   (let [results (db/links-by-target "schneider.gg" "W_link_35")]
-    (is (= "link0r1337" (:entity-id (first results))))))
+    (is (= "link0r1337" (get-in (first results) [:identifier :entity-id])))))
