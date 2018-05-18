@@ -7,16 +7,16 @@
 (defn whitelisted?
   "Return whether the source of a link is whitelisted."
   [link]
-  (some #{(:from_aggregate_id link)} config/whitelist))
+  (some #{(get-in link [:source :aggregate-id])} config/whitelist))
 
 (defn next-entity
   "Accepts a list and retrieves the statement the head-link is sourced by if its provider is whitelisted. Then retrieves all links connected to it and queues them. Returns the updated list."
   [queue]
   (if (whitelisted? (first queue))
     (let [link (first queue)
-          aggregate (:from_aggregate_id link)
-          entity-id (:from_entity_id link)
-          version (:from_version link)
+          aggregate (get-in link [:source :aggregate-id])
+          entity-id (get-in link [:source :entity-id])
+          version (get-in link [:source :link])
           statement (query/retrieve-exact-statement aggregate entity-id version)
           undercuts (query/retrieve-undercuts link)
           additional-links (query/links-to statement)]
