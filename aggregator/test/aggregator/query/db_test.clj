@@ -119,12 +119,12 @@
 (deftest test-entity-by-uri
   (let [results (db/entities-by-uri "hhu.de/34" :statements)]
     (is (= 1 (count results)))
-    (is (= "Jorge" (:author (first results))))))
+    (is (= "Jorge" (get-in (first results) [:content :author])))))
 
 (deftest test-undercuts
   (let [results (db/get-undercuts "schneider.gg" "W_link_35")]
     (is (= "link0r1337" (get-in (first results) [:identifier :entity-id])))))
 
 (deftest test-links-by-target
-  (let [results (db/links-by-target "schneider.gg" "W_link_35")]
+  (let [results (db/links-by-target "schneider.gg" "W_link_35" 1)]
     (is (= "link0r1337" (get-in (first results) [:identifier :entity-id])))))
