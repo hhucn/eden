@@ -83,7 +83,7 @@
   "Return all links with the corresponding target."
   [target-aggregator target-entity target-version]
   (unpack-elastic (elastic/search :links {:destination.aggregate-id target-aggregator
-                                          :destinaiton.entity-id target-entity
+                                          :destination.entity-id target-entity
                                           :destination.version target-version})))
 
 (defn random-statements
