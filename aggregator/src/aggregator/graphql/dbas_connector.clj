@@ -26,20 +26,25 @@
   []
   (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
     (map (fn [statement]
-           (let [default-statement {:content (get-in statement [:textversions :content])
-                                    :aggregate-id config/aggregate-name
-                                    :entity-id (:uid statement)
-                                    :version 1
-                                    :created nil ;; dbas won't play
-                                    :author (str "author#: "
-                                                 (get-in statement [:textversions :authorUid]))}
+           (let [default-statement {:content
+                                    {:content-string (get-in statement [:textversions :content])
+                                     :created nil ;; dbas won't play
+                                     :author (str "author#: "
+                                                  (get-in statement [:textversions :authorUid]))}
+                                    :identifier
+                                    {:aggregate-id config/aggregate-name
+                                     :entity-id (:uid statement)
+                                     :version 1}
+                                    :predecessor {}
+                                    :delete-flag false}
                  origin (get-statement-origin (:uid statement))]
              (if origin
-               (assoc default-statement
-                      :aggregate-id (:aggregate_id origin)
-                      :entity-id (:entity_id origin)
-                      :author (:author origin)
-                      :version (:version origin))
+               (assoc-in (assoc default-statement
+                                :identifier {:aggregate-id (:aggregate_id origin)
+                                             :entity-id (:entity_id origin)
+                                             :version (:version origin)})
+                         [:content :author]
+                         (:author origin))
                default-statement)))
          (:statements result))))
 
@@ -65,17 +70,20 @@
            (let [prepared-link 
                  {:author (str "author#: "
                                (:authorUid argument))
+                  :created nil ;; nil until we solve the graphql problem
                   :type link-type-val
-                  :from-aggregate-id config/aggregate-name
-                  :from-entity-id (:statementUid premise)
-                  :from-version 1
-                  :to-aggregate-id config/aggregate-name
-                  :aggregate-id config/aggregate-name
-                  :entity-id (:uid argument)
-                  :created nil}] ;; nil until we solve the graphql problem
+                  :source {:aggregate-id config/aggregate-name
+                           :entity-id (:statementUid premise)
+                           :version 1}
+                  :destination {:aggregate-id config/aggregate-name}
+                  :identifier {:aggregate-id config/aggregate-name
+                               :entity-id (:uid argument)
+                               :version 1}}]
              (if (not= link-type-val :undercut)
-               (assoc prepared-link :to-version 1 :to-entity-id (:conclusionUid argument))
-               (assoc prepared-link :to-entity-id (:argumentUid argument)))))
+               (assoc prepared-link :destination {:aggregate-id config/aggregate-name
+                                                  :version 1
+                                                  :entity-id (:conclusionUid argument)})
+               (assoc-in prepared-link [:destination :entity-id] (:argumentUid argument)))))
          (:premises premises))))
 
 
