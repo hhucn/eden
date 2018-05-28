@@ -7,12 +7,15 @@
 
 (defonce queue (first (last (s/exercise string?))))
 
-(def statement {:author "kangaroo"
-                :content "Schnapspralinen"
-                :aggregate-id "huepfer.verlag"
-                :entity-id "1"
-                :version 1
-                :created nil})
+(def statement {:content {:author "kangaroo"
+                          :content-string "Schnapspralinen"
+                          :created nil}
+                :identifier {
+                             :aggregate-id "huepfer.verlag"
+                             :entity-id "1"
+                             :version 1}
+                :predecessors {}
+                :delete-flag false})
 
 (def statements (map first (s/exercise ::gspecs/statement)))
 (def links (map first (s/exercise ::gspecs/link)))

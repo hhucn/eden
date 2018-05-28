@@ -44,20 +44,28 @@
 
 (defn- add
   "Add new content to the index."
-  [index type {:keys [aggregate-id entity-id] :as entity} msg]
+  [index type {:keys [identifier] :as entity} msg]
   (lib/return-ok msg
-                 (sp/request @conn {:url [index type (str aggregate-id "_" entity-id)]
+                 (sp/request @conn {:url [index type (str (:aggregate-id identifier)
+                                                          "_"
+                                                          (:entity-id identifier)
+                                                          "_"
+                                                          (:version identifier))]
                                     :method :put
                                     :body entity})))
 
 (defn- delete
   "Delete entity from ElasticSearch."
   ([index-name msg] (delete index-name  nil nil msg))
-  ([index-name type {:keys [aggregate-id entity-id]} msg]
+  ([index-name type {:keys [identifier]} msg]
    (let [deletion-path (vec (remove nil? (conj [(keyword index-name)]
                                                type)))
-         final-path (if (and aggregate-id entity-id)
-                      (vec (conj deletion-path (str aggregate-id "_" entity-id)))
+         final-path (if identifier
+                      (vec (conj deletion-path (str (:aggregate-id identifier)
+                                                    "_"
+                                                    (:entity-id identifier)
+                                                    "_"
+                                                    (:version identifier))))
                       deletion-path)]
      (try
        (lib/return-ok msg
@@ -164,7 +172,7 @@
   (if aggregate-id
     (search-request {:from 0
                      :size 10000
-                     :query {:bool {:must {:match {:aggregate-id aggregate-id}}}}} :statements)
+                     :query {:bool {:must {:match {:identifier.aggregate-id aggregate-id}}}}} :statements)
     (search-request {:from 0 :size 10000} (str "statements/"))))
 
 (defmethod search :all-links [_ aggregate-id]
@@ -174,7 +182,7 @@
   (if aggregate-id
     (search-request {:from 0
                      :size 10000
-                     :query {:bool {:must {:match {:aggregate-id aggregate-id}}}}} :links)
+                     :query {:bool {:must {:match {:identifier.aggregate-id aggregate-id}}}}} :links)
     (search-request {:from 0 :size 10000} (str "links/"))))
 
 (defmethod search :links [_ querymap]
@@ -187,10 +195,10 @@
 
 (defn entrypoint []
   (init-connection!)
-  (create-index "statements" {} {:statement {:properties {:aggregate-id {:type :keyword}
-                                                          :entity-id {:type :keyword}}}})
-  (create-index "links" {} {:link {:properties {:aggregate-id {:type :keyword}
-                                                :entity-id {:type :keyword}}}}))
+  (create-index "statements" {} {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
+                                                           :identifier.entity-id {:type :keyword}}}})
+  (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
+                                                :identifier.entity-id {:type :keyword}}}}))
 (entrypoint)
 
 
