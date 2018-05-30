@@ -11,7 +11,9 @@
 
 (def ^:private conn (atom nil))
 
-(def host (or (System/getenv "ELASTICSEARCH_URL") "http://search:9200"))
+(def host (if-let [host (System/getenv "ELASTICSEARCH_HOST")]
+            (str "http://" host ":9200")
+            "http://search:9200"))
 
 (defn- create-connection!
   "Read variables from environment and establish connection to the message

@@ -43,11 +43,11 @@
 (defn start-listeners
   "Start all important listeners."
   []
-  (pgl/connect {:host "dbas-db"
-                :port (read-string (System/getenv "DBAS_DB_PORT"))
-                :database "discussion"
-                :user (System/getenv "DBAS_DB_USER")
-                :password (System/getenv "DBAS_DB_PW")})
+  (pgl/connect {:host (System/getenv "DB_HOST")
+                :port (read-string (System/getenv "DB_PORT"))
+                :database (System/getenv "DB_NAME")
+                :user (System/getenv "DB_USER")
+                :password (System/getenv "DB_PW")})
   (doseq [[f event] [[handle-textversions "textversions_changes"]
                      [handle-statements "statements_changes"]
                      [handle-arguments "arguments_changes"]]]

@@ -30,9 +30,13 @@ services:
       - "BROKER_REMOTE=broker_set2"
       - "BROKER_USER=${BROKER_USER}"
       - "BROKER_PASS=${BROKER_PASS}"
-      - "DBAS_DB_USER=${DBAS_DB_USER}"
-      - "DBAS_DB_PW=${DBAS_DB_PW}"
-      - "DBAS_DB_PORT=${DBAS_DB_PORT}"
+      - "DB_USER=${DB_USER}"
+      - "DB_PW=${DB_PW}"
+      - "DB_PORT=${DB_PORT}"
+      - "DB_NAME=${DB_NAME}"
+      - "DBAS_HOST=dbas"
+      - "ELASTICSEARCH_HOST=search"
+      - "DB_HOST=dbas-db"
       - "AGGREGATOR_NAME=aggregator:8888"
 
   search:

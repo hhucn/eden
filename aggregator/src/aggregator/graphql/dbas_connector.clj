@@ -9,7 +9,9 @@
   [query]
   (->
    ;; This needs a dbas instance running under the name dbas in the same docker network.
-   (client/get "http://dbas:4284/api/v2/query"
+   (client/get (if-let [dbas-host (System/getenv "DBAS_HOST")]
+                 (str "http://" dbas-host ":4284/api/v2/query")
+                 "http://dbas:4284/api/v2/query")
                {:query-params
                 {"q" query}})
    :body
@@ -63,7 +65,7 @@
   [argument]
   (let [group-uid (:premisesgroupUid argument)
         premises (query-db (format
-                            "query {premises(premisesgroupUid: %d) {statementUid}}"
+                            "query {premises(premisegroupUid: %d) {statementUid}}"
                             group-uid))
         link-type-val (link-type argument)]
     (map (fn [premise]
@@ -89,7 +91,7 @@
 
 (defn get-links
   []
-  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, argumentUid, premisesgroupUid}}")
+  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, argumentUid, premisegroupUid}}")
         return-val (mapcat links-from-argument (:arguments result))]
     return-val))
 
