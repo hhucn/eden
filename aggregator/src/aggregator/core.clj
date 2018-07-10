@@ -3,6 +3,7 @@
             [aggregator.query.update :as update]
             [aggregator.graphql.dbas-connector :as dbas-conn]
             [aggregator.utils.pg-listener :as pg-listener]
+            [aggregator.config :as config]
             [taoensso.timbre :as log])
   (:gen-class))
 
@@ -20,9 +21,14 @@
   (doall (map update/update-link (read-string (slurp "/code/db/entrypoint/links.edn"))))
   (log/debug "Read all testdata"))
 
+(defn load-config
+  []
+  (swap! config/app-state assoc :known-aggregators config/whitelist))
+
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
+  (load-config)
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
