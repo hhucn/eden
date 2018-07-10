@@ -1,5 +1,12 @@
 (ns aggregator.config)
 
+;; ------------------------
+;; App State
+
+(def app-state (atom {}))
+
+;; ------------------------
+
 (def whitelist
   #{"aggregator:8888" "aggregator_set2:8888"})
 
