@@ -28,10 +28,10 @@
   [{:keys [source destination identifier] :as link}]
   (let [db-result (db/exact-link (:aggregate-id source) (:entity-id source) (:version source)
                                  (:aggregate-id destination) (:entity-id destination)
-                                 (:version destination))
-        named-aggregators #{(:aggregate-id identifier)
-                            (:aggregate-id destination) (:aggregate-id source)}]
-    (swap! config/app-state update-in [:known-aggregators] clojure.set/union named-aggregators)
+                                 (:version destination))]
+    (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id identifier))
+    (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id destination))
+    (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id source))
     (when-not db-result
       (log/debug (format "[UPDATE] Added new link to db: %s" link))
       (when (= (:aggregate-id identifier) config/aggregate-name)
