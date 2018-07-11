@@ -17,3 +17,11 @@
                           (reduce-kv (fn [acc k v] (assoc acc (hyphen->underscore k) v)) {} form)
                           form))]
     (walk/postwalk transform-map input)))
+
+(defn build-cache-pattern
+  "Returns the appropriate and current cache URI pattern from entity."
+  ([entity]
+   (let [id (:identifier entity)]
+     (str (:aggregate-id id) "/" (:entity-id id) "/" (:version id))))
+  ([aggregate-id entity-id version]
+   (str aggregate-id "/" entity-id "/" version)))

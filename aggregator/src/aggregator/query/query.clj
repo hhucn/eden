@@ -2,6 +2,7 @@
   (:require [aggregator.query.cache :as cache]
             [aggregator.query.db :as db]
             [aggregator.query.update :as up]
+            [aggregator.query.utils :as utils]
             [aggregator.broker.subscriber :as sub]
             [aggregator.config :as config]
             [clj-http.client :as client]
@@ -32,12 +33,12 @@
 (defn exact-statement
   "Return the exact statement from cache or db"
   [aggregate-id entity-id version]
-  (let [cached-statement (cache/retrieve (str aggregate-id "/" entity-id))]
+  (let [cached-statement (cache/retrieve (utils/build-cache-pattern aggregate-id entity-id version))]
     (if (and (not= cached-statement :missing)
-             (= (:version cached-statement) version))
+             (= (get-in cached-statement [:identifier :version]) version))
       cached-statement
       (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
-        (do (cache/cache-miss (str aggregate-id "/" entity-id) maybe-statement)
+        (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
             (log/debug "[query] Found exact statement in DB")
             maybe-statement)))))
 
@@ -80,7 +81,7 @@
 (defn remote-link
   "Retrieves a remote link from its aggregator"
   [aggregate entity-id]
-  (let [request-url (str "https://" aggregate "/link/" aggregate "/" entity-id)
+  (let [request-url (str config/protocol aggregate "/link/" aggregate "/" entity-id)
         result (get-payload request-url)]
     (up/update-link result)
     result))
