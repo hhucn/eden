@@ -1,8 +1,11 @@
 (ns aggregator.query.query-test
   (:require [aggregator.query.query :as query]
             [aggregator.query.db :as db]
+            [aggregator.query.update :as update]
+            [aggregator.query.cache :as cache]
             [aggregator.config :as config]
-            [clojure.test :refer [deftest is use-fixtures]]))
+            [clojure.test :refer [deftest is use-fixtures]]
+            [aggregator.query.utils :as utils]))
 
 (defn fixtures [f]
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
@@ -91,3 +94,15 @@
 (deftest local-tiered-retrieval
   (is (not= :not-found (query/tiered-retrieval "hhu.de/34" {:opts [:no-remote]})))
   (is (= :not-found (query/tiered-retrieval "foo.bar/nonexistent" {:opts [:no-remote]}))))
+
+
+(deftest test-cached-statements
+  (let [statement {:identifier {:aggregate-id "cache-aggregator" :entity-id "cache-id" :version 1}
+                   :content {:author "XxxBaeryerxxX"
+                             :content-string "there is a smaller park in O-Town"
+                             :created nil}
+                   :predecessors {}
+                   :delete-flag false}
+        id (:identifier statement)]
+    (cache/cache-miss (utils/build-cache-pattern statement) statement)
+    (is (= statement (query/exact-statement (:aggregate-id id) (:entity-id id) (:version id))))))

@@ -3,7 +3,6 @@
             [aggregator.query.cache :as cache]
             [aggregator.broker.publish :as pub]
             [aggregator.config :as config]
-            [clojure.set]
             [taoensso.timbre :as log]))
 
 (defn update-statement
