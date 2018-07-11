@@ -13,6 +13,8 @@
 (def aggregate-name
   (System/getenv "AGGREGATOR_NAME"))
 
+(def protocol
+  "http://")
 
 ;; -----------------------------------------------------------------------------
 ;; Broker-Configuration

@@ -12,8 +12,7 @@
   "Get data from a remote aggregator."
   [request-url]
   (try
-    (:data (:body (client/get request-url {:as :json
-                                           :insecure? :true})))
+    (:data (:body (client/get request-url {:as :json})))
     (catch Exception e
       {})))
 
@@ -59,7 +58,7 @@
   [uri]
   (let [split-uri (str/split uri #"/")
         aggregate (first split-uri)
-        request-url (str "https://" aggregate "/statements/" uri)
+        request-url (str config/protocol aggregate "/statements/" uri)
         result-data (get-data request-url)
         results (:payload result-data)]
     (subscribe-to-queue "statements" aggregate)
@@ -72,7 +71,7 @@
   [aggregate entity version]
   (if-let [local-statement (exact-statement aggregate entity version)]
     local-statement
-    (let [request-url (str "https://" aggregate "/statement/" aggregate "/" entity "/" version)
+    (let [request-url (str config/protocol aggregate "/statement/" aggregate "/" entity "/" version)
           result-data (get-data request-url)
           result (:payload result-data)]
       (up/update-statement result)
@@ -93,7 +92,7 @@
     possible-undercuts
     (let [aggregate (:aggregate-id link)
           entity-id (:entity-id link)
-          request-url (str "https://" aggregate "/link/undercuts/" aggregate "/" entity-id)
+          request-url (str config/protocol aggregate "/link/undercuts/" aggregate "/" entity-id)
           results (get-payload request-url)]
       (doseq [link results] (up/update-link link))
       results)))
@@ -106,7 +105,7 @@
     (let [aggregate (:aggregate-id statement)
           entity-id (:entity-id statement)
           version (:version statement)
-          request-url (str "https://" aggregate "/link/to/" aggregate "/" entity-id "/" version)
+          request-url (str config/protocol aggregate "/link/to/" aggregate "/" entity-id "/" version)
           results (get-payload request-url)]
       (doseq [link results] (up/update-link link))
       results)))
@@ -156,7 +155,7 @@
   ([]
    (doseq [host config/whitelist] (remote-starter-set host)))
   ([aggregator]
-   (let [results (get-payload (str "https://" aggregator "/statements/starter-set"))]
+   (let [results (get-payload (str config/protocol aggregator "/statements/starter-set"))]
      (when (and results (not= results "not-found"))
        (doseq [stmt results] (up/update-statement stmt))))))
 
@@ -172,7 +171,7 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-statements aggregator))))
   ([aggregator]
-   (let [results (get-payload (str "https://" aggregator "/statements"))]
+   (let [results (get-payload (str config/protocol aggregator "/statements"))]
      (when (not= results "not-found")
        (doseq [statement results]
          (up/update-statement statement))))))
@@ -189,7 +188,7 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-links aggregator))))
   ([aggregator]
-   (let [results (get-payload (str "https://" aggregator "/links"))]
+   (let [results (get-payload (str config/protocol aggregator "/links"))]
      (when (not= results "not-found")
        (doseq [link results]
          (up/update-link link))))))
