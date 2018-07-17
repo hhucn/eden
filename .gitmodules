@@ -1,3 +1,3 @@
 [submodule "dbas"]
 	path = dbas
-	url = ../../dbas/dbas.git
+	url = git@github.com:hhucn/dbas.git
