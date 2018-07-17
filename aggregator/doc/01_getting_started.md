@@ -1,4 +1,4 @@
-# EDEN
+# A1. Getting Started with EDEN
 
 This is a quick guide aimed at somebody who quickly wants to launch an EDEN instance.  
 The console commands shown here are designed to work on any Linux and Mac Shell.  
@@ -18,7 +18,7 @@ To download the whole package including D-BAS use:
 ```
 git clone --recursive git@github.com:hhucn/eden.git
 ```
-*(Check out the documentation if you already have a D-BAS instance and want to integrate it)*
+*(Check out "[Using your own D-BAS instance](02_using_own_dbas.html)" if you already have a D-BAS instance and want to integrate it)*
 
 
 ## Installation
@@ -54,18 +54,8 @@ You can use `docker ps` to see if the containers are running. The following imag
 * rabbitmq
 
 
-Should any of the containers not start properly, consult the troubleshooting guide at the documentation.
+Should any of the containers not start properly, consult the [troubleshooting-guide.](03_troubleshooting.html)
 
 ## Further Customization
 The automatically used D-BAS configuration starts a minimal running instance. It is functional, but additional features like mail delivery, authentication through OAuth, etc. are not working. 
 To activate them, customize the `dbas_development.env` by changing the placeholders in the corresponding places.
-
-
-## Testing
-You can run the tests by starting your EDEN instance with `docker-compose up`. While the containers are running execute 
-```
-docker exec aggregator_aggregator_1 lein cloverage
-```
-
-## Documentation
-TBD

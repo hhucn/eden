@@ -34,7 +34,10 @@
     (catch Exception e
       payload)))
 
-(defn uuid [] (java.util.UUID/randomUUID))
+(defn uuid
+  "Returns a random UUID.
+  Wrapper around java.util.UUID/randomUUID."
+  [] (java.util.UUID/randomUUID))
 
 (defn- return-map
   "Construct map containing information for the caller."

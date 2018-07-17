@@ -72,6 +72,7 @@ services:
 #      - "DBAS_AUTHN_SECRET=${DBAS_AUTHN_SECRET}"
     volumes:
       - ./dbas:/dbas
+      - ./dbas_development.env:/dbas/development.env
 
   dbas-db:
     build: dbas/docker/db/

@@ -2,13 +2,12 @@
   (:require [clj-http.client :as client]
             [clojure.data.json :as  json]
             [clojure.walk :refer [keywordize-keys]]
-            [aggregator.config :as config]
-            [taoensso.timbre :as log]))
+            [aggregator.config :as config]))
 
-(defn query-db
+(defn- query-db
   [query]
   (->
-   ;; This needs a dbas instance running under the name dbas in the same docker network.
+   ;; This needs a dbas instance running under the name specified in DBAS_HOST in the same network.
    (client/get (if-let [dbas-host (System/getenv "DBAS_HOST")]
                  (str "http://" dbas-host ":4284/api/v2/query")
                  "http://dbas:4284/api/v2/query")
@@ -20,11 +19,13 @@
    ))
 
 (defn get-statement-origin
+  "Return a certain statement-origin from D-BAS. This is needed from arguments which are not native to the queried D-BAS instance."
   [statement-uid]
   (let [result (query-db (format "query {statementOrigin(statementUid: %s) {entityId, aggregateId, author, version}}" statement-uid))]
     (:statementOrigin result)))
 
 (defn get-statements
+  "Return all statements from the D-BAS instance. The result is already in the EDEN-conform format."
   []
   (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
     (map (fn [statement]
@@ -51,6 +52,8 @@
          (:statements result))))
 
 (defn link-type
+  "Takes an `argument` (link) and returns the type of the link as a keyword.
+  (One of `:support`, `:attack`, `:undercut`)"
   [argument]
   (let [supportive? (get-in argument [:argument :isSupportive])
         conclusion-id (get-in argument [:argument :conclusionUid])]
@@ -61,7 +64,8 @@
         :undercut))))
 
 (defn links-from-argument
-  "Use the strange structure of DBAS-arguments to create links. Needs a connection to the local dbas instance."
+  "Use the strange structure of D-BAS-arguments to create links. Needs a connection to the local dbas instance.
+  Returned links in EDEN format."
   [argument]
   (let [group-uid (:premisesgroupUid argument)
         premises (query-db (format
@@ -90,6 +94,7 @@
 
 
 (defn get-links
+  "Return a map of all links that can be requested from the connected D-BAS instance."
   []
   (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, argumentUid, premisegroupUid}}")
         return-val (mapcat links-from-argument (:arguments result))]

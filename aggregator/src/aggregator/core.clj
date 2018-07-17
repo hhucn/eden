@@ -4,6 +4,7 @@
             [aggregator.graphql.dbas-connector :as dbas-conn]
             [aggregator.utils.pg-listener :as pg-listener]
             [aggregator.config :as config]
+            [aggregator.search.core :as search]
             [taoensso.timbre :as log])
   (:gen-class))
 
@@ -22,6 +23,8 @@
   (log/debug "Read all testdata"))
 
 (defn load-config
+  "Load variables from the config and use them correctly,
+  by e.g. writing appropriate derivatives into the app-state or similar."
   []
   (swap! config/app-state assoc :known-aggregators config/whitelist))
 
@@ -29,6 +32,7 @@
   "Bootstrap everything needed for the provider."
   [& args]
   (load-config)
+  (search/entrypoint)
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)

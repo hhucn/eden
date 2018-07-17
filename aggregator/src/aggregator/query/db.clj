@@ -1,9 +1,12 @@
 (ns aggregator.query.db
+  "This module is an API which wraps elastic as a database to be used in EDEN."
   (:require [clojure.string :as str]
             [aggregator.config :as config]
             [aggregator.search.core :as elastic]))
 
 (defn part-uri
+  "A helper function which splits an URI at `/`.
+  Returns a tuple with the first and second part."
   [uri]
   (let [split-uri (str/split uri #"/")]
     [(first split-uri) (second split-uri)]))
@@ -47,10 +50,12 @@
                                                       :identifier.version version}))))
 
 (defn all-statements
+  "Returns all statements currently saved in the elasticsearch database."
   []
   (unpack-elastic (elastic/search :all-statements config/aggregate-name)))
 
 (defn all-links
+  "Returns all links currently saved in the elasticsearch database."
   []
   (unpack-elastic (elastic/search :all-links config/aggregate-name)))
 
