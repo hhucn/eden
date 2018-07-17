@@ -157,4 +157,4 @@ deploy_docs:
     - git remote add origin https://wegi:$GITHUB_TOKEN@github.com/hhucn/eden-docs.git
     - git push -u origin master:gh-pages
   only:
-    - master
+    - master 
