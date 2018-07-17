@@ -35,6 +35,7 @@
 (def link (first (last (s/exercise ::gspecs/link))))
 
 (defn fixtures [f]
+  (search/entrypoint)
   (search/add-statement kangaroo)
   (search/add-statement penguin)
   (search/add-statement penguin2)

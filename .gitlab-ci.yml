@@ -79,6 +79,7 @@ test:
     - docker run -d --name db_$CI_JOB_ID --net=dbas_$CI_JOB_ID $CI_REGISTRY/cn-tsn/project/dbas/dbas/db:development
     - sleep 10  # init dbas' database
     - docker run -d --name web_$CI_JOB_ID --net=dbas_$CI_JOB_ID -e DB_PW=DXxCNtfnt!MOo!f8LY1!P%sw3KGzt@s! -e DB_NAME=discussion -e DB_USER=postgres -e DB_PORT=5432 -e DB_HOST=db_$CI_JOB_ID -e AUTHN_SECRET=89#s3cr3t_15 $CI_REGISTRY/cn-tsn/project/dbas/dbas:development
+    - sleep 20 # give the web instance time to start
     - docker run -d --name search_$CI_JOB_ID --net=dbas_$CI_JOB_ID $CI_REGISTRY_IMAGE/search:testing
 
   script:
@@ -91,3 +92,69 @@ test:
     - docker kill db_$CI_JOB_ID web_$CI_JOB_ID broker_$CI_JOB_ID search_$CI_JOB_ID aggregator_$CI_JOB_ID|| true
     - docker network rm dbas_$CI_JOB_ID || true
 
+################################
+# Deploy Images
+################################
+
+build_dev_images:
+  image: docker
+  stage: build
+  tags:
+    - 40c
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    # Build aggregator
+    - docker build -t $CI_REGISTRY_IMAGE --pull aggregator
+    - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE:develop
+    - docker push $CI_REGISTRY_IMAGE:develop
+    # Build database
+    - docker build -t $CI_REGISTRY_IMAGE/dbas-db --pull dbas/docker/db/
+    - docker tag $CI_REGISTRY_IMAGE/dbas-db $CI_REGISTRY_IMAGE/dbas-db:develop 
+    - docker push $CI_REGISTRY_IMAGE/dbas-db:develop 
+    # Build elasticsearch
+    - docker build -t $CI_REGISTRY_IMAGE/search --pull elasticsearch/
+    - docker tag $CI_REGISTRY_IMAGE/search $CI_REGISTRY_IMAGE/search:develop 
+    - docker push $CI_REGISTRY_IMAGE/search:develop 
+  only:
+    - develop
+
+build_master_images:
+  image: docker
+  stage: build
+  tags:
+    - 40c
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    # Build aggregator
+    - docker build -t $CI_REGISTRY_IMAGE --pull aggregator
+    - docker tag $CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE
+    - docker push $CI_REGISTRY_IMAGE
+    # Build database
+    - docker build -t $CI_REGISTRY_IMAGE/dbas-db --pull dbas/docker/db/
+    - docker tag $CI_REGISTRY_IMAGE/dbas-db $CI_REGISTRY_IMAGE/dbas-db
+    - docker push $CI_REGISTRY_IMAGE/dbas-db
+    # Build elasticsearch
+    - docker build -t $CI_REGISTRY_IMAGE/search --pull elasticsearch/
+    - docker tag $CI_REGISTRY_IMAGE/search $CI_REGISTRY_IMAGE/search
+    - docker push $CI_REGISTRY_IMAGE/search
+  only:
+    - master
+
+
+deploy_docs:
+  image: $CI_REGISTRY_IMAGE
+  stage: deploy
+  script:
+    - cd /code
+    - lein codox
+    - cd /code/target/default/doc
+    - apk add git
+    - git config --global user.email "alexander@schneider.gg"
+    - git config --global user.name "GITLAB-CI"
+    - git init
+    - git add .
+    - git commit -m "$CI_COMMIT_MESSAGE"
+    - git remote add origin https://wegi:$GITHUB_TOKEN@github.com/hhucn/eden-docs.git
+    - git push -u origin master:gh-pages
+  only:
+    - master

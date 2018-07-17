@@ -1,9 +1,11 @@
 (ns aggregator.query.db-test
   (:require [aggregator.query.db :as db]
             [aggregator.config :as config]
+            [aggregator.search.core :as search]
             [clojure.test :refer [deftest is use-fixtures]]))
 
 (defn fixtures [f]
+  (search/entrypoint)
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
                         :content {:author "Jorge"
                                   :content-string "money does not solve problems of our society"

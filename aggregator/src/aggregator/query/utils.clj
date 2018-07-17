@@ -4,12 +4,14 @@
             [clojure.string :as str]))
 
 (defn http-response->map
+  "Takes a ring http response in json and converts a clojure map of the body."
   [response]
   (-> response
       :body
       (json/read-str :key-fn keyword)))
 
 (defn underscore-keys
+  "Takes a map produced by e.g. D-BAS data and converts keywords like `:aggregate_id` to `:aggregate-id`"
   [input]
   (let [hyphen->underscore #(-> % str (str/replace "-" "_") (subs 1) keyword)
         transform-map (fn [form]

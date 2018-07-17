@@ -195,13 +195,14 @@
 ;; -----------------------------------------------------------------------------
 ;; Entrypoint
 
-(defn entrypoint []
+(defn entrypoint
+  "Initializes the connection to the elasticsearch instance and creates indices properly. Should be executed at the start of the instance and before tests using elasticsearch."
+  []
   (init-connection!)
   (create-index "statements" {} {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
                                                            :identifier.entity-id {:type :keyword}}}})
   (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
                                                 :identifier.entity-id {:type :keyword}}}}))
-(entrypoint)
 
 
 ;; -----------------------------------------------------------------------------

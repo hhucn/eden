@@ -8,6 +8,7 @@
             [taoensso.timbre :as log]))
 
 (defroutes app-routes
+  "The routes of the aggregator defined are RESTful and can be used to inquire for entities. Singular worded routes like `statement/` always require a specificity in the route following. Plural forms like `statements/` usualy return multiple things when not specified further."
   (GET "/" []
        (response {:status :ok
                   :data {:payload "Its definitely the horsesized chicken."}}))
