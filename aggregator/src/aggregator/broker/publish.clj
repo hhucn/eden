@@ -5,9 +5,7 @@
             [aggregator.broker.connector :as connector]
             [aggregator.utils.common :as lib]
             [aggregator.broker.config :as bconf]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (defn- publish
   "Create queue for entity and publish it on this queue."
@@ -16,23 +14,23 @@
     (try
       (lb/publish ch bconf/exchange routing-key (json/write-str payload)
                   {:content-type "application/json" :type (name entity-type)})
-      (catch Throwable t
-        (.printStackTrace t))
-      (finally
-        (connector/close-channel ch)))))
+      (catch Throwable t (.printStackTrace t))
+      (finally (connector/close-channel ch)))))
 
 (defn publish-statement
   "Put a statement to the correct queue. Statement must conform spec to be
   published."
   [statement]
   (when (lib/valid? ::gspecs/statement statement)
-    (publish statement bconf/default-route :statement)))
+    (publish statement "statements" :statement)
+    (lib/return-ok "Statement published")))
 
 (defn publish-link
   "Put a link to the correct queues. Link must conform spec to be published."
   [link]
   (when (lib/valid? ::gspecs/link link)
-    (publish link bconf/default-route :link)))
+    (publish link "links" :link)
+    (lib/return-ok "Link published.")))
 
 
 ;; -----------------------------------------------------------------------------

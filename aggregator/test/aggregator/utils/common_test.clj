@@ -3,9 +3,7 @@
             [clojure.spec.alpha :as s]
             [clojure.data.json :as json]
             [aggregator.utils.common :as lib]
-            [aggregator.specs]))
-
-(alias 'gspecs 'aggregator.specs)
+            [aggregator.specs :as gspecs]))
 
 (def statement (second (last (s/exercise ::gspecs/statement))))
 
@@ -13,8 +11,7 @@
   (are [x y] (= x y)
     true (lib/valid? string? "")
     false (lib/valid? string? :foo)
-    false (lib/valid? string? nil)
-    true (lib/valid? ::gspecs/statement statement)))
+    false (lib/valid? string? nil)))
 
 (deftest json->edn
   (are [x y] (= x y)
@@ -25,3 +22,13 @@
 
 (deftest uuid
   (is (s/valid? uuid? (lib/uuid))))
+
+(deftest return-error
+  (are [x y] (= x y)
+    [:status :message] (keys (lib/return-error "Message"))
+    {:status :error :message "Message" :data {:foo :bar}} (lib/return-error "Message" {:foo :bar})))
+
+(deftest return-ok
+  (are [x y] (= x y)
+    [:status :message] (keys (lib/return-ok "Message"))
+    {:status :ok :message "Message" :data {:foo :bar}} (lib/return-ok "Message" {:foo :bar})))

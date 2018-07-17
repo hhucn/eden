@@ -1,6 +1,6 @@
 (ns aggregator.query.cache-test
   (:require [aggregator.query.cache :as cache]
-            [clojure.test :refer :all]))
+            [clojure.test :refer [deftest is]]))
 
 (deftest deliver-missing
   (is (= (cache/retrieve "whatever_nonexistentsaklfhjjklshfSUDIOAH")

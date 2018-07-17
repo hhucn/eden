@@ -4,34 +4,31 @@
 (s/def ::no-slash (s/and string? #(not (re-find #"/" %)) #(pos? (count %))))
 
 (s/def ::author string?)
-(s/def ::content string?)
+(s/def ::content-string string?)
+(s/def ::created (s/or :nil nil? :timestamp string?)) ;; timestamp
+(s/def ::content
+  (s/keys :req-un [::content-string ::created ::author]))
+
 (s/def ::aggregate-id ::no-slash)
 (s/def ::entity-id ::no-slash)
 (s/def ::version pos-int?)
-(s/def ::created any?) ;; timestamp
-(s/def ::ancestor-aggregate-id ::no-slash)
-(s/def ::ancestor-entity-id ::no-slash)
-(s/def ::ancestor-version ::version)
+(s/def ::identifier
+  (s/keys :req-un [::aggregate-id ::entity-id ::version]))
+
+(s/def ::predecessors (s/coll-of ::identifier))
+(s/def ::delete-flag boolean?)
 (s/def ::statement
-  (s/keys :req-un [::author ::content
-                   ::aggregate-id ::entity-id ::version
-                   ::created]
-          :opt-un [::ancestor-aggregate-id ::ancestor-entity-id ::ancestor-version]))
+  (s/keys :req-un [::content
+                   ::identifier ::predecessors
+                   ::delete-flag]))
 ;; (s/exercise ::statement)
 
-
-(s/def ::from-aggregate-id ::no-slash)
-(s/def ::from-entity-id ::no-slash)
-(s/def ::from-version ::version)
 (s/def ::type keyword?)
-(s/def ::to-aggregate-id ::no-slash)
-(s/def ::to-entity-id ::no-slash)
-(s/def ::to-version ::version)
+(s/def ::source ::identifier)
+(s/def ::destination ::identifier)
 (s/def ::link
-  (s/keys :req-un [::author ::type
-                   ::from-aggregate-id ::from-entity-id ::from-version
-                   ::to-aggregate-id ::to-entity-id
-                   ::aggregate-id ::entity-id
-                   ::created]
-          :opt-un [::to-version]))
+  (s/keys :req-un [::type
+                   ::source ::destination
+                   ::identifier ::delete-flag]
+          :opt-un [::created ::author]))
 ;; (s/exercise ::link)

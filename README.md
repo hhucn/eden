@@ -1,52 +1,71 @@
-# Aggregator
+# EDEN
+
+This is a quick guide aimed at somebody who quickly wants to launch an EDEN instance.  
+The console commands shown here are designed to work on any Linux and Mac Shell.  
+Although we did not test it it should by now also work on most modern Windows systems.  
+
+## Downloading and Setup
+
+You can find the source-code of EDEN at [github](https://github.com/hhucn/eden/tree/master).
 
 
-## Setup
-
-As usual, you only need one command:
-
-    docker-compose up --build
+**Prerequisites**
+We provide EDEN inside multiple Docker containers. Please install `docker` and `docker-compose` 
+on your System to properly run EDEN.
 
 
-## Services
+To download the whole package including D-BAS use: 
+```
+git clone --recursive git@github.com:hhucn/eden.git
+```
+*(Check out the documentation if you already have a D-BAS instance and want to integrate it)*
 
-### broker -- RabbitMQ
 
-Currently we are using RabbitMQ. Starting the container exposes some ports where
-you can access the message broker. But this is only for debugging purposes,
-since you can directly connect to RabbitMQ when you are inside a container.
+## Installation
+Switch to the EDEN folder you just cloned with
+```
+cd eden
+```
 
-After you started the containers, you can access the management console at
-http://localhost:15672/ with the user `groot` and the password `iamgroot`. This
-user can be configured in the [.env](.env)-file.
+Build the containers by executing:
+```
+docker-compose build
+```
 
-### aggregator
+## Running EDEN
+Once the containers are build you can start EDEN by executing
+```
+docker-compose up
+```
 
-Clojure application containing the code to publish a new statement via the
-message broker.
+You should now see a lot of debug information in your console which is normal.  
+Wait until all services are started, which may take a minute or two.  
+You should now be able to open `http://localhost:4284` in your browser to see a fresh D-BAS instance.
 
-Exposes the port 7777 of the REPL so you can directly connect to the REPL in the
-container.
+You can use `docker ps` to see if the containers are running. The following images should be up:
 
-### query
 
-The core module of the repository, which coordinates the flow of information. All
-internal and external calls for arguments and other information flow trough this
-module which coordinates the cache usage and retrieves the information if needed.
-Retrieval works as a tiered process:
-1. Cache
-2. Local DB
-3. External Queries and Search
+* aggregator_aggregator
+* aggregator_dbas
+* aggregator_dbas-db
+* aggregator_search
+* hhucn/dbas-notifications
+* docker.elastic.co/kibana/kibana
+* rabbitmq
 
-The query also uses the pub/sub system to trigger publishes of new information and
-subscriptions to updates to aquired information from external sources.
 
-Dev-Status: 90%
+Should any of the containers not start properly, consult the troubleshooting guide at the documentation.
+
+## Further Customization
+The automatically used D-BAS configuration starts a minimal running instance. It is functional, but additional features like mail delivery, authentication through OAuth, etc. are not working. 
+To activate them, customize the `dbas_development.env` by changing the placeholders in the corresponding places.
 
 
 ## Testing
+You can run the tests by starting your EDEN instance with `docker-compose up`. While the containers are running execute 
+```
+docker exec aggregator_aggregator_1 lein cloverage
+```
 
-### subscriber
-
-Clojure test-application which acts as a consumer for RabbitMQ. You can read the
-messages from a specified queue via this service. Just for testing purposes.
+## Documentation
+TBD

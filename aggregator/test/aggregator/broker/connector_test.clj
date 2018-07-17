@@ -15,15 +15,29 @@
 ;; Tests
 
 (deftest open-channel-test
-  (is true (connector/open-channel)))
+  (is (not (nil? (connector/open-channel)))))
 
 (deftest close-channel-test
-  (is true (-> (connector/open-channel) connector/close-channel)))
+  (is (= :ok (:status (-> (connector/open-channel) connector/close-channel)))))
 
 (deftest create-queue-test
-  (is true (connector/create-queue "i.am.groot")))
+  (is (= :ok (:status (connector/create-queue "i.am.groot")))))
 
 (deftest delete-queue-test
   (let [queue (str (lib/uuid))]
-    (connector/create-queue queue)
-    (is true (connector/delete-queue queue))))
+    (is (= :ok (:status (connector/create-queue queue))))
+    (is (= :ok (:status (connector/delete-queue queue))))))
+
+(deftest queue-exists?
+  (let [queue (str (lib/uuid))]
+    (is (= :ok (:status (connector/create-queue queue))))
+    (is (connector/queue-exists? queue))
+    (is (= :ok (:status (connector/delete-queue queue))))
+    (is (not (connector/queue-exists? queue)))))
+
+(deftest connected?
+  (connector/init-connection!)
+  (is (connector/connected?))
+  (connector/close-connection!)
+  (is (not (connector/connected?)))
+  (connector/init-connection!))
