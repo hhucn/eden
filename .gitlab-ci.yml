@@ -155,6 +155,6 @@ deploy_docs:
     - git add .
     - git commit -m "$CI_COMMIT_MESSAGE"
     - git remote add origin https://wegi:$GITHUB_TOKEN@github.com/hhucn/eden-docs.git
-    - git push -u origin master:gh-pages
+    - git push -u origin master:gh-pages --force 
   only:
     - master 
