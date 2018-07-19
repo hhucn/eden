@@ -57,9 +57,9 @@
 
 
 (s/def ::statements (s/coll-of ::eden-specs/statement))
-(s/def ::payload-map (s/keys :req-un [::statements]))
-(s/explain ::payload-map {:statements (query/all-local-statements)})
-(def spec-routes
+(s/def ::statements-map (s/or(s/keys :req-un [::statements])))
+
+(def statement-routes
   (context "/statements" []
            :tags ["statements"]
            :coercion :spec
@@ -67,17 +67,32 @@
            (GET "/" []
                 :summary "Returns all statements"
                 :query-params []
-                :return ::payload-map
-                (ok {:statements (query/all-local-statements)}))))
+                :return ::statements-map
+                (ok {:statements (query/all-local-statements)}))
+
+           (GET "/starter-set" []
+                :summary "Returns up to 10 statements chosen by the Aggregator"
+                :query-params []
+                :return ::statements-map
+                (ok {:statements (query/starter-set)}))
+
+           (GET "/by-id" []
+                :summary "Returns all statements matching aggregator and entity-id"
+                :query-params [aggregate-id :- ::eden-specs/aggregate-id,
+                               entity-id :- ::eden-specs/entity-id]
+                :return ::statements-map
+                (ok {:statements (query/tiered-retrieval aggregate-id entity-id
+                                                         {:opts [:no-remote]})}))))
 
 (def app
-  (api {:swagger
+  (api {:coercion :spec
+        :swagger
         {:ui "/swagger"
          :spec "/swagger.json"
          :data {:info {:title "EDEN Aggregator API"
                        :description "An API to request statements and links from the EDEN instance."}
                 :tags [{:name "statements" :description "Retrieve Statements"}]}}}
-       spec-routes
+       statement-routes
        #_(-> spec-routes
            (wrap-json-body {:keywords? true
                             :bigdecimals? true})

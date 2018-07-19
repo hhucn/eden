@@ -11,16 +11,14 @@
 
 (defn get-data
   "Get data from a remote aggregator."
-  [request-url]
-  (try
-    (:data (:body (client/get request-url {:as :json})))
-    (catch Exception e
-      {})))
-
-(defn get-payload
-  "Helper to get the payload from a remote query."
-  [request-url]
-  (:payload (get-data request-url)))
+  ([request-url]
+   (get-data request-url {}))
+  ([request-url query-params]
+   (try
+     (:body (client/get request-url {:as :json
+                                     :query-params query-params}))
+     (catch Exception e
+       {}))))
 
 (defn- subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
@@ -56,16 +54,17 @@
 
 (defn retrieve-remote
   "Try to retrieve a statement from a remote aggregator. The host part is treated as the webhost."
-  [uri]
-  (let [split-uri (str/split uri #"/")
-        aggregate (first split-uri)
-        request-url (str config/protocol aggregate "/statements/" uri)
-        result-data (get-data request-url)
-        results (:payload result-data)]
-    (subscribe-to-queue "statements" aggregate)
-    (subscribe-to-queue "links" aggregate)
-    (doseq [statement results] (up/update-statement statement))
-    results))
+  ([uri]
+   (let [split-uri (str/split uri #"/")]
+     (retrieve-remote (first split-uri) (second split-uri))))
+  ([aggregate-id entity-id]
+   (let [request-url (str config/protocol aggregate-id "/statements/by-id")
+         result-data (:statements (get-data request-url {"aggregate-id" aggregate-id
+                                                         "entity-id" entity-id}))]
+     (subscribe-to-queue "statements" aggregate-id)
+     (subscribe-to-queue "links" aggregate-id)
+     (doseq [statement result-data] (up/update-statement statement))
+     result-data)))
 
 (defn retrieve-exact-statement
   "Retrieves an exact statement from cache / db / a remote aggregator."
@@ -74,7 +73,7 @@
     local-statement
     (let [request-url (str config/protocol aggregate "/statement/" aggregate "/" entity "/" version)
           result-data (get-data request-url)
-          result (:payload result-data)]
+          result (:statements result-data)]
       (up/update-statement result)
       result)))
 
@@ -125,10 +124,11 @@
 
 (defn tiered-retrieval
   "Check whether the Cache contains the desired entity. If not delegate to DB and remote acquisition."
-  ([uri]
-   (tiered-retrieval uri {}))
-  ([uri options]
-   (let [cached-entity (cache/retrieve uri)]
+  ([aggregate-id entity-id]
+   (tiered-retrieval aggregate-id entity-id {}))
+  ([aggregate-id entity-id options]
+   (let [uri (str aggregate-id "/" entity-id)
+         cached-entity (cache/retrieve uri)]
      (if (= cached-entity :missing)
        (check-db uri options)
        cached-entity))))
@@ -147,7 +147,7 @@
 
 
 (defn starter-set
-  "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or databse."
+  "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or database."
   []
   (db/random-statements 10))
 
@@ -156,7 +156,7 @@
   ([]
    (doseq [host config/whitelist] (remote-starter-set host)))
   ([aggregator]
-   (let [results (get-payload (str config/protocol aggregator "/statements/starter-set"))]
+   (let [results (:statements (get-data (str config/protocol aggregator "/statements/starter-set")))]
      (when (and results (not= results "not-found"))
        (doseq [stmt results] (up/update-statement stmt))))))
 
@@ -172,7 +172,7 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-statements aggregator))))
   ([aggregator]
-   (let [results (get-payload (str config/protocol aggregator "/statements"))]
+   (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
      (when (not= results "not-found")
        (doseq [statement results]
          (up/update-statement statement))))))

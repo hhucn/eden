@@ -92,8 +92,8 @@
   (is (= :not-found (query/retrieve-link "foo.bar/nonexistent"))))
 
 (deftest local-tiered-retrieval
-  (is (not= :not-found (query/tiered-retrieval "hhu.de/34" {:opts [:no-remote]})))
-  (is (= :not-found (query/tiered-retrieval "foo.bar/nonexistent" {:opts [:no-remote]}))))
+  (is (not= :not-found (query/tiered-retrieval "hhu.de" "34" {:opts [:no-remote]})))
+  (is (= :not-found (query/tiered-retrieval "foo.bar" "nonexistent" {:opts [:no-remote]}))))
 
 
 (deftest test-cached-statements
