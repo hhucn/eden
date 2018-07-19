@@ -4,14 +4,12 @@ This section lists the most common pitfalls. If this does not help you, please o
 
 ## D-BAS / Web container not found / could not be started
 Sometimes, when the container is started for the first time after the build stage, the `dbas` distribution can not be found by python.  
-This error can be solved by executing the following command, while the `aggregator_dbas` container is running:
-```
-docker exec aggregator_dbas_1 ./build_assets.sh
-```
+This error can be solved by first finding out the name of the `dbas` service.
+Use `docker ps` to find the service with the name of `<xxx>_dbas_1`.
 
-If the container is not running you can try to start the container on its own for the purpose of running the command:
+Then execute the following command, while the `<xxx>_dbas_1` container is running:
 ```
-docker run aggregator_dbas ./build_assets.sh
+docker exec <xxx>_dbas_1 ./build_assets.sh
 ```
 
 ## Could not bind port XXXX
