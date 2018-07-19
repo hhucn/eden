@@ -1,13 +1,18 @@
 (ns aggregator.api.routes
   "Define and expose the routes for the REST API in this file."
-  (:require [compojure.core :refer [GET POST defroutes]]
+  (:require [compojure.core :refer [POST defroutes]]
+            [compojure.api.sweet :refer [GET api context resource]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
             [ring.util.response :refer [response]]
             [aggregator.query.query :as query]
+            [spec-tools.spec :as spec]
+            [clojure.spec.alpha :as s]
+            [aggregator.specs :as eden-specs]
+            [ring.util.http-response :refer [ok]]
             [taoensso.timbre :as log]))
 
-(defroutes app-routes
+#_(defroutes app-routes
   "The routes of the aggregator defined are RESTful and can be used to inquire for entities. Singular worded routes like `statement/` always require a specificity in the route following. Plural forms like `statements/` usualy return multiple things when not specified further."
   (GET "/" []
        (response {:status :ok
@@ -50,13 +55,35 @@
                                                          (:entity params)
                                                          (read-string (:version params)))}})))
 
+
+(s/def ::statements (s/coll-of ::eden-specs/statement))
+(s/def ::payload-map (s/keys :req-un [::statements]))
+(s/explain ::payload-map {:statements (query/all-local-statements)})
+(def spec-routes
+  (context "/statements" []
+           :tags ["statements"]
+           :coercion :spec
+
+           (GET "/" []
+                :summary "Returns all statements"
+                :query-params []
+                :return ::payload-map
+                (ok {:statements (query/all-local-statements)}))))
+
 (def app
-  (-> app-routes
-      (wrap-json-body {:keywords? true
-                       :bigdecimals? true})
-      wrap-keyword-params
-      wrap-json-params
-      wrap-json-response))
+  (api {:swagger
+        {:ui "/swagger"
+         :spec "/swagger.json"
+         :data {:info {:title "EDEN Aggregator API"
+                       :description "An API to request statements and links from the EDEN instance."}
+                :tags [{:name "statements" :description "Retrieve Statements"}]}}}
+       spec-routes
+       #_(-> spec-routes
+           (wrap-json-body {:keywords? true
+                            :bigdecimals? true})
+           wrap-keyword-params
+           wrap-json-params
+           wrap-json-response)))
 
 (comment
   (use 'ring.adapter.jetty)

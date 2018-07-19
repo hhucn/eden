@@ -18,7 +18,9 @@
                  [ring/ring-mock "0.3.2"]
                  [ring/ring-jetty-adapter "1.6.3"]
                  [clj-http "3.7.0"]
-                 [codox-theme-rdash "0.1.2"]]
+                 [codox-theme-rdash "0.1.2"]
+                 [metosin/compojure-api "2.0.0-alpha19"]
+                 [metosin/spec-tools "0.6.1"]]
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [nightlight "2.1.1"]]
