@@ -15,23 +15,6 @@
 
 #_(defroutes app-routes
   "The routes of the aggregator defined are RESTful and can be used to inquire for entities. Singular worded routes like `statement/` always require a specificity in the route following. Plural forms like `statements/` usualy return multiple things when not specified further."
-  (GET "/" []
-       (response {:status :ok
-                  :data {:payload "Its definitely the horsesized chicken."}}))
-  (GET "/statements" _request
-       (response {:status :ok
-                  :data {:payload (query/all-local-statements)}}))
-  (GET "/statements/starter-set" _request
-       (response {:status :ok
-                  :data {:payload (query/starter-set)}}))
-  ;; The Order of those GET Requests is important!
-  ;; The other way around starter-set will be interpreted as an entity.
-  (GET "/statements/:entity{.+}" {:keys [params]}
-       (log/debug "[REST] Someone just retrieved statements")
-       (response {:status :ok
-                  :data {:payload (query/tiered-retrieval
-                                   (str (:entity params))
-                                   {:opts [:no-remote]})}}))
   (GET "/links" _request
        (response {:status :ok
                   :data {:payload (query/all-local-links)}}))
@@ -60,8 +43,10 @@
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
+(s/def ::links (s/coll-of ::eden-specs/link))
+(s/def ::links-map (s/keys :req-un [::links]))
 
-(def statement-routes
+(def statements-routes
   (context "/statements" []
            :tags ["statements"]
            :coercion :spec
@@ -86,6 +71,17 @@
                 (ok {:statements (query/tiered-retrieval aggregate-id entity-id
                                                          {:opts [:no-remote]})}))))
 
+(def links-routes
+  (context "/links" []
+    :tags ["links"]
+    :coercion :spec
+
+    (GET "/" []
+      :summary "Returns all links"
+      :query-params []
+      :return ::links-map
+      (ok {:links (query/all-local-links)}))))
+
 (def app
   (api {:coercion :spec
         :swagger
@@ -93,21 +89,20 @@
          :spec "/swagger.json"
          :data {:info {:title "EDEN Aggregator API"
                        :description "An API to request statements and links from the EDEN instance."}
-                :tags [{:name "statements" :description "Retrieve Statements"}]}}}
-       statement-routes
+                :tags [{:name "statements" :description "Retrieve Statements"}
+                       {:name "links" :description "Retrieve Links"}]}}}
+
+       statements-routes
+       links-routes
+
        (GET "/" []
          :summary "Test whether the api is online"
          :query-params []
          :return ::welcome-message
          (ok "Hello!"))
+
        (undocumented
-        (compojure.route/not-found (not-found {:not "found"})))
-       #_(-> spec-routes
-           (wrap-json-body {:keywords? true
-                            :bigdecimals? true})
-           wrap-keyword-params
-           wrap-json-params
-           wrap-json-response)))
+        (compojure.route/not-found (not-found {:not "found"})))))
 
 (comment
   (use 'ring.adapter.jetty)
