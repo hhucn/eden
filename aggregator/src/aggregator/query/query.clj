@@ -81,7 +81,7 @@
   "Retrieves a remote link from its aggregator"
   [aggregate entity-id]
   (let [request-url (str config/protocol aggregate "/link/" aggregate "/" entity-id)
-        result (get-payload request-url)]
+        result (get-data request-url)]
     (up/update-link result)
     result))
 
@@ -93,7 +93,7 @@
     (let [aggregate (:aggregate-id link)
           entity-id (:entity-id link)
           request-url (str config/protocol aggregate "/link/undercuts/" aggregate "/" entity-id)
-          results (get-payload request-url)]
+          results (get-data request-url)]
       (doseq [link results] (up/update-link link))
       results)))
 
@@ -106,7 +106,7 @@
           entity-id (:entity-id statement)
           version (:version statement)
           request-url (str config/protocol aggregate "/link/to/" aggregate "/" entity-id "/" version)
-          results (get-payload request-url)]
+          results (get-data request-url)]
       (doseq [link results] (up/update-link link))
       results)))
 
@@ -118,7 +118,7 @@
    (let [possible-entity (db/statements-by-uri uri)]
      (if (= possible-entity :missing)
        (if (some #(= % :no-remote) opts)
-         :not-found
+         []
          (retrieve-remote uri))
        (cache/cache-miss uri possible-entity)))))
 
@@ -140,7 +140,7 @@
     (if (= cached-link :missing)
       (let [db-result (db/links-by-uri uri)]
         (if (= db-result :missing)
-          :not-found
+          []
           (do (cache/cache-miss-link uri db-result)
             db-result)))
       cached-link)))
@@ -157,8 +157,7 @@
    (doseq [host config/whitelist] (remote-starter-set host)))
   ([aggregator]
    (let [results (:statements (get-data (str config/protocol aggregator "/statements/starter-set")))]
-     (when (and results (not= results "not-found"))
-       (doseq [stmt results] (up/update-statement stmt))))))
+     (doseq [stmt results] (up/update-statement stmt)))))
 
 (defn all-local-statements
   "Retrieve all locally saved statements belonging to the aggregator."
@@ -173,9 +172,8 @@
        (all-remote-statements aggregator))))
   ([aggregator]
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
-     (when (not= results "not-found")
-       (doseq [statement results]
-         (up/update-statement statement))))))
+     (doseq [statement results]
+       (up/update-statement statement)))))
 
 (defn all-local-links
   "Retrieve all locally saved statements belonging to the aggregator."
@@ -189,7 +187,6 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-links aggregator))))
   ([aggregator]
-   (let [results (get-payload (str config/protocol aggregator "/links"))]
-     (when (not= results "not-found")
-       (doseq [link results]
-         (up/update-link link))))))
+   (let [results (get-data (str config/protocol aggregator "/links"))]
+     (doseq [link results]
+       (up/update-link link)))))

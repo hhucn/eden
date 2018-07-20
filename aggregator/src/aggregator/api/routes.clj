@@ -1,7 +1,8 @@
 (ns aggregator.api.routes
   "Define and expose the routes for the REST API in this file."
   (:require [compojure.core :refer [POST defroutes]]
-            [compojure.api.sweet :refer [GET api context resource]]
+            [compojure.route]
+            [compojure.api.sweet :refer [GET api context resource undocumented]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
             [ring.util.response :refer [response]]
@@ -9,7 +10,7 @@
             [spec-tools.spec :as spec]
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
-            [ring.util.http-response :refer [ok]]
+            [ring.util.http-response :refer [ok not-found]]
             [taoensso.timbre :as log]))
 
 #_(defroutes app-routes
@@ -56,8 +57,9 @@
                                                          (read-string (:version params)))}})))
 
 
+(s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
-(s/def ::statements-map (s/or(s/keys :req-un [::statements])))
+(s/def ::statements-map (s/keys :req-un [::statements]))
 
 (def statement-routes
   (context "/statements" []
@@ -93,6 +95,13 @@
                        :description "An API to request statements and links from the EDEN instance."}
                 :tags [{:name "statements" :description "Retrieve Statements"}]}}}
        statement-routes
+       (GET "/" []
+         :summary "Test whether the api is online"
+         :query-params []
+         :return ::welcome-message
+         (ok "Hello!"))
+       (undocumented
+        (compojure.route/not-found (not-found {:not "found"})))
        #_(-> spec-routes
            (wrap-json-body {:keywords? true
                             :bigdecimals? true})

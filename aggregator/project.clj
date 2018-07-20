@@ -20,7 +20,8 @@
                  [clj-http "3.7.0"]
                  [codox-theme-rdash "0.1.2"]
                  [metosin/compojure-api "2.0.0-alpha19"]
-                 [metosin/spec-tools "0.6.1"]]
+                 [metosin/spec-tools "0.6.1"]
+                 [cheshire "5.8.0"]]
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [nightlight "2.1.1"]]
