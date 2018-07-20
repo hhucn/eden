@@ -17,9 +17,8 @@
           aggregate (get-in link [:source :aggregate-id])
           entity-id (get-in link [:source :entity-id])
           version (get-in link [:source :link])
-          statement (query/retrieve-exact-statement aggregate entity-id version)
           undercuts (query/retrieve-undercuts aggregate entity-id)
-          additional-links (query/links-to statement)]
+          additional-links (query/links-to aggregate entity-id version)]
       (concat (rest queue) undercuts additional-links))
     (rest queue)))
 
@@ -31,11 +30,14 @@
       (when (seq next-step)
         (recur next-step)))))
 
-(defn lookup-related
+(defn- lookup-related
   "Lookup all related links and statements 'downstream' from the starting statement."
   [statement]
   (log/debug (format "[retriever] Starting to pull related data for %s" statement))
-  (let [startlinks (query/links-to statement)]
+  (let [aggregate-id (get-in statement [:identifier :aggregate-id])
+        entity-id (get-in statement [:identifier :entity-id])
+        version (get-in statement [:identifier :version])
+        startlinks (query/links-to aggregate-id entity-id version)]
     (loop-next startlinks)))
 
 (defn automatic-retriever

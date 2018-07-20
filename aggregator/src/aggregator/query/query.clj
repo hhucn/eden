@@ -47,10 +47,8 @@
 
 (defn links-by-target
   "Retrieve all local links in db pointing to the target statement."
-  [target]
-  (db/links-by-target (:aggregate-id target)
-                      (:entity-id target)
-                      (:version target)))
+  [aggregate-id entity-id version]
+  (db/links-by-target aggregate-id entity-id version))
 
 (defn retrieve-remote
   "Try to retrieve a statement from a remote aggregator. The host part is treated as the webhost."
@@ -98,14 +96,13 @@
 
 (defn links-to
   "Retrieve all links pointing to provided statement. (From the statements aggregator)"
-  [statement]
-  (if-let [possible-links (links-by-target statement)]
+  [aggregate-id entity-id version]
+  (if-let [possible-links (links-by-target aggregate-id entity-id version)]
     possible-links
-    (let [aggregate (:aggregate-id statement)
-          entity-id (:entity-id statement)
-          version (:version statement)
-          request-url (str config/protocol aggregate "/link/to/" aggregate "/" entity-id "/" version)
-          results (get-data request-url)]
+    (let [request-url (str config/protocol aggregate-id "/link/to/")
+          results (get-data request-url {"aggregate-id" aggregate-id
+                                         "entity-id" entity-id
+                                         "version" version})]
       (doseq [link results] (up/update-link link))
       results)))
 

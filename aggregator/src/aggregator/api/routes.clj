@@ -15,16 +15,6 @@
 
 #_(defroutes app-routes
   "The routes of the aggregator defined are RESTful and can be used to inquire for entities. Singular worded routes like `statement/` always require a specificity in the route following. Plural forms like `statements/` usualy return multiple things when not specified further."
-  (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
-       (log/debug "[REST] Someone just retrieved undercuts")
-       (response {:status :ok
-                  :data {:payload (query/local-undercuts (str (:target-entity params)))}}))
-  (GET "/link/to/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
-       (log/debug "[REST] Someone just retrieved pointed links")
-       (response {:status :ok
-                  :data {:payload (query/links-by-target (:aggregate params)
-                                                         (:entity params)
-                                                         (read-string (:version params)))}}))
   (GET "/link/:entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved a link")
        (response {:status :ok
@@ -84,7 +74,15 @@
       :query-params [aggregate-id :- ::eden-specs/aggregate-id
                      entity-id :- ::eden-specs/entity-id]
       :return ::links-map
-      (ok {:links (query/local-undercuts aggregate-id entity-id)}))))
+      (ok {:links (query/local-undercuts aggregate-id entity-id)}))
+
+    (GET "/to" []
+      :summary "Return all links pointing to a specific statement"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id
+                     entity-id :- ::eden-specs/entity-id
+                     version :- ::eden-specs/version]
+      :return ::links-map
+      (ok {:links (query/links-by-target aggregate-id entity-id version)}))))
 
 (def app
   (api {:coercion :spec
