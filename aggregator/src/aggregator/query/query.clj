@@ -42,7 +42,7 @@
 
 (defn local-undercuts
   "Retrieve all links from the db that undercut the link passed as argument."
-  [{:keys [aggregate-id entity-id]}]
+  [aggregate-id entity-id]
   (db/get-undercuts aggregate-id entity-id))
 
 (defn links-by-target
@@ -87,13 +87,12 @@
 
 (defn retrieve-undercuts
   "Retrieve a (possibly remote) list of undercuts. The argument is the link being undercut."
-  [link]
-  (if-let [possible-undercuts (local-undercuts link)]
+  [aggregate-id entity-id]
+  (if-let [possible-undercuts (local-undercuts aggregate-id entity-id)]
     possible-undercuts
-    (let [aggregate (:aggregate-id link)
-          entity-id (:entity-id link)
-          request-url (str config/protocol aggregate "/link/undercuts/" aggregate "/" entity-id)
-          results (get-data request-url)]
+    (let [request-url (str config/protocol aggregate-id "/links/undercuts/")
+          results (get-data request-url {"aggregate-id" aggregate-id
+                                         "entity-id" entity-id})]
       (doseq [link results] (up/update-link link))
       results)))
 

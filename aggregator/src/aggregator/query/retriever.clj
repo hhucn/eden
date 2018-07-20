@@ -18,7 +18,7 @@
           entity-id (get-in link [:source :entity-id])
           version (get-in link [:source :link])
           statement (query/retrieve-exact-statement aggregate entity-id version)
-          undercuts (query/retrieve-undercuts link)
+          undercuts (query/retrieve-undercuts aggregate entity-id)
           additional-links (query/links-to statement)]
       (concat (rest queue) undercuts additional-links))
     (rest queue)))

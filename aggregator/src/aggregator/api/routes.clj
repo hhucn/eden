@@ -15,9 +15,6 @@
 
 #_(defroutes app-routes
   "The routes of the aggregator defined are RESTful and can be used to inquire for entities. Singular worded routes like `statement/` always require a specificity in the route following. Plural forms like `statements/` usualy return multiple things when not specified further."
-  (GET "/links" _request
-       (response {:status :ok
-                  :data {:payload (query/all-local-links)}}))
   (GET "/link/undercuts/:target-entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved undercuts")
        (response {:status :ok
@@ -48,28 +45,28 @@
 
 (def statements-routes
   (context "/statements" []
-           :tags ["statements"]
-           :coercion :spec
+    :tags ["statements"]
+    :coercion :spec
 
-           (GET "/" []
-                :summary "Returns all statements"
-                :query-params []
-                :return ::statements-map
-                (ok {:statements (query/all-local-statements)}))
+    (GET "/" []
+      :summary "Returns all statements"
+      :query-params []
+      :return ::statements-map
+      (ok {:statements (query/all-local-statements)}))
 
-           (GET "/starter-set" []
-                :summary "Returns up to 10 statements chosen by the Aggregator"
-                :query-params []
-                :return ::statements-map
-                (ok {:statements (query/starter-set)}))
+    (GET "/starter-set" []
+      :summary "Returns up to 10 statements chosen by the Aggregator"
+      :query-params []
+      :return ::statements-map
+      (ok {:statements (query/starter-set)}))
 
-           (GET "/by-id" []
-                :summary "Returns all statements matching aggregator and entity-id"
-                :query-params [aggregate-id :- ::eden-specs/aggregate-id,
-                               entity-id :- ::eden-specs/entity-id]
-                :return ::statements-map
-                (ok {:statements (query/tiered-retrieval aggregate-id entity-id
-                                                         {:opts [:no-remote]})}))))
+    (GET "/by-id" []
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id,
+                     entity-id :- ::eden-specs/entity-id]
+      :return ::statements-map
+      (ok {:statements (query/tiered-retrieval aggregate-id entity-id
+                                               {:opts [:no-remote]})}))))
 
 (def links-routes
   (context "/links" []
@@ -80,7 +77,14 @@
       :summary "Returns all links"
       :query-params []
       :return ::links-map
-      (ok {:links (query/all-local-links)}))))
+      (ok {:links (query/all-local-links)}))
+
+    (GET "/undercuts" []
+      :summary "Return all undercuts targeting `aggregate-id/entity-id`"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id
+                     entity-id :- ::eden-specs/entity-id]
+      :return ::links-map
+      (ok {:links (query/local-undercuts aggregate-id entity-id)}))))
 
 (def app
   (api {:coercion :spec
