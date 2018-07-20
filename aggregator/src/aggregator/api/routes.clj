@@ -18,13 +18,7 @@
   (GET "/link/:entity{.+}" {:keys [params]}
        (log/debug "[REST] Someone just retrieved a link")
        (response {:status :ok
-                  :data {:payload (query/retrieve-link (str (:entity params)))}}))
-  (GET "/statement/:aggregate{.+}/:entity{.+}/:version{[0-9]+}" {:keys [params]}
-       (log/debug "[REST] Someone just retrieved a specific statement")
-       (response {:status :ok
-                  :data {:payload (query/exact-statement (:aggregate params)
-                                                         (:entity params)
-                                                         (read-string (:version params)))}})))
+                  :data {:payload (query/retrieve-link (str (:entity params)))}})))
 
 
 (s/def ::welcome-message spec/string?)
@@ -32,6 +26,8 @@
 (s/def ::statements-map (s/keys :req-un [::statements]))
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
+(s/def ::statement-map (s/keys :req-un [::eden-specs/statement]))
+(s/def ::link-map (s/keys :req-un [::eden-specs/link]))
 
 (def statements-routes
   (context "/statements" []
@@ -84,6 +80,32 @@
       :return ::links-map
       (ok {:links (query/links-by-target aggregate-id entity-id version)}))))
 
+(def statement-routes
+  (context "/statement" []
+    :tags ["statement"]
+    :coercion :spec
+
+    (GET "/" []
+      :summary "Return a specific statement by identifiers"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id
+                     entity-id :- ::eden-specs/entity-id
+                     version :- ::eden-specs/version]
+      :return ::statement-map
+      (ok {:statement (query/exact-statement aggregate-id entity-id version)}))))
+
+(def link-routes
+  (context "/link" []
+    :tags ["link"]
+    :coercion :spec
+
+    (GET "/" []
+      :summary "Return a specific link by identifiers"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id
+                     entity-id :- ::eden-specs/entity-id
+                     version :- ::eden-specs/version]
+      :return ::link-map
+      (ok {:statement (query/retrieve-link aggregate-id entity-id version)}))))
+
 (def app
   (api {:coercion :spec
         :swagger
@@ -92,9 +114,13 @@
          :data {:info {:title "EDEN Aggregator API"
                        :description "An API to request statements and links from the EDEN instance."}
                 :tags [{:name "statements" :description "Retrieve Statements"}
-                       {:name "links" :description "Retrieve Links"}]}}}
+                       {:name "links" :description "Retrieve Links"}
+                       {:name "statement" :description "Retrieve single specific statement"}
+                       {:name "link" :description "Retrieve single specific link"}]}}}
 
+       statement-routes
        statements-routes
+       link-routes
        links-routes
 
        (GET "/" []

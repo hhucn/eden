@@ -57,8 +57,8 @@
      (retrieve-remote (first split-uri) (second split-uri))))
   ([aggregate-id entity-id]
    (let [request-url (str config/protocol aggregate-id "/statements/by-id")
-         result-data (:statements (get-data request-url {"aggregate-id" aggregate-id
-                                                         "entity-id" entity-id}))]
+         result-data (:statements (get-data request-url {:aggregate-id aggregate-id
+                                                         :entity-id entity-id}))]
      (subscribe-to-queue "statements" aggregate-id)
      (subscribe-to-queue "links" aggregate-id)
      (doseq [statement result-data] (up/update-statement statement))
@@ -69,8 +69,10 @@
   [aggregate entity version]
   (if-let [local-statement (exact-statement aggregate entity version)]
     local-statement
-    (let [request-url (str config/protocol aggregate "/statement/" aggregate "/" entity "/" version)
-          result-data (get-data request-url)
+    (let [request-url (str config/protocol aggregate "/statement")
+          result-data (get-data request-url {:aggregate-id aggregate
+                                             :entity-id entity
+                                             :version version})
           result (:statements result-data)]
       (up/update-statement result)
       result)))
@@ -89,8 +91,8 @@
   (if-let [possible-undercuts (local-undercuts aggregate-id entity-id)]
     possible-undercuts
     (let [request-url (str config/protocol aggregate-id "/links/undercuts/")
-          results (get-data request-url {"aggregate-id" aggregate-id
-                                         "entity-id" entity-id})]
+          results (get-data request-url {:aggregate-id aggregate-id
+                                         :entity-id entity-id})]
       (doseq [link results] (up/update-link link))
       results)))
 
@@ -100,9 +102,9 @@
   (if-let [possible-links (links-by-target aggregate-id entity-id version)]
     possible-links
     (let [request-url (str config/protocol aggregate-id "/link/to/")
-          results (get-data request-url {"aggregate-id" aggregate-id
-                                         "entity-id" entity-id
-                                         "version" version})]
+          results (get-data request-url {:aggregate-id aggregate-id
+                                         :entity-id entity-id
+                                         :version version})]
       (doseq [link results] (up/update-link link))
       results)))
 
