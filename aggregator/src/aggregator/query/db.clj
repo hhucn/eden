@@ -16,6 +16,11 @@
   [response]
   (map :_source (get-in response [:data :hits])))
 
+(defn- keywordize-types
+  "Keywordize the type value of links coming from the elastic db."
+  [link-map]
+  (map #(update % :type keyword) link-map))
+
 (defn entities-by-uri
   "Returns all entities matched by the uri."
   [uri entity-type]
@@ -25,7 +30,9 @@
                                                       :identifier.entity-id (second uri-info)}))]
     (if (= '() query-values)
       :missing
-      query-values)))
+      (if (= entity-type :links)
+        (keywordize-types query-values)
+        query-values))))
 
 (defn statements-by-uri
   "Return all versions of the desired statement or :missing if it can not be found."
@@ -57,7 +64,7 @@
 (defn all-links
   "Returns all links currently saved in the elasticsearch database."
   []
-  (unpack-elastic (elastic/search :all-links config/aggregate-name)))
+  (keywordize-types (unpack-elastic (elastic/search :all-links config/aggregate-name))))
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
@@ -70,7 +77,7 @@
   (let [query-map {:source.aggregate-id from-aggregate :source.entity-id from-entity
                    :source.version from-version :destination.aggregate-id to-aggregate
                    :destination.entity-id to-entity :destination.version to-version}]
-    (first (unpack-elastic (elastic/search :links query-map)))))
+    (first (keywordize-types (unpack-elastic (elastic/search :links query-map))))))
 
 (defn insert-link
   "Requires a map conforming to the ::aggregator.specs/link as input. Inserts the statement into the database."
@@ -80,16 +87,16 @@
 (defn get-undercuts
   "Returns all undercuts that point to target aggregator and entity-id."
   [target-aggregator target-entity-id]
-  (unpack-elastic (elastic/search :links {:type "undercut"
-                                          :destination.aggregate-id target-aggregator
-                                          :destination.entity-id target-entity-id})))
+  (keywordize-types (unpack-elastic (elastic/search :links {:type "undercut"
+                                                           :destination.aggregate-id target-aggregator
+                                                           :destination.entity-id target-entity-id}))))
 
 (defn links-by-target
   "Return all links with the corresponding target."
   [target-aggregator target-entity target-version]
-  (unpack-elastic (elastic/search :links {:destination.aggregate-id target-aggregator
-                                          :destination.entity-id target-entity
-                                          :destination.version target-version})))
+  (keywordize-types (unpack-elastic (elastic/search :links {:destination.aggregate-id target-aggregator
+                                                           :destination.entity-id target-entity
+                                                           :destination.version target-version}))))
 
 (defn random-statements
   "Return *num* random statements from the db."
