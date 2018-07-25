@@ -17,14 +17,17 @@
 
 (deftest handler-test
   (testing "Test root route for status 200"
-    (is (= 200 (:status (routes/app (mock/request :get "/")))))))
+    (let [response (routes/app (mock/request :get "/"))]
+      (is (= (:status response) 200)))))
 
 (deftest statement-nonexistent-route
   (testing "Test nonexistent-route for status 500"
-    (is (= 404 (:status (routes/app (mock/request :get "/statements/fantasy.dork/nonexistent")))))))
+    (let [response (routes/app (mock/request :get "/statements/fantasy.dork/nonexistent"))]
+      (is (= (:status response) 404)))))
 
 (deftest statement-retrieval-test
-  (let [response (routes/app (mock/request :get "/statements/by-id?aggregate-id=foo&entity-id=bar"))
-        body     (parse-body (:body response))]
-    (is (= (:status response) 200))
-    (is (= (:statements body) []))))
+  (testing "Test for empty statements"
+    (let [response (routes/app (mock/request :get "/statements/by-id?aggregate-id=foo&entity-id=bar"))
+          body     (parse-body (:body response))]
+      (is (= (:status response) 200))
+      (is (= (:statements body) [])))))
