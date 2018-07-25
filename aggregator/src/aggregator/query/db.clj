@@ -73,11 +73,16 @@
 
 (defn exact-link
   "Return the exact link and only that if possible."
-  [from-aggregate from-entity from-version to-aggregate to-entity to-version]
-  (let [query-map {:source.aggregate-id from-aggregate :source.entity-id from-entity
-                   :source.version from-version :destination.aggregate-id to-aggregate
-                   :destination.entity-id to-entity :destination.version to-version}]
-    (first (keywordize-types (unpack-elastic (elastic/search :links query-map))))))
+  ([aggregate-id entity-id version]
+   (let [query-map {:identifier.aggregate-id aggregate-id
+                    :identifier.entity-id entity-id
+                    :identifier.version version}]
+     (first (keywordize-types (unpack-elastic (elastic/search :links query-map))))))
+  ([from-aggregate from-entity from-version to-aggregate to-entity to-version]
+   (let [query-map {:source.aggregate-id from-aggregate :source.entity-id from-entity
+                    :source.version from-version :destination.aggregate-id to-aggregate
+                    :destination.entity-id to-entity :destination.version to-version}]
+     (first (keywordize-types (unpack-elastic (elastic/search :links query-map)))))))
 
 (defn insert-link
   "Requires a map conforming to the ::aggregator.specs/link as input. Inserts the statement into the database."

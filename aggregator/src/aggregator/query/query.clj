@@ -133,13 +133,14 @@
 
 (defn retrieve-link
   "Retrieve a link from cache or db. Returns :not-found if no such link can be found."
-  [uri]
-  (let [cached-link (cache/retrieve-link uri)]
+  [aggregate-id entity-id version]
+  (let [link-uri (str aggregate-id "/" entity-id "/" version)
+        cached-link (cache/retrieve-link link-uri)]
     (if (= cached-link :missing)
-      (let [db-result (db/links-by-uri uri)]
+      (let [db-result (db/exact-link aggregate-id entity-id version)]
         (if (= db-result :missing)
           []
-          (do (cache/cache-miss-link uri db-result)
+          (do (cache/cache-miss-link link-uri db-result)
             db-result)))
       cached-link)))
 

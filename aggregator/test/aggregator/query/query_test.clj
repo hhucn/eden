@@ -87,8 +87,8 @@
 
 ;; Here be tests
 (deftest test-retrieve-link
-  (is (not (empty? (query/retrieve-link "schneider.gg/link0r1337"))))
-  (is (empty? (query/retrieve-link "foo.bar/nonexistent"))))
+  (is (not (empty? (query/retrieve-link "schneider.gg" "link0r1337" 1))))
+  (is (empty? (query/retrieve-link "foo.bar" "nonexistent" 1))))
 
 (deftest local-tiered-retrieval
   (is (not (empty? (query/tiered-retrieval "hhu.de" "34" {:opts [:no-remote]}))))
