@@ -70,12 +70,13 @@
   (if-let [local-statement (exact-statement aggregate entity version)]
     local-statement
     (let [request-url (str config/protocol aggregate "/statement")
-          result-data (get-data request-url {:aggregate-id aggregate
-                                             :entity-id entity
-                                             :version version})
-          result (:statements result-data)]
-      (up/update-statement result)
-      result)))
+          result-data (client/get request-url {:as :json
+                                               :query-params {:aggregate-id aggregate
+                                                              :entity-id entity
+                                                              :version version}})
+          result-body (:body result-data)]
+      (when-not (= 404 (:status result-data))
+        (up/update-statement (:statement result-body))))))
 
 (defn retrieve-undercuts
   "Retrieve a (possibly remote) list of undercuts. The argument is the link being undercut."
