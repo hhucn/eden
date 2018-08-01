@@ -77,14 +77,6 @@
       (up/update-statement result)
       result)))
 
-(defn remote-link
-  "Retrieves a remote link from its aggregator"
-  [aggregate entity-id]
-  (let [request-url (str config/protocol aggregate "/link/" aggregate "/" entity-id)
-        result (get-data request-url)]
-    (up/update-link result)
-    result))
-
 (defn retrieve-undercuts
   "Retrieve a (possibly remote) list of undercuts. The argument is the link being undercut."
   [aggregate-id entity-id]
@@ -132,7 +124,7 @@
        cached-entity))))
 
 (defn retrieve-link
-  "Retrieve a link from cache or db. Returns :not-found if no such link can be found."
+  "Retrieve a link from cache or db. Returns empty vector if no such link can be found."
   [aggregate-id entity-id version]
   (let [link-uri (str aggregate-id "/" entity-id "/" version)
         cached-link (cache/retrieve-link link-uri)]
