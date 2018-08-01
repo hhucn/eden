@@ -35,7 +35,7 @@
     (if (and (not= cached-statement :missing)
              (= (get-in cached-statement [:identifier :version]) version))
       cached-statement
-      (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
+      (when-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
         (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
             (log/debug "[query] Found exact statement in DB")
             maybe-statement)))))
@@ -129,11 +129,8 @@
   (let [link-uri (str aggregate-id "/" entity-id "/" version)
         cached-link (cache/retrieve-link link-uri)]
     (if (= cached-link :missing)
-      (let [db-result (db/exact-link aggregate-id entity-id version)]
-        (if (= db-result :missing)
-          []
-          (do (cache/cache-miss-link link-uri db-result)
-            db-result)))
+      (when-let [db-result (db/exact-link aggregate-id entity-id version)]
+        (cache/cache-miss-link link-uri db-result))
       cached-link)))
 
 

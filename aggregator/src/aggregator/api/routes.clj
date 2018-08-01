@@ -78,7 +78,9 @@
                      entity-id :- ::eden-specs/entity-id
                      version :- ::eden-specs/version]
       :return ::statement-map
-      (ok {:statement (query/exact-statement aggregate-id entity-id version)}))))
+      (if-let [statement (query/exact-statement aggregate-id entity-id version)]
+        (ok {:statement statement})
+        (not-found nil)))))
 
 (def link-routes
   (context "/link" []
@@ -91,7 +93,9 @@
                      entity-id :- ::eden-specs/entity-id
                      version :- ::eden-specs/version]
       :return ::link-map
-      (ok {:link (query/retrieve-link aggregate-id entity-id version)}))))
+      (if-let [link (query/retrieve-link aggregate-id entity-id version)]
+        (ok {:link link})
+        (not-found nil)))))
 
 (def app
   (api {:coercion :spec
