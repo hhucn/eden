@@ -11,16 +11,14 @@
 
 (defn get-data
   "Get data from a remote aggregator."
-  [request-url]
-  (try
-    (:data (:body (client/get request-url {:as :json})))
-    (catch Exception e
-      {})))
-
-(defn get-payload
-  "Helper to get the payload from a remote query."
-  [request-url]
-  (:payload (get-data request-url)))
+  ([request-url]
+   (get-data request-url {}))
+  ([request-url query-params]
+   (try
+     (:body (client/get request-url {:as :json
+                                     :query-params query-params}))
+     (catch Exception e
+       {}))))
 
 (defn- subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
@@ -37,77 +35,68 @@
     (if (and (not= cached-statement :missing)
              (= (get-in cached-statement [:identifier :version]) version))
       cached-statement
-      (if-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
+      (when-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
         (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
             (log/debug "[query] Found exact statement in DB")
             maybe-statement)))))
 
 (defn local-undercuts
   "Retrieve all links from the db that undercut the link passed as argument."
-  [{:keys [aggregate-id entity-id]}]
+  [aggregate-id entity-id]
   (db/get-undercuts aggregate-id entity-id))
 
 (defn links-by-target
   "Retrieve all local links in db pointing to the target statement."
-  [target]
-  (db/links-by-target (:aggregate-id target)
-                      (:entity-id target)
-                      (:version target)))
+  [aggregate-id entity-id version]
+  (db/links-by-target aggregate-id entity-id version))
 
 (defn retrieve-remote
   "Try to retrieve a statement from a remote aggregator. The host part is treated as the webhost."
-  [uri]
-  (let [split-uri (str/split uri #"/")
-        aggregate (first split-uri)
-        request-url (str config/protocol aggregate "/statements/" uri)
-        result-data (get-data request-url)
-        results (:payload result-data)]
-    (subscribe-to-queue "statements" aggregate)
-    (subscribe-to-queue "links" aggregate)
-    (doseq [statement results] (up/update-statement statement))
-    results))
+  ([uri]
+   (let [split-uri (str/split uri #"/")]
+     (retrieve-remote (first split-uri) (second split-uri))))
+  ([aggregate-id entity-id]
+   (let [request-url (str config/protocol aggregate-id "/statements/by-id")
+         result-data (:statements (get-data request-url {:aggregate-id aggregate-id
+                                                         :entity-id entity-id}))]
+     (subscribe-to-queue "statements" aggregate-id)
+     (subscribe-to-queue "links" aggregate-id)
+     (doseq [statement result-data] (up/update-statement statement))
+     result-data)))
 
 (defn retrieve-exact-statement
   "Retrieves an exact statement from cache / db / a remote aggregator."
   [aggregate entity version]
   (if-let [local-statement (exact-statement aggregate entity version)]
     local-statement
-    (let [request-url (str config/protocol aggregate "/statement/" aggregate "/" entity "/" version)
-          result-data (get-data request-url)
-          result (:payload result-data)]
+    (let [request-url (str config/protocol aggregate "/statement")
+          result-data (get-data request-url {:aggregate-id aggregate
+                                             :entity-id entity
+                                             :version version})
+          result (:statements result-data)]
       (up/update-statement result)
       result)))
 
-(defn remote-link
-  "Retrieves a remote link from its aggregator"
-  [aggregate entity-id]
-  (let [request-url (str config/protocol aggregate "/link/" aggregate "/" entity-id)
-        result (get-payload request-url)]
-    (up/update-link result)
-    result))
-
 (defn retrieve-undercuts
   "Retrieve a (possibly remote) list of undercuts. The argument is the link being undercut."
-  [link]
-  (if-let [possible-undercuts (local-undercuts link)]
+  [aggregate-id entity-id]
+  (if-let [possible-undercuts (local-undercuts aggregate-id entity-id)]
     possible-undercuts
-    (let [aggregate (:aggregate-id link)
-          entity-id (:entity-id link)
-          request-url (str config/protocol aggregate "/link/undercuts/" aggregate "/" entity-id)
-          results (get-payload request-url)]
+    (let [request-url (str config/protocol aggregate-id "/links/undercuts/")
+          results (get-data request-url {:aggregate-id aggregate-id
+                                         :entity-id entity-id})]
       (doseq [link results] (up/update-link link))
       results)))
 
 (defn links-to
   "Retrieve all links pointing to provided statement. (From the statements aggregator)"
-  [statement]
-  (if-let [possible-links (links-by-target statement)]
+  [aggregate-id entity-id version]
+  (if-let [possible-links (links-by-target aggregate-id entity-id version)]
     possible-links
-    (let [aggregate (:aggregate-id statement)
-          entity-id (:entity-id statement)
-          version (:version statement)
-          request-url (str config/protocol aggregate "/link/to/" aggregate "/" entity-id "/" version)
-          results (get-payload request-url)]
+    (let [request-url (str config/protocol aggregate-id "/link/to/")
+          results (get-data request-url {:aggregate-id aggregate-id
+                                         :entity-id entity-id
+                                         :version version})]
       (doseq [link results] (up/update-link link))
       results)))
 
@@ -119,35 +108,34 @@
    (let [possible-entity (db/statements-by-uri uri)]
      (if (= possible-entity :missing)
        (if (some #(= % :no-remote) opts)
-         :not-found
+         []
          (retrieve-remote uri))
        (cache/cache-miss uri possible-entity)))))
 
 (defn tiered-retrieval
   "Check whether the Cache contains the desired entity. If not delegate to DB and remote acquisition."
-  ([uri]
-   (tiered-retrieval uri {}))
-  ([uri options]
-   (let [cached-entity (cache/retrieve uri)]
+  ([aggregate-id entity-id]
+   (tiered-retrieval aggregate-id entity-id {}))
+  ([aggregate-id entity-id options]
+   (let [uri (str aggregate-id "/" entity-id)
+         cached-entity (cache/retrieve uri)]
      (if (= cached-entity :missing)
        (check-db uri options)
        cached-entity))))
 
 (defn retrieve-link
-  "Retrieve a link from cache or db. Returns :not-found if no such link can be found."
-  [uri]
-  (let [cached-link (cache/retrieve-link uri)]
+  "Retrieve a link from cache or db. Returns empty vector if no such link can be found."
+  [aggregate-id entity-id version]
+  (let [link-uri (str aggregate-id "/" entity-id "/" version)
+        cached-link (cache/retrieve-link link-uri)]
     (if (= cached-link :missing)
-      (let [db-result (db/links-by-uri uri)]
-        (if (= db-result :missing)
-          :not-found
-          (do (cache/cache-miss-link uri db-result)
-            db-result)))
+      (when-let [db-result (db/exact-link aggregate-id entity-id version)]
+        (cache/cache-miss-link link-uri db-result))
       cached-link)))
 
 
 (defn starter-set
-  "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or databse."
+  "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or database."
   []
   (db/random-statements 10))
 
@@ -156,9 +144,8 @@
   ([]
    (doseq [host config/whitelist] (remote-starter-set host)))
   ([aggregator]
-   (let [results (get-payload (str config/protocol aggregator "/statements/starter-set"))]
-     (when (and results (not= results "not-found"))
-       (doseq [stmt results] (up/update-statement stmt))))))
+   (let [results (:statements (get-data (str config/protocol aggregator "/statements/starter-set")))]
+     (doseq [stmt results] (up/update-statement stmt)))))
 
 (defn all-local-statements
   "Retrieve all locally saved statements belonging to the aggregator."
@@ -172,10 +159,9 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-statements aggregator))))
   ([aggregator]
-   (let [results (get-payload (str config/protocol aggregator "/statements"))]
-     (when (not= results "not-found")
-       (doseq [statement results]
-         (up/update-statement statement))))))
+   (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
+     (doseq [statement results]
+       (up/update-statement statement)))))
 
 (defn all-local-links
   "Retrieve all locally saved statements belonging to the aggregator."
@@ -189,7 +175,6 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-links aggregator))))
   ([aggregator]
-   (let [results (get-payload (str config/protocol aggregator "/links"))]
-     (when (not= results "not-found")
-       (doseq [link results]
-         (up/update-link link))))))
+   (let [results (get-data (str config/protocol aggregator "/links"))]
+     (doseq [link results]
+       (up/update-link link)))))
