@@ -1,25 +1,12 @@
 (ns aggregator.api.routes
   "Define and expose the routes for the REST API in this file."
-  (:require [compojure.core :refer [POST defroutes]]
-            [compojure.route]
+  (:require [compojure.route]
             [compojure.api.sweet :refer [GET api context resource undocumented]]
-            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
-            [ring.middleware.json :refer [wrap-json-params wrap-json-response wrap-json-body]]
-            [ring.util.response :refer [response]]
             [aggregator.query.query :as query]
             [spec-tools.spec :as spec]
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
-            [ring.util.http-response :refer [ok not-found]]
-            [taoensso.timbre :as log]))
-
-#_(defroutes app-routes
-  "The routes of the aggregator defined are RESTful and can be used to inquire for entities. Singular worded routes like `statement/` always require a specificity in the route following. Plural forms like `statements/` usualy return multiple things when not specified further."
-  (GET "/link/:entity{.+}" {:keys [params]}
-       (log/debug "[REST] Someone just retrieved a link")
-       (response {:status :ok
-                  :data {:payload (query/retrieve-link (str (:entity params)))}})))
-
+            [ring.util.http-response :refer [ok not-found]]))
 
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
@@ -104,7 +91,7 @@
                      entity-id :- ::eden-specs/entity-id
                      version :- ::eden-specs/version]
       :return ::link-map
-      (ok {:statement (query/retrieve-link aggregate-id entity-id version)}))))
+      (ok {:link (query/retrieve-link aggregate-id entity-id version)}))))
 
 (def app
   (api {:coercion :spec
