@@ -179,3 +179,8 @@
    (let [results (get-data (str config/protocol aggregator "/links"))]
      (doseq [link results]
        (up/update-link link)))))
+
+(defn statements-contain
+  "Retrieve all statements where the content.content-string contains the `query`"
+  [query]
+  (db/statements-contain query))

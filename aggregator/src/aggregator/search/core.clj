@@ -167,6 +167,14 @@
   "Search for a matching entity (multiple versions possible)."
   (search-request {:query {:bool {:must (construct-query querymap)}}} :statements))
 
+(defmethod search :statements-fuzzy [_ querystring]
+  (search-request
+   {:query
+    {:match
+     {:content.content-string
+      {:query (append-star-if-not-empty querystring)
+       :fuzziness "AUTO"}}}} :statements))
+
 (defmethod search :all-statements [_ aggregate-id]
   "Return the first 10.000 results of the statements from a specified
   aggregate-id. Returns the first 10k statements on the queried host if an empty
