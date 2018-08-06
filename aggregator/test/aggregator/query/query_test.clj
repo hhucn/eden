@@ -67,6 +67,12 @@
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
+  (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P420" :version 1}
+                        :content {:author "saywhaaat"
+                                  :content-string "califragilistic extrahotentific"
+                                  :created nil}
+                        :predecessors {}
+                        :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
                         :content {:author "XxxBaeryerxxX"
                                   :content-string "there is a smaller park in O-Town"
@@ -107,4 +113,4 @@
     (is (= statement (query/exact-statement (:aggregate-id id) (:entity-id id) (:version id))))))
 
 (deftest test-statements-contain
-  (is (= 10 (count (query/statements-contain "park")))))
+  (is (= 10 (count (query/statements-contain "califragilistic")))))
