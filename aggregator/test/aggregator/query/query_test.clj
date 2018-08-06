@@ -105,3 +105,6 @@
         id (:identifier statement)]
     (cache/cache-miss (utils/build-cache-pattern statement) statement)
     (is (= statement (query/exact-statement (:aggregate-id id) (:entity-id id) (:version id))))))
+
+(deftest test-statements-contain
+  (is (= 9 (count (query/statements-contain "park")))))
