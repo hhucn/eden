@@ -113,4 +113,4 @@
     (is (= statement (query/exact-statement (:aggregate-id id) (:entity-id id) (:version id))))))
 
 (deftest test-statements-contain
-  (is (= 10 (count (query/statements-contain "califragilistic")))))
+  (is (= 1 (count (query/statements-contain "califragilistic")))))
