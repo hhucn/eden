@@ -107,4 +107,4 @@
     (is (= statement (query/exact-statement (:aggregate-id id) (:entity-id id) (:version id))))))
 
 (deftest test-statements-contain
-  (is (= 9 (count (query/statements-contain "park")))))
+  (is (= 10 (count (query/statements-contain "park")))))
