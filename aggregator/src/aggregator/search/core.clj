@@ -207,8 +207,21 @@
   "Initializes the connection to the elasticsearch instance and creates indices properly. Should be executed at the start of the instance and before tests using elasticsearch."
   []
   (init-connection!)
-  (create-index "statements" {} {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
-                                                           :identifier.entity-id {:type :keyword}}}})
+  (create-index "statements" {:index
+                              {:analysis
+                               {:filter
+                                {:synonym_filter
+                                 {:expand true
+                                  :type "synonym"
+                                  :synonyms_path "synonyms_english.txt"}}
+                                :analyzer
+                                {:synonym_analyzer
+                                 {:tokenizer "standard"
+                                  :filter ["lowercase" "synonym_filter"]}}}}}
+                {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
+                                           :identifier.entity-id {:type :keyword}
+                                           :content.content-string {:type "text"
+                                                                    :analyzer "synonym_analyzer"}}}})
   (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
                                                 :identifier.entity-id {:type :keyword}}}}))
 
