@@ -43,6 +43,7 @@ services:
     build: elasticsearch/
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/synonyms_english.txt:/usr/share/elasticsearch/config/synonyms_english.txt
     ports:
       - "9200:9200"
     environment:

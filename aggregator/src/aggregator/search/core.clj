@@ -211,8 +211,9 @@
                               {:analysis
                                {:filter
                                 {:synonym_filter
-                                 {:type "synonym"
-                                  :synonyms ["park, garden"]}}
+                                 {:expand true
+                                  :type "synonym"
+                                  :synonyms_path "synonyms_english.txt"}}
                                 :analyzer
                                 {:synonym_analyzer
                                  {:tokenizer "standard"

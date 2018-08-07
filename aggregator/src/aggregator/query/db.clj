@@ -115,4 +115,3 @@
   "Return all statements from the elasticsearch-db where content.content-string containts `query`"
   [query]
   (unpack-elastic (elastic/search :statements-fuzzy query)))
-
