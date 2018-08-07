@@ -5,7 +5,7 @@ services:
     image: rabbitmq:3.6-management-alpine
     ports:
       - "15672:15672"  # web-access to management console
-      - "5671-5672:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
+      # - "5671-5672:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
     environment:
       - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
       - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
@@ -81,8 +81,3 @@ services:
       - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
-
-  dbas-notifications:
-    image: hhucn/dbas-notifications
-    ports:
-      - "5222:5222"

@@ -16,11 +16,8 @@ docker exec <xxx>_dbas_1 ./build_assets.sh
 This error usually means, that one of the ports that are usually used by EDEN is already bound on your machine. The ports EDEN uses per default are:
 
 - 4284 - The port of D-BAS web view
-- 5222 - Used by D-BAS Notifications
 - 5432 - The default port of the DBAS database
 - 5601 - Kibana interface to control elasticsearch
-- 5671 - RabbitMQ debugging
-- 5672 - RabbitMQ debugging
 - 7777 - A Clojure REPL
 - 8888 - Ring Development Server
 - 9200 - The elasticsearch service
