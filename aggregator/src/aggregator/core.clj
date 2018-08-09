@@ -2,6 +2,7 @@
   (:require [aggregator.query.retriever :as retriever]
             [aggregator.query.update :as update]
             [aggregator.graphql.dbas-connector :as dbas-conn]
+            [aggregator.broker.connector :as broker]
             [aggregator.utils.pg-listener :as pg-listener]
             [aggregator.config :as config]
             [aggregator.search.core :as search]
@@ -33,6 +34,8 @@
   [& args]
   (load-config)
   (search/entrypoint)
+  (when-not (broker/connected?)
+    (broker/init-connection!))
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
