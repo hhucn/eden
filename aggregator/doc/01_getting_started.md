@@ -49,7 +49,6 @@ You can use `docker ps` to see if the containers are running. The following imag
 * aggregator_dbas
 * aggregator_dbas-db
 * aggregator_search
-* hhucn/dbas-notifications
 * docker.elastic.co/kibana/kibana
 * rabbitmq
 

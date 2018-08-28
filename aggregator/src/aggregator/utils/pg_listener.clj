@@ -21,7 +21,7 @@
                                 :entity-id (get-in textversion [:data :uid])
                                 :version 1}
                    :delete-flag false
-                   :predecessor {}}
+                   :predecessors []}
         origin (get-statement-origin (get-in textversion [:data :statement_uid]))]
     (if origin
       (update/update-statement

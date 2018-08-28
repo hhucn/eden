@@ -38,7 +38,7 @@
                                     {:aggregate-id config/aggregate-name
                                      :entity-id (:uid statement)
                                      :version 1}
-                                    :predecessor {}
+                                    :predecessors []
                                     :delete-flag false}
                  origin (get-statement-origin (:uid statement))]
              (if origin

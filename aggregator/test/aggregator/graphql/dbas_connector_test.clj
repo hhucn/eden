@@ -12,7 +12,7 @@
           (is (contains? (first result) :identifier))
           (is (contains? (first result) :content))
           (is (contains? (first result) :delete-flag))
-          (is (contains? (first result) :predecessor)))))))
+          (is (contains? (first result) :predecessors)))))))
 
 (deftest test-link-type
   (testing "Test whether the right link types are determined from the graphQL response"

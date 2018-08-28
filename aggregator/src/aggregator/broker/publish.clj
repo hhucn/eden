@@ -5,7 +5,8 @@
             [aggregator.broker.connector :as connector]
             [aggregator.utils.common :as lib]
             [aggregator.broker.config :as bconf]
-            [aggregator.specs :as gspecs]))
+            [aggregator.specs :as gspecs]
+            [taoensso.timbre :as log]))
 
 (defn- publish
   "Create queue for entity and publish it on this queue."
@@ -22,6 +23,7 @@
   published."
   [statement]
   (when (lib/valid? ::gspecs/statement statement)
+    (log/debug (format "About to publish the following statement: %s" statement))
     (publish statement "statements" :statement)
     (lib/return-ok "Statement published")))
 
