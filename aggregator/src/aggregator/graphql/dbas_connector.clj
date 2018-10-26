@@ -67,7 +67,7 @@
   "Use the strange structure of D-BAS-arguments to create links. Needs a connection to the local dbas instance.
   Returned links in EDEN format."
   [argument]
-  (let [group-uid (:premisesgroupUid argument)
+  (let [group-uid (:premisegroupUid argument)
         premises (query-db (format
                             "query {premises(premisegroupUid: %d) {statementUid}}"
                             group-uid))
@@ -99,4 +99,3 @@
   (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, argumentUid, premisegroupUid}}")
         return-val (mapcat links-from-argument (:arguments result))]
     return-val))
-
