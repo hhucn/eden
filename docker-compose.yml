@@ -37,7 +37,7 @@ services:
       - "DBAS_HOST=dbas"
       - "ELASTICSEARCH_HOST=search"
       - "DB_HOST=dbas-db"
-      - "AGGREGATOR_NAME=aggregator:8888"
+      - AGGREGATOR_NAME
 
   search:
     build: elasticsearch/
@@ -70,6 +70,14 @@ services:
       - "DB_NAME=${DB_NAME}"
       - "DB_HOST=${DB_HOST}"
       - "AUTHN_SECRET=${AUTHN_SECRET}"
+      - HHU_LDAP_SERVER
+      - HHU_LDAP_BASE
+      - HHU_LDAP_ACCOUNT_SCOPE
+      - HHU_LDAP_ACCOUNT_FILTER
+      - HHU_LDAP_ACCOUNT_FIRSTNAME
+      - HHU_LDAP_ACCOUNT_LAST
+      - HHU_LDAP_ACCOUNT_TITLE
+      - HHU_LDAP_ACCOUNT_EMAIL
     volumes:
       - ./dbas:/dbas
 
