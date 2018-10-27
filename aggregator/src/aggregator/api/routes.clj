@@ -6,7 +6,8 @@
             [spec-tools.spec :as spec]
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
-            [ring.util.http-response :refer [ok not-found]]))
+            [ring.util.http-response :refer [ok not-found]]
+            [ring.middleware.cors :as ring-cors]))
 
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
@@ -103,31 +104,36 @@
                   (ok {:link link})
                   (not-found nil)))))
 
+(def ^:private hello-route
+  (GET "/" []
+    :summary "Test whether the api is online"
+    :query-params []
+    :return ::welcome-message
+    (ok "Hello!")))
+
 (def app
-  (api {:coercion :spec
-        :swagger
-        {:ui "/swagger"
-         :spec "/swagger.json"
-         :data {:info {:title "EDEN Aggregator API"
-                       :description "An API to request statements and links from the EDEN instance."}
-                :tags [{:name "statements" :description "Retrieve Statements"}
-                       {:name "links" :description "Retrieve Links"}
-                       {:name "statement" :description "Retrieve single specific statement"}
-                       {:name "link" :description "Retrieve single specific link"}]}}}
+  (->
+   (api {:coercion :spec
+         :swagger
+         {:ui "/swagger"
+          :spec "/swagger.json"
+          :data {:info {:title "EDEN Aggregator API"
+                        :description "An API to request statements and links from the EDEN instance."}
+                 :tags [{:name "statements" :description "Retrieve Statements"}
+                        {:name "links" :description "Retrieve Links"}
+                        {:name "statement" :description "Retrieve single specific statement"}
+                        {:name "link" :description "Retrieve single specific link"}]}}}
 
-       statement-routes
-       statements-routes
-       link-routes
-       links-routes
+        statement-routes
+        statements-routes
+        link-routes
+        links-routes
+        hello-route
 
-       (GET "/" []
-         :summary "Test whether the api is online"
-         :query-params []
-         :return ::welcome-message
-         (ok "Hello!"))
-
-       (undocumented
-        (compojure.route/not-found (not-found {:not "found"})))))
+        (undocumented
+         (compojure.route/not-found (not-found {:not "found"}))))
+   (ring-cors/wrap-cors :access-control-allow-origin #".*"
+                        :access-control-allow-methods [:get :put :post :delete])))
 
 (comment
   (use 'ring.adapter.jetty)
