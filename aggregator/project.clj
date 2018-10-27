@@ -47,5 +47,7 @@
   :main ^:skip-aot aggregator.core
   :target-path "target/%s"
 
+  :local-repo ".m2/repo"
+
   :codox {:metadata {:doc/format :markdown}
           :themes [:rdash]})
