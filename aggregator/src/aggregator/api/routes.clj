@@ -112,28 +112,28 @@
     (ok "Hello!")))
 
 (def app
-  (->
-   (api {:coercion :spec
-         :swagger
-         {:ui "/swagger"
-          :spec "/swagger.json"
-          :data {:info {:title "EDEN Aggregator API"
-                        :description "An API to request statements and links from the EDEN instance."}
-                 :tags [{:name "statements" :description "Retrieve Statements"}
-                        {:name "links" :description "Retrieve Links"}
-                        {:name "statement" :description "Retrieve single specific statement"}
-                        {:name "link" :description "Retrieve single specific link"}]}}}
-
-        statement-routes
-        statements-routes
-        link-routes
-        links-routes
-        hello-route
-
-        (undocumented
-         (compojure.route/not-found (not-found {:not "found"}))))
-   (ring-cors/wrap-cors :access-control-allow-origin #".*"
-                        :access-control-allow-methods [:get :put :post :delete])))
+  (let [compojure-api-handler
+        (api {:coercion :spec
+              :swagger
+              {:ui "/swagger"
+               :spec "/swagger.json"
+               :data {:info {:title "EDEN Aggregator API"
+                             :description "An API to request statements and links from the EDEN instance."}
+                      :tags [{:name "statements" :description "Retrieve Statements"}
+                             {:name "links" :description "Retrieve Links"}
+                             {:name "statement" :description "Retrieve single specific statement"}
+                             {:name "link" :description "Retrieve single specific link"}]}}}
+             statement-routes
+             statements-routes
+             link-routes
+             links-routes
+             hello-route
+             (undocumented
+              (compojure.route/not-found (not-found {:not "found"}))))]
+    (ring-cors/wrap-cors
+     compojure-api-handler
+     :access-control-allow-origin #".*"
+     :access-control-allow-methods [:get :put :post :delete])))
 
 (comment
   (use 'ring.adapter.jetty)
