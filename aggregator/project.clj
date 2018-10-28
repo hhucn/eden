@@ -17,6 +17,7 @@
                  [ring/ring-json "0.4.0"]
                  [ring/ring-mock "0.3.2"]
                  [ring/ring-jetty-adapter "1.6.3"]
+                 [ring-cors "0.1.12"]
                  [clj-http "3.7.0"]
                  [codox-theme-rdash "0.1.2"]
                  [metosin/compojure-api "2.0.0-alpha19"]
@@ -45,6 +46,8 @@
 
   :main ^:skip-aot aggregator.core
   :target-path "target/%s"
+
+  :local-repo ".m2/repo"
 
   :codox {:metadata {:doc/format :markdown}
           :themes [:rdash]})
