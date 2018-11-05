@@ -64,7 +64,6 @@
        (lib/return-error (:queue-ex exceptions)))))
   ([queue broker] (subscribe to-query queue broker)))
 
-
 ;; -----------------------------------------------------------------------------
 ;; Specs
 
