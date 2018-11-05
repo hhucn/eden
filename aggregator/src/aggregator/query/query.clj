@@ -138,7 +138,7 @@
 (defn starter-set
   "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or database."
   []
-  (db/random-statements 10))
+  (db/random-statements 100))
 
 (defn remote-starter-set
   "Retrieve remote starter sets and put them into the cache and db."
@@ -161,6 +161,7 @@
        (all-remote-statements aggregator))))
   ([aggregator]
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
+     (subscribe-to-queue "statements" aggregator)
      (doseq [statement results]
        (up/update-statement statement)))))
 
@@ -177,6 +178,7 @@
        (all-remote-links aggregator))))
   ([aggregator]
    (let [results (get-data (str config/protocol aggregator "/links"))]
+     (subscribe-to-queue "links" aggregator)
      (doseq [link results]
        (up/update-link link)))))
 
