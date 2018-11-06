@@ -24,9 +24,8 @@
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
   if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
-  (let [queue-name (get-in queue [:data :queue-name])
-        cleaned-host (first (str/split host #":"))]
-    (sub/subscribe queue-name {:host cleaned-host})))
+  (let [cleaned-host (first (str/split host #":"))]
+    (sub/subscribe queue {:host cleaned-host})))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
