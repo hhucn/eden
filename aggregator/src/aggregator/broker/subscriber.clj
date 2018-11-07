@@ -2,11 +2,13 @@
   (:require [langohr.core :as rmq]
             [langohr.channel :as lch]
             [langohr.consumers :as lcons]
+            [langohr.queue :as lq]
             [taoensso.timbre :as log]
             [aggregator.utils.common :as lib]
             [aggregator.query.update :as qupd]
             [aggregator.specs :as gspecs]
-            [clojure.spec.alpha :as s])
+            [clojure.spec.alpha :as s]
+            [aggregator.broker.subscriber :as sub])
   (:import [com.rabbitmq.client AuthenticationFailureException]))
 
 (def exceptions
@@ -50,6 +52,7 @@
                   :username (or user (System/getenv "BROKER_USER"))
                   :password (or password (System/getenv "BROKER_PASS"))})
            ch (lch/open conn)]
+       (lq/declare ch queue {:exclusive false :auto-delete true})
        (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
        (log/debug (format "Connected to queue %s. Channel id: %s" queue (.getChannelNumber ch)))
        (lib/return-ok "Connection to message queue established."))
