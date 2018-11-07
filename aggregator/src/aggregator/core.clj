@@ -36,6 +36,8 @@
   (search/entrypoint)
   (when-not (broker/connected?)
     (broker/init-connection!))
+  (broker/create-queue "statements")
+  (broker/create-queue "links")
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)

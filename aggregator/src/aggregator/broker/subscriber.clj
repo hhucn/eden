@@ -51,7 +51,6 @@
                   :username (or user (System/getenv "BROKER_USER"))
                   :password (or password (System/getenv "BROKER_PASS"))})
            ch (lch/open conn)]
-       (lq/declare ch queue {:exclusive false :auto-delete true})
        (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
        (log/debug (format "Connected to queue %s. Channel id: %s" queue (.getChannelNumber ch)))
        (lib/return-ok "Connection to message queue established."))

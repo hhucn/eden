@@ -54,8 +54,8 @@
   (future
     (loop [whitelisted config/whitelist]
       (log/debug "Pulling all whitelisted information at once.")
-      (dorun (map query/all-remote-statements whitelisted))
-      (dorun (map query/all-remote-links whitelisted))
+      (run! query/all-remote-statements whitelisted)
+      (run! query/all-remote-links whitelisted)
       (Thread/sleep 120000)
       (recur whitelisted))))
 

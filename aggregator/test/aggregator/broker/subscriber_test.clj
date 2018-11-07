@@ -60,7 +60,7 @@
   (testing "Wrong password also returns an :error"
     (is (= :error (:status
                    (sub/subscribe handler queue
-                                  (assoc broker :user "The wrong password you have."))))))
+                                  (assoc broker :password "The wrong password you have."))))))
   (testing "Can't subscribe to a non-existent queue"
     (is (= :error (:status
                    (sub/subscribe handler

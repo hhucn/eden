@@ -21,7 +21,8 @@
   (is (= :ok (:status (-> (connector/open-channel) connector/close-channel)))))
 
 (deftest create-queue-test
-  (is (= :ok (:status (connector/create-queue "i.am.groot")))))
+  (is (= :ok (:status (connector/create-queue "i.am.groot"))))
+  (connector/delete-queue "i.am.groot"))
 
 (deftest delete-queue-test
   (let [queue (str (lib/uuid))]
