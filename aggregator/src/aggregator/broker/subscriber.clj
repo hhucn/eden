@@ -7,8 +7,7 @@
             [aggregator.utils.common :as lib]
             [aggregator.query.update :as qupd]
             [aggregator.specs :as gspecs]
-            [clojure.spec.alpha :as s]
-            [aggregator.broker.subscriber :as sub])
+            [clojure.spec.alpha :as s])
   (:import [com.rabbitmq.client AuthenticationFailureException]))
 
 (def exceptions
