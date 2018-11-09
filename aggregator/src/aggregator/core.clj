@@ -34,10 +34,7 @@
   [& args]
   (load-config)
   (search/entrypoint)
-  (when-not (broker/connected?)
-    (broker/init-connection!))
-  (broker/create-queue "statements")
-  (broker/create-queue "links")
+  (broker/entrypoint)
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
