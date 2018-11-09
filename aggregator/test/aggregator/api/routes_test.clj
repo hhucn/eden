@@ -6,9 +6,9 @@
             [cheshire.core :as cheshire]))
 
 (defn fixtures [f]
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (f)
-  (connector/close-connection!))
+  (connector/close-local-connection!))
 (use-fixtures :once fixtures)
 
 (defn- parse-body [body]

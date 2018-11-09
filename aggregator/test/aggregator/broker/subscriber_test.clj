@@ -26,7 +26,7 @@
 
 ;; Test preparation
 (defn fixtures [f]
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (connector/create-queue queue)
   (connector/create-queue queue-two)
   (pub/publish-statement statement)
@@ -34,7 +34,7 @@
   (f)
   (connector/delete-queue queue)
   (connector/delete-queue queue-two)
-  (connector/close-connection!))
+  (connector/close-local-connection!))
 (use-fixtures :once fixtures)
 
 
@@ -52,15 +52,6 @@
     (is (= :error (:status
                    (sub/subscribe handler queue
                                   (assoc broker :host "deathstar#4"))))))
-  (testing "Wrong user gives status :error"
-    (deftest subscribe-wrong-user
-      (is (= :error (:status
-                     (sub/subscribe handler queue
-                                    (assoc broker :user "yoda")))))))
-  (testing "Wrong password also returns an :error"
-    (is (= :error (:status
-                   (sub/subscribe handler queue
-                                  (assoc broker :password "The wrong password you have."))))))
   (testing "Can't subscribe to a non-existent queue"
     (is (= :error (:status
                    (sub/subscribe handler

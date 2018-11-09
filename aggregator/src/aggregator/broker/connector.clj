@@ -5,15 +5,24 @@
             [langohr.channel :as lch]
             [langohr.queue :as lq]
             [aggregator.broker.config :as bconf]
+            [aggregator.config :as config]
             [aggregator.utils.common :as lib]))
 
-(def ^:private conn (atom nil))
+(defn broker-data
+  "Helper shortcut to get the broker-data from the state."
+  [name]
+  (get-in @config/app-state [:broker-info name]))
 
 (defn connected?
-  "Check if connection to broker is established."
-  [] (if (and @conn (not (rmq/closed? @conn))) true false))
+  "Check if connection to broker is established. When no broker-name is given, the local broker is checked. If connection is established return connection, otherwise nil."
+  ([broker-name]
+   (:conn (broker-data broker-name)))
+  ([]
+   (connected? (System/getenv "BROKER_HOST"))))
 
-(defmacro with-connection
+#_(defmacro with-connection
+  "Executes the body if the local connection is established.
+  Returns the error message otherwise."
   [error-msg & body]
   `(if (connected?)
      (do ~@body)
@@ -26,42 +35,70 @@
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
   broker."
-  [] (reset! conn (rmq/connect {:host (System/getenv "BROKER_HOST")
-                                :username (System/getenv "BROKER_USER")
-                                :password (System/getenv "BROKER_PASS")})))
+  [hostname] (rmq/connect {:host hostname
+                           :username (System/getenv "BROKER_USER")
+                           :password (System/getenv "BROKER_PASS")}))
 
-(defn init-connection!
-  "Initializes connection to broker and creates an exchange."
+(defn get-connection!
+  "Opens a connection to a remote broker. If the connection is already opened, returns the opened connection.
+  Connections are stored within the app-state inside the config-module."
+  ([broker-name]
+   (let [conn (:conn (broker-data broker-name))]
+     (or conn
+         (let [new-conn (create-connection! broker-name)]
+           (swap! config/app-state assoc-in [:broker-info broker-name :conn] new-conn)
+           new-conn))))
+  ([]
+   (get-connection! (System/getenv "BROKER_HOST"))))
+
+(defn init-local-connection!
+  "Initializes connection to local broker and creates an exchange."
   []
-  (create-connection!)
+  (get-connection! (System/getenv "BROKER_HOST"))
   (log/debug "Connection to Message Broker established.")
   (lib/return-ok "Connection established."))
 
+(declare close-all-channels!)
 (defn close-connection!
-  "Close connection to message broker."
+  "Closes a connection for a given broker and returns :ok. If the connection is already closed, return nil."
+  [broker-name]
+  (when-let [conn (:conn (broker-data broker-name))]
+    (close-all-channels! broker-name)
+    (rmq/close conn)
+    (swap! config/app-state assoc-in [:broker-info broker-name :conn] nil)
+    :ok))
+
+(defn close-local-connection!
+  "Close connection to the local message broker."
   []
-  (with-connection "Connection could not be closed."
-    (rmq/close @conn)
-    (reset! conn nil)
-    (lib/return-ok "Connection closed.")))
+  (close-connection! (System/getenv "BROKER_HOST"))
+  (lib/return-ok "Connection closed."))
 
 
 ;; -----------------------------------------------------------------------------
 ;; For the communication with the broker
 
-(defn open-channel
-  "Opens a channel for an existing connection to the broker."
-  []
-  (with-connection "Could not create channel."
-    (lch/open @conn)))
+(defn open-channel!
+  "Opens a channel returns it.
+  Keep in mind that you need to close this connection when finished."
+  ([broker-name]
+   (when-let [connection (get-connection! broker-name)]
+     (lch/open connection)))
+  ([] (open-channel! (System/getenv "BROKER_HOST"))))
 
-(defn close-channel
+(defn close-channel!
   "Given a channel, close it!"
   [ch]
-  (with-connection "Could not close channel."
-    (when-not (lch/closed? ch)
-      (lch/close ch)
-      (lib/return-ok "Channel closed."))))
+  (when-not (lch/closed? ch)
+    (lch/close ch)
+    (lib/return-ok "Channel closed.")))
+
+(defn close-all-channels!
+  "Closes all known channels for a certain broker."
+  [broker-name]
+  (let [channels (:subscriptions (broker-data broker-name))]
+    (run! (fn [[_ chan]] (lch/close chan)) channels)
+    (swap! config/app-state assoc-in [:broker-info broker-name :subscriptions] {})))
 
 (defn create-queue
   "Creates a queue for a given aggregator. Uses aggregator as the queue name and
@@ -71,49 +108,47 @@
   Example:
   (create-queue \"statements\")"
   ([queue-name exchange]
-   (with-connection "Could not create queue."
+   (let [ch (open-channel!)]
      (try
-       (let [ch (open-channel)
-             queue-name queue-name
-             expires-in-ms (* 30 60 1000)]
-         (lq/declare ch queue-name {:arguments {"x-expires" expires-in-ms}})
-         (lq/bind ch queue-name exchange {:routing-key queue-name})
-         (close-channel ch)
-         (log/debug "Created queue:" queue-name)
-         (lib/return-ok "Queue created." {:queue-name queue-name :expires-in-ms expires-in-ms}))
+       (lq/declare ch queue-name {:durable true
+                                  :auto-delete false})
+       (lq/bind ch queue-name exchange {:routing-key queue-name})
+       (log/debug "Created queue:" queue-name)
+       (lib/return-ok "Queue created." {:queue-name queue-name})
        (catch java.io.IOException _e
          (log/error "Could not create queue" queue-name)
-         (lib/return-error "Could not create queue, caught IOException.")))))
+         (lib/return-error "Could not create queue, caught IOException."))
+       (finally (close-channel! ch)))))
   ([queue-name]
    (create-queue queue-name bconf/exchange)))
 
 (defn queue-exists?
   "Check if queue exists. Returns a Boolean when connection is established."
   [queue]
-  (with-connection (format "Can't query existence of queue '%s'." queue)
+  (let [_ (get-connection!)
+        ch (open-channel!)]
     (try
-      (let [ch (open-channel)]
-        (lq/status ch queue)
-        (close-channel ch)
-        true)
-      (catch java.io.IOException _e false))))
+      (lq/status ch queue)
+      true
+      (catch java.io.IOException _e false)
+      (finally (close-channel! ch)))))
 
 (defn delete-queue
   "Given a queue-name, delete it!"
   [queue]
-  (with-connection "Could not delete queue."
+  (let [_ (get-connection!)
+        ch (open-channel!)]
     (when queue-exists?
-      (let [ch (open-channel)]
-        (lq/delete ch queue)
-        (close-channel ch)
-        (lib/return-ok "Queue deleted.")))))
+      (lq/delete ch queue)
+      (close-channel! ch)
+      (lib/return-ok "Queue deleted."))))
 
 
 ;; -----------------------------------------------------------------------------
 ;; Entrypoint
 
 (defn entrypoint []
-  (init-connection!)
+  (init-local-connection!)
   (create-queue "statements")
   (create-queue "links"))
 ;;(entrypoint)
