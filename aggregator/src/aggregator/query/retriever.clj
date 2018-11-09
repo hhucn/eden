@@ -51,7 +51,7 @@
       (log/debug "[retriever] Automatic search waking up.")
       (query/remote-starter-set)
       (recur (rand-nth (keys (cache/get-cached-statements))))))
-  (future
+  #_(future
     (loop [whitelisted config/whitelist]
       (log/debug "Pulling all whitelisted information at once.")
       (run! query/all-remote-statements whitelisted)
