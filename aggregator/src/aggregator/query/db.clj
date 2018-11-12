@@ -93,15 +93,16 @@
   "Returns all undercuts that point to target aggregator and entity-id."
   [target-aggregator target-entity-id]
   (keywordize-types (unpack-elastic (elastic/search :links {:type "undercut"
-                                                           :destination.aggregate-id target-aggregator
-                                                           :destination.entity-id target-entity-id}))))
+                                                            :destination.aggregate-id target-aggregator
+                                                            :destination.entity-id target-entity-id}))))
 
 (defn links-by-target
   "Return all links with the corresponding target."
   [target-aggregator target-entity target-version]
-  (keywordize-types (unpack-elastic (elastic/search :links {:destination.aggregate-id target-aggregator
-                                                           :destination.entity-id target-entity
-                                                           :destination.version target-version}))))
+  (keywordize-types (unpack-elastic
+                     (elastic/search :links {:destination.aggregate-id target-aggregator
+                                             :destination.entity-id target-entity
+                                             :destination.version target-version}))))
 
 (defn random-statements
   "Return *num* random statements from the db."

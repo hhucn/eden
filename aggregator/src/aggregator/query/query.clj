@@ -93,10 +93,13 @@
   [aggregate-id entity-id version]
   (if-let [possible-links (links-by-target aggregate-id entity-id version)]
     possible-links
-    (let [request-url (str config/protocol aggregate-id "/link/to/")
+    (let [request-url (str config/protocol aggregate-id "/links/to/")
           results (get-data request-url {:aggregate-id aggregate-id
                                          :entity-id entity-id
                                          :version version})]
+      (log/debug (format "Pulled %s downstream links for %s/%s/%s"
+                         (count results)
+                         aggregate-id entity-id version))
       (doseq [link results] (up/update-link link))
       results)))
 

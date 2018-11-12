@@ -73,23 +73,19 @@
                             group-uid))
         link-type-val (link-type argument)]
     (map (fn [premise]
-           (let [prepared-link 
-                 {:author (str "author#: "
-                               (:authorUid argument))
-                  :created nil ;; nil until we solve the graphql problem
-                  :type link-type-val
-                  :source {:aggregate-id config/aggregate-name
-                           :entity-id (:statementUid premise)
-                           :version 1}
-                  :destination {:aggregate-id config/aggregate-name}
-                  :identifier {:aggregate-id config/aggregate-name
-                               :entity-id (:uid argument)
-                               :version 1}}]
-             (if (not= link-type-val :undercut)
-               (assoc prepared-link :destination {:aggregate-id config/aggregate-name
-                                                  :version 1
-                                                  :entity-id (:conclusionUid argument)})
-               (assoc-in prepared-link [:destination :entity-id] (:argumentUid argument)))))
+           {:author (str "author#: "
+                         (:authorUid argument))
+            :created nil ;; nil until we solve the graphql problem
+            :type link-type-val
+            :source {:aggregate-id config/aggregate-name
+                     :entity-id (:statementUid premise)
+                     :version 1}
+            :destination {:aggregate-id config/aggregate-name
+                          :version 1
+                          :entity-id (:conclusionUid argument)}
+            :identifier {:aggregate-id config/aggregate-name
+                         :entity-id (:uid argument)
+                         :version 1}})
          (:premises premises))))
 
 
