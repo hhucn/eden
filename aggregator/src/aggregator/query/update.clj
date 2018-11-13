@@ -18,9 +18,12 @@
       (when (= (:aggregate-id identifier) config/aggregate-name)
         (pub/publish-statement statement))
       (db/insert-statement statement))
-    (cache/cache-miss (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
-                           (:version identifier))
-                      statement)))
+    (let [cache-uri (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
+                         (:version identifier))
+          cached-entity (cache/retrieve cache-uri)]
+      (when (= :missing cached-entity)
+        (cache/cache-miss cache-uri statement))))
+  statement)
 
 (defn update-link
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
@@ -38,4 +41,5 @@
       (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
                                   (:version identifier))
                              link)
-      (db/insert-link link))))
+      (db/insert-link link))
+    link))
