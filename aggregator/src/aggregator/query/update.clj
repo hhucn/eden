@@ -3,6 +3,8 @@
             [aggregator.query.cache :as cache]
             [aggregator.broker.publish :as pub]
             [aggregator.config :as config]
+            [aggregator.specs :as specs]
+            [clojure.spec.alpha :as s]
             [taoensso.timbre :as log]))
 
 (defn update-statement
@@ -43,3 +45,27 @@
                              link)
       (db/insert-link link))
     link))
+
+(defn update-statement-content
+  "Updates the content-text of a statement and bumps the version."
+  [statement updated-text]
+  (let [updated-statement (-> statement
+                              (assoc-in [:content :content-string] (str updated-text))
+                              (update-in [:identifier :version] inc))]
+    (when (s/valid? ::specs/statement updated-statement)
+      (db/insert-statement updated-statement)
+      updated-statement)))
+
+(defn fork-statement
+  "Forks a statement with a new identifier, content-string and author."
+  [statement identifier content-string author]
+  (let [updated-statement (-> statement
+                              (assoc-in [:content :content-string] (str content-string))
+                              (assoc-in [:content :author] (str author))
+                              (assoc :identifier identifier)
+                              (assoc-in [:identifier :version] 1)
+                              (assoc :predecessors [(:identifier statement)]))]
+    (when (s/valid? ::specs/statement updated-statement)
+      (db/insert-statement updated-statement)
+      (pub/publish-statement updated-statement)
+      updated-statement)))
