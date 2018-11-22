@@ -49,7 +49,14 @@
                         entity-id :- ::eden-specs/entity-id]
          :return ::statements-map
          (ok {:statements (query/tiered-retrieval aggregate-id entity-id
-                                                  {:opts [:no-remote]})}))))
+                                                  {:opts [:no-remote]})}))
+
+    (GET "/custom" []
+         :summary "Returns all statements matching the search term in a custom field"
+         :query-params [custom-field :- spec/string?
+                        search-term :- spec/string?]
+         :return ::statements-map
+         (ok {:statements (query/custom-statement custom-field search-term)}))))
 
 (def links-routes
   (context "/links" []
@@ -68,7 +75,7 @@
                         entity-id :- ::eden-specs/entity-id]
          :return ::links-map
          (ok {:links (query/local-undercuts aggregate-id entity-id)}))
-    
+
     (GET "/to" []
          :summary "Return all links pointing to a specific statement"
          :query-params [aggregate-id :- ::eden-specs/aggregate-id

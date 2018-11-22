@@ -188,3 +188,9 @@
   "Retrieve all statements where the content.content-string contains the `query`"
   [query]
   (db/statements-contain query))
+
+
+(defn custom-statement
+  "Retrieve a statement with a custom field containg a specific search-term."
+  [field search-term]
+  (db/custom-statement-search field search-term))
