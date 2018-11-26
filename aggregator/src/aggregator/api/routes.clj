@@ -133,18 +133,11 @@
                  :return ::link-map
                  (ok {:link (update/update-link (utils/json->edn link))}))))
 
-(def ^:private hello-route
-  (GET "/" []
-    :summary "Test whether the api is online"
-    :query-params []
-    :return ::welcome-message
-    (ok "Hello!")))
-
 (def app
   (let [compojure-api-handler
         (api {:coercion :spec
               :swagger
-              {:ui "/swagger"
+              {:ui "/"
                :spec "/swagger.json"
                :data {:info {:title "EDEN Aggregator API"
                              :description "An API to request statements and links from the EDEN instance."}
@@ -156,7 +149,6 @@
              statements-routes
              link-routes
              links-routes
-             hello-route
              (undocumented
               (compojure.route/not-found (not-found {:not "found"}))))]
     (ring-cors/wrap-cors
