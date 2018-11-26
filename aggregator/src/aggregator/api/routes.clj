@@ -15,10 +15,33 @@
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
+(s/def ::minimal-statement (s/keys :req-un [::eden-specs/content-string ::eden-specs/author]))
+(s/def ::minimal-premise ::minimal-statement)
+(s/def ::minimal-conclusion ::minimal-statement)
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
 (s/def ::statement-map (s/keys :req-un [::eden-specs/statement]))
 (s/def ::link-map (s/keys :req-un [::eden-specs/link]))
+(s/def ::premise-id ::eden-specs/identifier)
+(s/def ::conclusion-id ::eden-specs/identifier)
+(s/def ::new-argument (s/keys :req-un [::premise-id ::conclusion-id]))
+(s/def ::link-type #{"support" "attack" "undercut"})
+(s/def ::minimal-argument (s/keys :req-un [::minimal-premise ::minimal-conclusion ::link-type]))
+
+(def argument-routes
+  (context "/argument" []
+           :tags ["argument"]
+           :coercion :spec
+
+           (POST "/add" []
+                 :summary "Add a new argument to the EDEN database"
+                 :body [request-body ::minimal-argument]
+                 :return ::new-argument
+                 (ok
+                  (let [premise (:minimal-premise request-body)
+                        conclusion (:minimal-conclusion request-body)
+                        link-type (:link-type request-body)]
+                    (update/add-argument premise conclusion link-type))))))
 
 (def statements-routes
   (context "/statements" []
@@ -149,6 +172,7 @@
              statements-routes
              link-routes
              links-routes
+             argument-routes
              (undocumented
               (compojure.route/not-found (not-found {:not "found"}))))]
     (ring-cors/wrap-cors

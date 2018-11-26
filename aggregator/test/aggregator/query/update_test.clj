@@ -1,5 +1,6 @@
 (ns aggregator.query.update-test
   (:require [aggregator.query.update :as update]
+            [aggregator.query.query :as query]
             [aggregator.config :as config]
             [clojure.test :refer [deftest is]]))
 
@@ -54,3 +55,26 @@
     (is (= "Der Wetschi" (get-in updated-statement [:content :author])))
     (is (= "name-test" (:aggregate-id predecessor)))
     (is (= "34" (:entity-id predecessor)))))
+
+
+(deftest add-argument
+  (let [{:keys [premise-id conclusion-id link-id]} (update/add-argument
+                                                    {:content-string "Der Kalli testet"
+                                                     :author "¯\\_(ツ)_/¯"}
+                                                    {:content-string "Conclusion wird supportet"
+                                                     :author "Foo"}
+                                                    :support)]
+    (is (= "¯\\_(ツ)_/¯"
+           (get-in (query/exact-statement (:aggregate-id premise-id)
+                                          (:entity-id premise-id)
+                                          (:version premise-id))
+                   [:content :author])))
+    (is (= "Conclusion wird supportet"
+           (get-in (query/exact-statement (:aggregate-id conclusion-id)
+                                          (:entity-id conclusion-id)
+                                          (:version conclusion-id))
+                   [:content :content-string])))
+    (is (not (nil?
+              (count (query/retrieve-link (:aggregate-id link-id)
+                                          (:entity-id link-id)
+                                          (:version link-id))))))))

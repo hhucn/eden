@@ -69,3 +69,41 @@
       (db/insert-statement updated-statement)
       (pub/publish-statement updated-statement)
       updated-statement)))
+
+(defn- statement-from-minimal
+  "Generate a statement from the minimal needed information."
+  [{:keys [content-string author]}]
+  {:content {:content-string content-string
+             :author author
+             :created nil}
+   :identifier {:aggregate-id config/aggregate-name
+                :entity-id (str (java.util.UUID/randomUUID))
+                :version 1}
+   :delete-flag :false
+   :predecessors []})
+
+(defn- link-premise-conclusion
+  "Given a premise and a conclusion, link them both with an argument link."
+  [premise conclusion link-type]
+  (let [premise-id (:identifier premise)
+        conclusion-id (:identifier conclusion)]
+    {:type (:keyword link-type)
+     :source premise-id
+     :destination conclusion-id
+     :delete-flag :false
+     :identifier {:aggregate-id config/aggregate-name
+                  :entity-id (str "link_" (java.util.UUID/randomUUID))
+                  :version 1}}))
+
+(defn add-argument
+  "Adds an argument to the database."
+  [premise conclusion link-type]
+  (let [complete-premise (statement-from-minimal premise)
+        complete-conclusion (statement-from-minimal conclusion)
+        link (link-premise-conclusion complete-premise complete-conclusion link-type)]
+    (update-statement complete-premise)
+    (update-statement complete-conclusion)
+    (update-link link)
+    {:premise-id (:identifier complete-premise)
+     :conclusion-id (:identifier complete-conclusion)
+     :link-id (:identifier link)}))
