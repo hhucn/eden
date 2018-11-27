@@ -57,10 +57,10 @@
       updated-statement)))
 
 (defn fork-statement
-  "Forks a statement with a new identifier, content-string and author."
-  [statement identifier content-string author]
+  "Forks a statement with a new identifier, text and author."
+  [statement identifier text author]
   (let [updated-statement (-> statement
-                              (assoc-in [:content :text] (str content-string))
+                              (assoc-in [:content :text] (str text))
                               (assoc-in [:content :author] (str author))
                               (assoc :identifier identifier)
                               (assoc-in [:identifier :version] 1)
@@ -72,8 +72,8 @@
 
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
-  [{:keys [content-string author]}]
-  {:content {:content-text content-string
+  [{:keys [text author]}]
+  {:content {:content-text text
              :author author
              :created nil}
    :identifier {:aggregate-id config/aggregate-name

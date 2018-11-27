@@ -185,7 +185,7 @@
        (up/update-link link)))))
 
 (defn statements-contain
-  "Retrieve all statements where the content.content-string contains the `query`"
+  "Retrieve all statements where the content.text contains the `query`"
   [query]
   (db/statements-contain query))
 

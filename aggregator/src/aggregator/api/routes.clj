@@ -2,6 +2,7 @@
   "Define and expose the routes for the REST API in this file."
   (:require [compojure.route]
             [compojure.api.sweet :refer [GET POST api context resource undocumented]]
+            [compojure.api.exception :as ex]
             [aggregator.query.query :as query]
             [aggregator.utils.common :as utils]
             [aggregator.query.update :as update]
@@ -14,18 +15,22 @@
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
-(s/def ::minimal-statement (s/keys :req-un [::eden-specs/content-string ::eden-specs/author]))
+
+(s/def ::minimal-statement (s/keys :req-un [::eden-specs/text ::eden-specs/author]))
 (s/def ::premise ::minimal-statement)
 (s/def ::conclusion ::minimal-statement)
+
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
 (s/def ::statement-map (s/keys :req-un [::eden-specs/statement]))
 (s/def ::link-map (s/keys :req-un [::eden-specs/link]))
+
 (s/def ::premise-name ::eden-specs/identifier)
 (s/def ::conclusion-name ::eden-specs/identifier)
 (s/def ::link-name ::eden-specs/identifier)
 (s/def ::new-argument (s/keys :req-un [::premise-name ::conclusion-name]
                               :opt-un [::link-name]))
+
 (s/def ::link-type #{"support" "attack" "undercut"})
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type]))
 
@@ -39,6 +44,7 @@
                  :body [request-body ::minimal-argument]
                  :return ::new-argument
                  (created
+                  "/argument"
                   (let [premise (:premise request-body)
                         conclusion (:conclusion request-body)
                         link-type (:link-type request-body)]
@@ -160,6 +166,11 @@
 (def app
   (let [compojure-api-handler
         (api {:coercion :spec
+              :exceptions
+              {:handlers
+               {::ex/request-parsing (ex/with-logging ex/request-parsing-handler :info)
+                ::ex/request-validation (ex/with-logging ex/request-validation-handler :error)
+                ::ex/response-validation (ex/with-logging ex/response-validation-handler :error)}}
               :swagger
               {:ui "/"
                :spec "/swagger.json"
