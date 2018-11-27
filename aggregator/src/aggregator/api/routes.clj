@@ -133,7 +133,9 @@
                  :summary "Add a statement to the EDEN database"
                  :body [statement ::eden-specs/statement]
                  :return ::statement-map
-                 (ok {:statement (update/update-statement (utils/json->edn statement))}))))
+                 (created
+                  "/statement"
+                  {:statement (update/update-statement (utils/json->edn statement))}))))
 
 (defn wrap-link-type [handler]
   (fn [request]
@@ -161,7 +163,9 @@
                  :middleware [wrap-link-type]
                  :body [link ::eden-specs/link]
                  :return ::link-map
-                 (ok {:link (update/update-link (utils/json->edn link))}))))
+                 (created
+                  "/link"
+                  {:link (update/update-link (utils/json->edn link))}))))
 
 (def app
   (let [compojure-api-handler

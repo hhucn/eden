@@ -79,7 +79,7 @@
    :identifier {:aggregate-id config/aggregate-name
                 :entity-id (str (java.util.UUID/randomUUID))
                 :version 1}
-   :delete-flag :false
+   :delete-flag false
    :predecessors []})
 
 (defn- link-premise-conclusion
@@ -90,7 +90,7 @@
     {:type (:keyword link-type)
      :source premise-id
      :destination conclusion-id
-     :delete-flag :false
+     :delete-flag false
      :identifier {:aggregate-id config/aggregate-name
                   :entity-id (str "link_" (java.util.UUID/randomUUID))
                   :version 1}}))
