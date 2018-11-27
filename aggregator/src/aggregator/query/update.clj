@@ -47,7 +47,7 @@
     link))
 
 (defn update-statement-content
-  "Updates the content-text of a statement and bumps the version."
+  "Updates the text of a statement and bumps the version."
   [statement updated-text]
   (let [updated-statement (-> statement
                               (assoc-in [:content :text] (str updated-text))
@@ -73,7 +73,7 @@
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
   [{:keys [text author]}]
-  {:content {:content-text text
+  {:content {:text text
              :author author
              :created nil}
    :identifier {:aggregate-id config/aggregate-name
