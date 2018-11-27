@@ -171,7 +171,7 @@
   (search-request
    {:query
     {:match
-     {:content.content-string
+     {:content.text
       {:query (append-star-if-not-empty querystring)
        :fuzziness "AUTO"}}}} :statements))
 
@@ -220,8 +220,8 @@
                                   :filter ["lowercase" "synonym_filter"]}}}}}
                 {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
                                            :identifier.entity-id {:type :keyword}
-                                           :content.content-string {:type "text"
-                                                                    :analyzer "synonym_analyzer"}}}})
+                                           :content.text {:type "text"
+                                                          :analyzer "synonym_analyzer"}}}})
   (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
                                                 :identifier.entity-id {:type :keyword}}}}))
 

@@ -8,10 +8,9 @@
 (defonce queue (first (last (s/exercise string?))))
 
 (def statement {:content {:author "kangaroo"
-                          :content-string "Schnapspralinen"
+                          :text "Schnapspralinen"
                           :created nil}
-                :identifier {
-                             :aggregate-id "huepfer.verlag"
+                :identifier {:aggregate-id "huepfer.verlag"
                              :entity-id "1"
                              :version 1}
                 :predecessors {}

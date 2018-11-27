@@ -7,7 +7,7 @@
 (def some-statement
   {:identifier {:aggregate-id "name-test" :entity-id "34" :version 1}
    :content {:author "Jorge"
-             :content-string "money does not solve problems of our society"
+             :text "money does not solve problems of our society"
              :created nil}
    :predecessors {}
    :delete-flag false})
@@ -38,8 +38,8 @@
         updated-statement-2 (update/update-statement-content some-statement :fooo)
         not-a-statement (update/update-statement-content some-link "fail")]
     (is (= 2 (get-in updated-statement [:identifier :version])))
-    (is (= "lolz" (get-in updated-statement [:content :content-string])))
-    (is (= ":fooo" (get-in updated-statement-2 [:content :content-string])))
+    (is (= "lolz" (get-in updated-statement [:content :text])))
+    (is (= ":fooo" (get-in updated-statement-2 [:content :text])))
     (is (nil? not-a-statement))))
 
 (deftest test-fork-statement
@@ -49,7 +49,7 @@
                                                  "New content" "Der Wetschi")
         predecessor (first (:predecessors updated-statement))]
     (is (= 1 (get-in updated-statement [:identifier :version])))
-    (is (= "New content" (get-in updated-statement [:content :content-string])))
+    (is (= "New content" (get-in updated-statement [:content :text])))
     (is (= "new-agg.de" (get-in updated-statement [:identifier :aggregate-id])))
     (is (= "42" (get-in updated-statement [:identifier :entity-id])))
     (is (= "Der Wetschi" (get-in updated-statement [:content :author])))
@@ -59,9 +59,9 @@
 
 (deftest add-argument
   (let [{:keys [premise-id conclusion-id link-id]} (update/add-argument
-                                                    {:content-string "Der Kalli testet"
+                                                    {:text "Der Kalli testet"
                                                      :author "¯\\_(ツ)_/¯"}
-                                                    {:content-string "Conclusion wird supportet"
+                                                    {:text "Conclusion wird supportet"
                                                      :author "Foo"}
                                                     :support)]
     (is (= "¯\\_(ツ)_/¯"
@@ -73,7 +73,7 @@
            (get-in (query/exact-statement (:aggregate-id conclusion-id)
                                           (:entity-id conclusion-id)
                                           (:version conclusion-id))
-                   [:content :content-string])))
+                   [:content :text])))
     (is (not (nil?
               (count (query/retrieve-link (:aggregate-id link-id)
                                           (:entity-id link-id)

@@ -4,10 +4,10 @@
 (s/def ::no-slash (s/and string? #(not (re-find #"/" %)) #(pos? (count %))))
 
 (s/def ::author string?)
-(s/def ::content-string string?)
+(s/def ::text string?)
 (s/def ::created (s/or :nil nil? :timestamp string?)) ;; timestamp
 (s/def ::content
-  (s/keys :req-un [::content-string ::created ::author]))
+  (s/keys :req-un [::text ::created ::author]))
 
 (s/def ::aggregate-id ::no-slash)
 (s/def ::entity-id ::no-slash)

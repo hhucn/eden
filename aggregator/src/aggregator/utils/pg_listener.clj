@@ -15,7 +15,7 @@
   [textversion]
   (log/debug (format "Received new textversion from D-BAS: %s" (:data textversion)))
   (let [statement {:content {:author (str (get-in textversion [:data :author_uid]))
-                             :content-string (get-in textversion [:data :content])
+                             :text (get-in textversion [:data :content])
                              :created nil}
                    :identifier {:aggregate-id config/aggregate-name
                                 :entity-id (str (get-in textversion [:data :uid]))

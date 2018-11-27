@@ -113,7 +113,7 @@
                                  {:identifier.aggregate-id config/aggregate-name})))))
 
 (defn statements-contain
-  "Return all statements from the elasticsearch-db where content.content-string containts `query`"
+  "Return all statements from the elasticsearch-db where content.text containts `query`"
   [query]
   (unpack-elastic (elastic/search :statements-fuzzy query)))
 

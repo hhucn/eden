@@ -30,7 +30,7 @@
   (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
     (map (fn [statement]
            (let [default-statement {:content
-                                    {:content-string (get-in statement [:textversions :content])
+                                    {:text (get-in statement [:textversions :content])
                                      :created nil ;; dbas won't play
                                      :author (str "author#: "
                                                   (get-in statement [:textversions :authorUid]))}

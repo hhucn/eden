@@ -20,8 +20,8 @@
                  [ring-cors "0.1.12"]
                  [clj-http "3.7.0"]
                  [codox-theme-rdash "0.1.2"]
-                 [metosin/compojure-api "2.0.0-alpha19"]
-                 [metosin/spec-tools "0.6.1"]
+                 [metosin/compojure-api "2.0.0-alpha28"]
+                 [metosin/spec-tools "0.8.2"]
                  [cheshire "5.8.0"]]
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
