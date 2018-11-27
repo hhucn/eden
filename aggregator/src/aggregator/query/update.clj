@@ -50,7 +50,7 @@
   "Updates the content-text of a statement and bumps the version."
   [statement updated-text]
   (let [updated-statement (-> statement
-                              (assoc-in [:content :content-string] (str updated-text))
+                              (assoc-in [:content :text] (str updated-text))
                               (update-in [:identifier :version] inc))]
     (when (s/valid? ::specs/statement updated-statement)
       (db/insert-statement updated-statement)
@@ -60,7 +60,7 @@
   "Forks a statement with a new identifier, content-string and author."
   [statement identifier content-string author]
   (let [updated-statement (-> statement
-                              (assoc-in [:content :content-string] (str content-string))
+                              (assoc-in [:content :text] (str content-string))
                               (assoc-in [:content :author] (str author))
                               (assoc :identifier identifier)
                               (assoc-in [:identifier :version] 1)
@@ -73,7 +73,7 @@
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
   [{:keys [content-string author]}]
-  {:content {:content-string content-string
+  {:content {:content-text content-string
              :author author
              :created nil}
    :identifier {:aggregate-id config/aggregate-name

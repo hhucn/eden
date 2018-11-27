@@ -9,73 +9,73 @@
 (defn fixtures [f]
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
                         :content {:author "Jorge"
-                                  :content-string "money does not solve problems of our society"
+                                  :text "money does not solve problems of our society"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P12" :version 1}
                         :content {:author "George"
-                                  :content-string "we should shut down University Park"
+                                  :text "we should shut down University Park"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P13" :version 1}
                         :content {:author "George"
-                                  :content-string "shutting down University Park will save $100.000 a year"
+                                  :text "shutting down University Park will save $100.000 a year"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P22" :version 1}
                         :content {:author "AlterVerwalter"
-                                  :content-string "the city is planing a new park in the upcoming month"
+                                  :text "the city is planing a new park in the upcoming month"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "7" :version 1}
                         :content {:author "Bolek"
-                                  :content-string "we should not abandon our town's core task"
+                                  :text "we should not abandon our town's core task"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P23" :version 1}
                         :content {:author "XxxBaerchiDarkDestoyerxxX"
-                                  :content-string "there is a smaller park in O-Town"
+                                  :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P232" :version 1}
                         :content {:author "XxxBestoyerxxX"
-                                  :content-string "there is a smaller park in O-Town"
+                                  :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P231" :version 1}
                         :content {:author "XxxBoyerxxX"
-                                  :content-string "there is a smaller park in O-Town"
+                                  :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P230" :version 1}
                         :content {:author "XxxBayerxxX"
-                                  :content-string "there is a smaller park in O-Town"
+                                  :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P29" :version 1}
                         :content {:author "XxxBaeryerxxX"
-                                  :content-string "there is a smaller park in O-Town"
+                                  :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P420" :version 1}
                         :content {:author "saywhaaat"
-                                  :content-string "califragilistic extrahotentific"
+                                  :text "califragilistic extrahotentific"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
                         :content {:author "XxxBaeryerxxX"
-                                  :content-string "there is a smaller park in O-Town"
+                                  :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
@@ -104,7 +104,7 @@
 (deftest test-cached-statements
   (let [statement {:identifier {:aggregate-id "cache-aggregator" :entity-id "cache-id" :version 1}
                    :content {:author "XxxBaeryerxxX"
-                             :content-string "there is a smaller park in O-Town"
+                             :text "there is a smaller park in O-Town"
                              :created nil}
                    :predecessors {}
                    :delete-flag false}

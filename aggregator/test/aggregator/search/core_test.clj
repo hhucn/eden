@@ -4,7 +4,7 @@
             [clojure.spec.alpha :as s]
             [aggregator.specs :as gspecs]))
 
-(def kangaroo {:content {:content-string "Schnapspralinen"
+(def kangaroo {:content {:text "Schnapspralinen"
                          :author "kangaroo"
                          :created nil}
                :identifier {:aggregate-id "huepfer.verlag"
@@ -13,7 +13,7 @@
                :predecessors {}
                :delete-flag false})
 
-(def penguin {:content {:content-string "Teewurst"
+(def penguin {:content {:text "Teewurst"
                          :author "penguin"
                          :created nil}
                :identifier {:aggregate-id "penguin.books:8080"
@@ -22,7 +22,7 @@
                :predecessors {}
               :delete-flag false})
 
-(def penguin2 {:content {:content-string "Teewurst 2: Die Rache der Teewurst"
+(def penguin2 {:content {:text "Teewurst 2: Die Rache der Teewurst"
                          :author "penguin"
                          :created nil}
                :identifier {:aggregate-id "penguin.books:8080"

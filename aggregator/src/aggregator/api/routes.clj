@@ -8,38 +8,39 @@
             [spec-tools.spec :as spec]
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
-            [ring.util.http-response :refer [ok not-found]]
-            [ring.middleware.cors :as ring-cors]
-            [taoensso.timbre :as log]))
+            [ring.util.http-response :refer [ok not-found created]]
+            [ring.middleware.cors :as ring-cors]))
 
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
 (s/def ::minimal-statement (s/keys :req-un [::eden-specs/content-string ::eden-specs/author]))
-(s/def ::minimal-premise ::minimal-statement)
-(s/def ::minimal-conclusion ::minimal-statement)
+(s/def ::premise ::minimal-statement)
+(s/def ::conclusion ::minimal-statement)
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
 (s/def ::statement-map (s/keys :req-un [::eden-specs/statement]))
 (s/def ::link-map (s/keys :req-un [::eden-specs/link]))
-(s/def ::premise-id ::eden-specs/identifier)
-(s/def ::conclusion-id ::eden-specs/identifier)
-(s/def ::new-argument (s/keys :req-un [::premise-id ::conclusion-id]))
+(s/def ::premise-name ::eden-specs/identifier)
+(s/def ::conclusion-name ::eden-specs/identifier)
+(s/def ::link-name ::eden-specs/identifier)
+(s/def ::new-argument (s/keys :req-un [::premise-name ::conclusion-name]
+                              :opt-un [::link-name]))
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::minimal-argument (s/keys :req-un [::minimal-premise ::minimal-conclusion ::link-type]))
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type]))
 
 (def argument-routes
   (context "/argument" []
            :tags ["argument"]
            :coercion :spec
 
-           (POST "/add" []
-                 :summary "Add a new argument to the EDEN database"
+           (POST "/" []
+                 :summary "Add a new argument to the EDEN database."
                  :body [request-body ::minimal-argument]
                  :return ::new-argument
-                 (ok
-                  (let [premise (:minimal-premise request-body)
-                        conclusion (:minimal-conclusion request-body)
+                 (created
+                  (let [premise (:premise request-body)
+                        conclusion (:conclusion request-body)
                         link-type (:link-type request-body)]
                     (update/add-argument premise conclusion link-type))))))
 
@@ -122,7 +123,7 @@
                   (ok {:statement statement})
                   (not-found nil)))
 
-           (POST "/add" []
+           (POST "/" []
                  :summary "Add a statement to the EDEN database"
                  :body [statement ::eden-specs/statement]
                  :return ::statement-map
@@ -149,7 +150,7 @@
                   (ok {:link link})
                   (not-found nil)))
 
-           (POST "/add" []
+           (POST "/" []
                  :summary "Add a link to the EDEN database"
                  :middleware [wrap-link-type]
                  :body [link ::eden-specs/link]
@@ -167,7 +168,8 @@
                       :tags [{:name "statements" :description "Retrieve Statements"}
                              {:name "links" :description "Retrieve Links"}
                              {:name "statement" :description "Retrieve or add a single specific statement"}
-                             {:name "link" :description "Retrieve or add a single specific link"}]}}}
+                             {:name "link" :description "Retrieve or add a single specific link"}
+                             {:name "argument" :description "Retrive or add whole arguments"}]}}}
              statement-routes
              statements-routes
              link-routes
