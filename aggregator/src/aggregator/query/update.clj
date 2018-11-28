@@ -4,6 +4,7 @@
             [aggregator.broker.publish :as pub]
             [aggregator.config :as config]
             [aggregator.specs :as specs]
+            [aggregator.utils.common :as utils]
             [clojure.spec.alpha :as s]
             [taoensso.timbre :as log]))
 
@@ -75,7 +76,7 @@
   [{:keys [text author]}]
   {:content {:text text
              :author author
-             :created nil}
+             :created (utils/time-now-str)}
    :identifier {:aggregate-id config/aggregate-name
                 :entity-id (str (java.util.UUID/randomUUID))
                 :version 1}
@@ -93,7 +94,8 @@
      :delete-flag false
      :identifier {:aggregate-id config/aggregate-name
                   :entity-id (str "link_" (java.util.UUID/randomUUID))
-                  :version 1}}))
+                  :version 1}
+     :created (utils/time-now-str)}))
 
 (defn add-argument
   "Adds an argument to the database."
