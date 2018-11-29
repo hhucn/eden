@@ -2,9 +2,14 @@
   (:require [clojure.spec.alpha :as s]))
 
 (s/def ::no-slash (s/and string? #(not (re-find #"/" %)) #(pos? (count %))))
+(s/def ::non-empty-string (s/and string? #((complement clojure.string/blank?) %)))
 
-(s/def ::author string?)
-(s/def ::text string?)
+(s/def ::dgep-native boolean?)
+(s/def ::name ::non-empty-string)
+(s/def ::id pos-int?)
+(s/def ::author (s/keys :req-un [::dgep-native ::name ::id]))
+
+(s/def ::text ::non-empty-string)
 (s/def ::created (s/or :nil nil? :timestamp string?)) ;; timestamp
 (s/def ::content
   (s/keys :req-un [::text ::created ::author]))

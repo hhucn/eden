@@ -3,7 +3,7 @@
             [aggregator.config :as config]
             [aggregator.query.update :as update]
             [taoensso.timbre :as log]
-            [aggregator.graphql.dbas-connector :refer [links-from-argument get-statement-origin]]))
+            [aggregator.graphql.dbas-connector :as dbas-conn :refer [links-from-argument get-statement-origin]]))
 
 (defn- handle-statements
   "Handle changes in statements"
@@ -14,7 +14,8 @@
   "Handle changes in the textversions. They belong to the statements."
   [textversion]
   (log/debug (format "Received new textversion from D-BAS: %s" (:data textversion)))
-  (let [statement {:content {:author (str (get-in textversion [:data :author_uid]))
+  (let [author-id (get-in textversion [:data :author_uid])
+        statement {:content {:author (dbas-conn/get-author author-id)
                              :text (get-in textversion [:data :content])
                              :created nil}
                    :identifier {:aggregate-id config/aggregate-name
@@ -29,7 +30,9 @@
                         :identifier {:aggregate-id (str (:aggregate_id origin))
                                      :entity-id (str (:entity_id origin))
                                      :version (:version origin)})
-                 [:content :author] (str (:author origin))))
+                 [:content :author] {:dgep-native false
+                                     :name (str (:author origin))
+                                     :id 1234567}))
       (update/update-statement statement))))
 
 (defn- handle-arguments

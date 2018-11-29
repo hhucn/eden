@@ -42,7 +42,7 @@
 (defn statements-by-author
   "Return all statements with a certain author."
   [author]
-  (unpack-elastic (elastic/search :statements {:content.author author})))
+  (unpack-elastic (elastic/search :statements {:content.author.name author})))
 
 (defn links-by-uri
   "Return all link-versions defined by the uri"

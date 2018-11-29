@@ -62,7 +62,7 @@
   [statement identifier text author]
   (let [updated-statement (-> statement
                               (assoc-in [:content :text] (str text))
-                              (assoc-in [:content :author] (str author))
+                              (assoc-in [:content :author] (utils/json->edn author))
                               (assoc :identifier identifier)
                               (assoc-in [:identifier :version] 1)
                               (assoc :predecessors [(:identifier statement)]))]
