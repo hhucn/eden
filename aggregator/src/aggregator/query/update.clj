@@ -3,6 +3,7 @@
             [aggregator.query.cache :as cache]
             [aggregator.broker.publish :as pub]
             [aggregator.config :as config]
+            [aggregator.graphql.dbas-connector :as dbas]
             [aggregator.specs :as specs]
             [aggregator.utils.common :as utils]
             [clojure.spec.alpha :as s]
@@ -73,7 +74,7 @@
 
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
-  [{:keys [text author]}]
+  [text author]
   {:content {:text text
              :author author
              :created (utils/time-now-str)}
@@ -85,10 +86,11 @@
 
 (defn- link-premise-conclusion
   "Given a premise and a conclusion, link them both with an argument link."
-  [premise conclusion link-type]
+  [premise conclusion link-type author]
   (let [premise-id (:identifier premise)
         conclusion-id (:identifier conclusion)]
     {:type (:keyword link-type)
+     :author author
      :source premise-id
      :destination conclusion-id
      :delete-flag false
@@ -99,10 +101,11 @@
 
 (defn add-argument
   "Adds an argument to the database."
-  [premise conclusion link-type]
-  (let [complete-premise (statement-from-minimal premise)
-        complete-conclusion (statement-from-minimal conclusion)
-        link (link-premise-conclusion complete-premise complete-conclusion link-type)]
+  [premise conclusion link-type author-id]
+  (let [author (dbas/get-author author-id)
+        complete-premise (statement-from-minimal premise author)
+        complete-conclusion (statement-from-minimal conclusion author)
+        link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
     (update-statement complete-premise)
     (update-statement complete-conclusion)
     (update-link link)

@@ -16,9 +16,8 @@
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
 
-(s/def ::minimal-statement (s/keys :req-un [::eden-specs/text ::eden-specs/author]))
-(s/def ::premise ::minimal-statement)
-(s/def ::conclusion ::minimal-statement)
+(s/def ::premise ::eden-specs/text)
+(s/def ::conclusion ::eden-specs/text)
 
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
@@ -31,8 +30,9 @@
 (s/def ::new-argument (s/keys :req-un [::premise-name ::conclusion-name]
                               :opt-un [::link-name]))
 
+(s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type]))
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
 
 (def argument-routes
   (context "/argument" []
@@ -47,8 +47,9 @@
                   "/argument"
                   (let [premise (:premise request-body)
                         conclusion (:conclusion request-body)
-                        link-type (:link-type request-body)]
-                    (update/add-argument premise conclusion link-type))))))
+                        link-type (:link-type request-body)
+                        author-id (:author-id request-body)]
+                    (update/add-argument premise conclusion link-type author-id))))))
 
 (def statements-routes
   (context "/statements" []
@@ -184,7 +185,7 @@
                              {:name "links" :description "Retrieve Links"}
                              {:name "statement" :description "Retrieve or add a single specific statement"}
                              {:name "link" :description "Retrieve or add a single specific link"}
-                             {:name "argument" :description "Retrive or add whole arguments"}]}}}
+                             {:name "argument" :description "Add whole arguments"}]}}}
              statement-routes
              statements-routes
              link-routes
