@@ -8,79 +8,106 @@
 
 (defn fixtures [f]
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
-                        :content {:author "Jorge"
+                        :content {:author {:name "Jorge"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "money does not solve problems of our society"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P12" :version 1}
-                        :content {:author "George"
+                        :content {:author {:name "George"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "we should shut down University Park"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P13" :version 1}
-                        :content {:author "George"
+                        :content {:author {:name "George"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "shutting down University Park will save $100.000 a year"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P22" :version 1}
-                        :content {:author "AlterVerwalter"
+                        :content {:author {:name "AlterVerwalter"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "the city is planing a new park in the upcoming month"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "7" :version 1}
-                        :content {:author "Bolek"
+                        :content {:author {:name "Bolek"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "we should not abandon our town's core task"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P23" :version 1}
-                        :content {:author "XxxBaerchiDarkDestoyerxxX"
+                        :content {:author {:name "XxxBaerchiDarkDestoyerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P232" :version 1}
-                        :content {:author "XxxBestoyerxxX"
+                        :content {:author {:name "XxxBestoyerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P231" :version 1}
-                        :content {:author "XxxBoyerxxX"
+                        :content {:author {:name "XxxBoyerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P230" :version 1}
-                        :content {:author "XxxBayerxxX"
+                        :content {:author {:name "XxxBayerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P29" :version 1}
-                        :content {:author "XxxBaeryerxxX"
+                        :content {:author {:name "XxxBaeryerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P420" :version 1}
-                        :content {:author "saywhaaat"
+                        :content {:author {:name "saywhaaat"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "califragilistic extrahotentific"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
-                        :content {:author "XxxBaeryerxxX"
+                        :content {:author {:name "XxxBaeryerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   
-  (db/insert-link {:author "Wegi" :created nil :type :undercut
+  (db/insert-link {:author {:name "Wegi"
+                            :dgep-native true
+                            :id 1234}
+                   :created nil :type :undercut
                    :source {:aggregate-id "schneider.gg"
                             :entity-id "W01" :version 1337}
                    :destination {:aggregate-id "schneider.gg"
@@ -103,7 +130,9 @@
 
 (deftest test-cached-statements
   (let [statement {:identifier {:aggregate-id "cache-aggregator" :entity-id "cache-id" :version 1}
-                   :content {:author "XxxBaeryerxxX"
+                   :content {:author {:name "XxxBaeryerxxX"
+                                      :dgep-native true
+                                      :id 1234}
                              :text "there is a smaller park in O-Town"
                              :created nil}
                    :predecessors {}

@@ -5,7 +5,9 @@
             [aggregator.specs :as gspecs]))
 
 (def kangaroo {:content {:text "Schnapspralinen"
-                         :author "kangaroo"
+                         :author {:name "kangaroo"
+                                  :dgep-native true
+                                  :id 1234}
                          :created nil}
                :identifier {:aggregate-id "huepfer.verlag"
                             :entity-id "1"
@@ -14,7 +16,9 @@
                :delete-flag false})
 
 (def penguin {:content {:text "Teewurst"
-                         :author "penguin"
+                        :author {:name "penguin"
+                                 :dgep-native true
+                                 :id 1234}
                          :created nil}
                :identifier {:aggregate-id "penguin.books:8080"
                             :entity-id "1"
@@ -23,7 +27,9 @@
               :delete-flag false})
 
 (def penguin2 {:content {:text "Teewurst 2: Die Rache der Teewurst"
-                         :author "penguin"
+                         :author {:name "penguin"
+                                  :dgep-native true
+                                  :id 1234}
                          :created nil}
                :identifier {:aggregate-id "penguin.books:8080"
                             :entity-id "2"

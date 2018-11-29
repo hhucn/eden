@@ -7,73 +7,98 @@
 (defn fixtures [f]
   (search/entrypoint)
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "34" :version 1}
-                        :content {:author "Jorge"
+                        :content {:author {:name "Jorge"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "money does not solve problems of our society"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P12" :version 1}
-                        :content {:author "George"
+                        :content {:author {:name "George"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "we should shut down University Park"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P13" :version 1}
-                        :content {:author "George"
+                        :content {:author {:name "George"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "shutting down University Park will save $100.000 a year"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P22" :version 1}
-                        :content {:author "AlterVerwalter"
+                        :content {:author {:name "AlterVerwalter"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "the city is planing a new park in the upcoming month"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "7" :version 1}
-                        :content {:author "Bolek"
+                        :content {:author {:name "Bolek"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "we should not abandon our town's core task"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P23" :version 1}
-                        :content {:author "XxxBaerchiDarkDestoyerxxX"
+                        :content {:author {:name "XxxBaerchiDarkDestoyerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P232" :version 1}
-                        :content {:author "XxxBestoyerxxX"
+                        :content {:author {:name "XxxBestroyerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P231" :version 1}
-                        :content {:author "XxxBoyerxxX"
+                        :content {:author {:name "XxxBoyerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P230" :version 1}
-                        :content {:author "XxxBayerxxX"
+                        :content {:author {:name "XxxBayerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id "hhu.de" :entity-id "P29" :version 1}
-                        :content {:author "XxxBaeryerxxX"
+                        :content {:author {:name "XxxBaeryerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
   (db/insert-statement {:identifier {:aggregate-id config/aggregate-name :entity-id "P29v2" :version 1}
-                        :content {:author "XxxBaeryerxxX"
+                        :content {:author {:name "XxxBaeryerxxX"
+                                           :dgep-native true
+                                           :id 1234}
                                   :text "there is a smaller park in O-Town"
                                   :created nil}
                         :predecessors {}
                         :delete-flag false})
 
-  (db/insert-link {:author "Wegi" :created nil :type :undercut
+  (db/insert-link {:author {:name "Wegi"
+                            :dgep-native true
+                            :id 1234}
+                   :created nil :type :undercut
                    :source {:aggregate-id "schneider.gg"
                             :entity-id "W01" :version 1337}
                    :destination {:aggregate-id "schneider.gg"
@@ -91,7 +116,7 @@
   (is (= (get-in (first (db/statements-by-uri "hhu.de/P13")) [:identifier :entity-id]) "P13"))
   (is (= (get-in (first (db/statements-by-uri "hhu.de/P22")) [:content :text])
          "the city is planing a new park in the upcoming month"))
-  (is (= (get-in (first (db/statements-by-uri "hhu.de/7")) [:content :author]) "Bolek")))
+  (is (= (get-in (first (db/statements-by-uri "hhu.de/7")) [:content :author :name]) "Bolek")))
 
 (deftest statement-by-author-test
   (is (= (count (db/statements-by-author "XxxBaerchiDarkDestoyerxxX")) 1))
@@ -99,7 +124,10 @@
 
 (deftest insert-statement-test
   (db/insert-statement {:content
-                        {:author "Wegi" :text "Test me baby one more time" :created nil}
+                        {:author {:name "Wegi"
+                                  :dgep-native true
+                                  :id 1234}
+                         :text "Test me baby one more time" :created nil}
                         :identifier
                         {:aggregate-id "schneider.gg" :entity-id "W01" :version 1337}
                         :delete-flag false
@@ -109,9 +137,9 @@
          "Test me baby one more time")))
 
 (deftest insert-link-test
-  (is (= (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35" 1))
+  (is (= (:name (:author (db/exact-link "schneider.gg" "W01" 1337 "schneider.gg" "W_link_35" 1)))
          "Wegi"))
-  (is (= "Wegi" (:author (first (db/links-by-uri "schneider.gg/link0r1337"))))))
+  (is (= "Wegi" (:name (:author (first (db/links-by-uri "schneider.gg/link0r1337")))))))
 
 (deftest random-statements
   (let [results (db/random-statements 1)]
@@ -121,7 +149,7 @@
 (deftest test-entity-by-uri
   (let [results (db/entities-by-uri "hhu.de/34" :statements)]
     (is (= 1 (count results)))
-    (is (= "Jorge" (get-in (first results) [:content :author])))))
+    (is (= "Jorge" (get-in (first results) [:content :author :name])))))
 
 (deftest test-undercuts
   (let [results (db/get-undercuts "schneider.gg" "W_link_35")]

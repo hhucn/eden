@@ -7,7 +7,9 @@
 
 (defonce queue (first (last (s/exercise string?))))
 
-(def statement {:content {:author "kangaroo"
+(def statement {:content {:author {:dgep-native false
+                                   :name "Kängaroo"
+                                   :id 15}
                           :text "Schnapspralinen"
                           :created nil}
                 :identifier {:aggregate-id "huepfer.verlag"
