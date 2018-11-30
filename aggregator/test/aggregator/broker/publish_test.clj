@@ -7,11 +7,12 @@
 
 (defonce queue (first (last (s/exercise string?))))
 
-(def statement {:content {:author "kangaroo"
-                          :content-string "Schnapspralinen"
+(def statement {:content {:author {:dgep-native false
+                                   :name "Kängaroo"
+                                   :id 15}
+                          :text "Schnapspralinen"
                           :created nil}
-                :identifier {
-                             :aggregate-id "huepfer.verlag"
+                :identifier {:aggregate-id "huepfer.verlag"
                              :entity-id "1"
                              :version 1}
                 :predecessors {}
@@ -22,9 +23,9 @@
 
 ;; Test preparation
 (defn fixtures [f]
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (f)
-  (connector/close-connection!))
+  (connector/close-local-connection!))
 (use-fixtures :once fixtures)
 
 

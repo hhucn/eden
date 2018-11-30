@@ -10,12 +10,16 @@
 (def queue (str (lib/uuid)))
 (def queue-two (str (lib/uuid)))  ;; like Mewto, hihi
 
-(def statement {:author "kangaroo"
-                :content "Schnapspralinen"
-                :aggregate-id "huepfer.verlag"
-                :entity-id "1"
-                :version 1
-                :created nil})
+(def statement {:content {:text "Schnapspralinen2"
+                          :created nil
+                          :author {:dgep-native false
+                                   :name "kangaroo"
+                                   :id 42}}
+                :identifier {:aggregate-id "huepfer.verlag"
+                             :entity-id "1"
+                             :version 1}
+                :delete-flag true
+                :predecessors []})
 
 (def link (first (last (s/exercise ::gspecs/link))))
 
@@ -26,7 +30,7 @@
 
 ;; Test preparation
 (defn fixtures [f]
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (connector/create-queue queue)
   (connector/create-queue queue-two)
   (pub/publish-statement statement)
@@ -34,7 +38,7 @@
   (f)
   (connector/delete-queue queue)
   (connector/delete-queue queue-two)
-  (connector/close-connection!))
+  (connector/close-local-connection!))
 (use-fixtures :once fixtures)
 
 
@@ -52,15 +56,6 @@
     (is (= :error (:status
                    (sub/subscribe handler queue
                                   (assoc broker :host "deathstar#4"))))))
-  (testing "Wrong user gives status :error"
-    (deftest subscribe-wrong-user
-      (is (= :error (:status
-                     (sub/subscribe handler queue
-                                    (assoc broker :user "yoda")))))))
-  (testing "Wrong password also returns an :error"
-    (is (= :error (:status
-                   (sub/subscribe handler queue
-                                  (assoc broker :user "The wrong password you have."))))))
   (testing "Can't subscribe to a non-existent queue"
     (is (= :error (:status
                    (sub/subscribe handler

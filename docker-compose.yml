@@ -1,11 +1,11 @@
-version: "3.1"
+version: "3.2"
 
 services:
   broker:
     image: rabbitmq:3.6-management-alpine
     ports:
       - "15672:15672"  # web-access to management console
-      # - "5671-5672:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
+      - "5671-5672:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
     environment:
       - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
       - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
@@ -37,7 +37,7 @@ services:
       - "DBAS_HOST=dbas"
       - "ELASTICSEARCH_HOST=search"
       - "DB_HOST=dbas-db"
-      - "AGGREGATOR_NAME=aggregator:8888"
+      - AGGREGATOR_NAME
 
   search:
     build: elasticsearch/
@@ -62,18 +62,24 @@ services:
     ports:
       - "4284:4284"
     links:
-      - dbas-db:db
-    env_file:
-      - dbas/development.env 
-#    environment:
-#      - "DBAS_DB_USER=${DBAS_DB_USER}"
-#      - "DBAS_DB_PW=${DBAS_DB_PW}"
-#      - "DBAS_DB_HOST=${DBAS_DB_HOST}"
-#      - "DBAS_DB_PORT=${DBAS_DB_PORT}"
-#      - "DBAS_AUTHN_SECRET=${DBAS_AUTHN_SECRET}"
+      - dbas-db:db 
+    environment:
+      - "DB_USER=${DB_USER}"
+      - "DB_PW=${DB_PW}"
+      - "DB_PORT=${DB_PORT}"
+      - "DB_NAME=${DB_NAME}"
+      - "DB_HOST=${DB_HOST}"
+      - "AUTHN_SECRET=${AUTHN_SECRET}"
+      - HHU_LDAP_SERVER
+      - HHU_LDAP_BASE
+      - HHU_LDAP_ACCOUNT_SCOPE
+      - HHU_LDAP_ACCOUNT_FILTER
+      - HHU_LDAP_ACCOUNT_FIRSTNAME
+      - HHU_LDAP_ACCOUNT_LAST
+      - HHU_LDAP_ACCOUNT_TITLE
+      - HHU_LDAP_ACCOUNT_EMAIL
     volumes:
       - ./dbas:/dbas
-      - ./dbas_development.env:/dbas/development.env
 
   dbas-db:
     build: dbas/docker/db/

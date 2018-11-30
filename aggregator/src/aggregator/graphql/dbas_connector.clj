@@ -2,7 +2,8 @@
   (:require [clj-http.client :as client]
             [clojure.data.json :as  json]
             [clojure.walk :refer [keywordize-keys]]
-            [aggregator.config :as config]))
+            [aggregator.config :as config]
+            [taoensso.timbre :as log]))
 
 (defn- query-db
   [query]
@@ -27,13 +28,16 @@
 (defn get-statements
   "Return all statements from the D-BAS instance. The result is already in the EDEN-conform format."
   []
-  (let [result (query-db "query { statements { uid, textversions { content, authorUid} }}")]
+  (let [result (query-db "query { statements { uid, textversions { content, author {publicNickname, uid}} }}")]
     (map (fn [statement]
-           (let [default-statement {:content
-                                    {:content-string (get-in statement [:textversions :content])
+           (let [author-name (get-in statement [:textversions :author :publicNickname])
+                 author-id (get-in statement [:textversions :author :uid])
+                 default-statement {:content
+                                    {:text (get-in statement [:textversions :content])
                                      :created nil ;; dbas won't play
-                                     :author (str "author#: "
-                                                  (get-in statement [:textversions :authorUid]))}
+                                     :author {:dgep-native true
+                                              :name author-name
+                                              :id (Integer/parseInt author-id)}}
                                     :identifier
                                     {:aggregate-id config/aggregate-name
                                      :entity-id (:uid statement)
@@ -67,36 +71,46 @@
   "Use the strange structure of D-BAS-arguments to create links. Needs a connection to the local dbas instance.
   Returned links in EDEN format."
   [argument]
-  (let [group-uid (:premisesgroupUid argument)
+  (let [group-uid (:premisegroupUid argument)
         premises (query-db (format
                             "query {premises(premisegroupUid: %d) {statementUid}}"
                             group-uid))
-        link-type-val (link-type argument)]
+        link-type-val (link-type argument)
+        author (:author argument)
+        destination-id (or (:conclusionUid argument) (:argumentUid argument))]
     (map (fn [premise]
-           (let [prepared-link 
-                 {:author (str "author#: "
-                               (:authorUid argument))
-                  :created nil ;; nil until we solve the graphql problem
-                  :type link-type-val
-                  :source {:aggregate-id config/aggregate-name
-                           :entity-id (:statementUid premise)
-                           :version 1}
-                  :destination {:aggregate-id config/aggregate-name}
-                  :identifier {:aggregate-id config/aggregate-name
-                               :entity-id (:uid argument)
-                               :version 1}}]
-             (if (not= link-type-val :undercut)
-               (assoc prepared-link :destination {:aggregate-id config/aggregate-name
-                                                  :version 1
-                                                  :entity-id (:conclusionUid argument)})
-               (assoc-in prepared-link [:destination :entity-id] (:argumentUid argument)))))
+           {:author {:dgep-native true
+                     :name (:publicNickname author)
+                     :id (Integer/parseInt (:uid author))}
+            :created nil ;; nil until we solve the graphql problem
+            :type link-type-val
+            :source {:aggregate-id config/aggregate-name
+                     :entity-id (str (:statementUid premise))
+                     :version 1}
+            :destination {:aggregate-id config/aggregate-name
+                          :version 1
+                          :entity-id (str destination-id)}
+            :identifier {:aggregate-id config/aggregate-name
+                         :entity-id (str (:uid argument))
+                         :version 1}
+            :delete-flag (:isDisabled argument)})
          (:premises premises))))
-
 
 (defn get-links
   "Return a map of all links that can be requested from the connected D-BAS instance."
   []
-  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, authorUid, argumentUid, premisegroupUid}}")
+  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, author {publicNickname uid}, argumentUid, premisegroupUid, isDisabled}}")
         return-val (mapcat links-from-argument (:arguments result))]
     return-val))
 
+(defn get-author
+  "Queries D-BAS for an author and returns an author-map."
+  [author-id]
+  (let [id (if (int? author-id)
+             author-id
+             (Integer/parseInt author-id))
+        result (query-db (format "query {user(uid: %d){publicNickname}}" id))]
+    (log/debug result)
+    {:dgep-native true
+     :id id 
+     :name (get-in result [:user :publicNickname])}))

@@ -42,7 +42,7 @@
 (defn statements-by-author
   "Return all statements with a certain author."
   [author]
-  (unpack-elastic (elastic/search :statements {:content.author author})))
+  (unpack-elastic (elastic/search :statements {:content.author.name author})))
 
 (defn links-by-uri
   "Return all link-versions defined by the uri"
@@ -93,15 +93,16 @@
   "Returns all undercuts that point to target aggregator and entity-id."
   [target-aggregator target-entity-id]
   (keywordize-types (unpack-elastic (elastic/search :links {:type "undercut"
-                                                           :destination.aggregate-id target-aggregator
-                                                           :destination.entity-id target-entity-id}))))
+                                                            :destination.aggregate-id target-aggregator
+                                                            :destination.entity-id target-entity-id}))))
 
 (defn links-by-target
   "Return all links with the corresponding target."
   [target-aggregator target-entity target-version]
-  (keywordize-types (unpack-elastic (elastic/search :links {:destination.aggregate-id target-aggregator
-                                                           :destination.entity-id target-entity
-                                                           :destination.version target-version}))))
+  (keywordize-types (unpack-elastic
+                     (elastic/search :links {:destination.aggregate-id target-aggregator
+                                             :destination.entity-id target-entity
+                                             :destination.version target-version}))))
 
 (defn random-statements
   "Return *num* random statements from the db."
@@ -112,6 +113,12 @@
                                  {:identifier.aggregate-id config/aggregate-name})))))
 
 (defn statements-contain
-  "Return all statements from the elasticsearch-db where content.content-string containts `query`"
+  "Return all statements from the elasticsearch-db where content.text containts `query`"
   [query]
   (unpack-elastic (elastic/search :statements-fuzzy query)))
+
+
+(defn custom-statement-search
+  "Search for statements by looking for content in a custom field."
+  [field search-term]
+  (unpack-elastic (elastic/search :statements {(keyword field) search-term})))

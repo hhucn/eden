@@ -4,8 +4,10 @@
             [clojure.spec.alpha :as s]
             [aggregator.specs :as gspecs]))
 
-(def kangaroo {:content {:content-string "Schnapspralinen"
-                         :author "kangaroo"
+(def kangaroo {:content {:text "Schnapspralinen"
+                         :author {:name "kangaroo"
+                                  :dgep-native true
+                                  :id 1234}
                          :created nil}
                :identifier {:aggregate-id "huepfer.verlag"
                             :entity-id "1"
@@ -13,8 +15,10 @@
                :predecessors {}
                :delete-flag false})
 
-(def penguin {:content {:content-string "Teewurst"
-                         :author "penguin"
+(def penguin {:content {:text "Teewurst"
+                        :author {:name "penguin"
+                                 :dgep-native true
+                                 :id 1234}
                          :created nil}
                :identifier {:aggregate-id "penguin.books:8080"
                             :entity-id "1"
@@ -22,8 +26,10 @@
                :predecessors {}
               :delete-flag false})
 
-(def penguin2 {:content {:content-string "Teewurst 2: Die Rache der Teewurst"
-                         :author "penguin"
+(def penguin2 {:content {:text "Teewurst 2: Die Rache der Teewurst"
+                         :author {:name "penguin"
+                                  :dgep-native true
+                                  :id 1234}
                          :created nil}
                :identifier {:aggregate-id "penguin.books:8080"
                             :entity-id "2"

@@ -5,9 +5,9 @@
 
 ;; Test preparation
 (defn fixtures [f]
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (f)
-  (connector/close-connection!))
+  (connector/close-local-connection!))
 (use-fixtures :once fixtures)
 
 
@@ -15,13 +15,14 @@
 ;; Tests
 
 (deftest open-channel-test
-  (is (not (nil? (connector/open-channel)))))
+  (is (not (nil? (connector/open-channel!)))))
 
 (deftest close-channel-test
-  (is (= :ok (:status (-> (connector/open-channel) connector/close-channel)))))
+  (is (= :ok (:status (-> (connector/open-channel!) connector/close-channel!)))))
 
 (deftest create-queue-test
-  (is (= :ok (:status (connector/create-queue "i.am.groot")))))
+  (is (= :ok (:status (connector/create-queue "i.am.groot"))))
+  (connector/delete-queue "i.am.groot"))
 
 (deftest delete-queue-test
   (let [queue (str (lib/uuid))]
@@ -36,8 +37,8 @@
     (is (not (connector/queue-exists? queue)))))
 
 (deftest connected?
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (is (connector/connected?))
-  (connector/close-connection!)
+  (connector/close-local-connection!)
   (is (not (connector/connected?)))
-  (connector/init-connection!))
+  (connector/init-local-connection!))

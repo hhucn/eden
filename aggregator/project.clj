@@ -1,4 +1,4 @@
-(defproject aggregator "0.2"
+(defproject aggregator "0.3"
   :description "The aggregator module for the EDEN framework. The aggregator coordinates the internal and external dataflows of an EDEN instance."
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -17,10 +17,11 @@
                  [ring/ring-json "0.4.0"]
                  [ring/ring-mock "0.3.2"]
                  [ring/ring-jetty-adapter "1.6.3"]
+                 [ring-cors "0.1.12"]
                  [clj-http "3.7.0"]
                  [codox-theme-rdash "0.1.2"]
-                 [metosin/compojure-api "2.0.0-alpha19"]
-                 [metosin/spec-tools "0.6.1"]
+                 [metosin/compojure-api "2.0.0-alpha28"]
+                 [metosin/spec-tools "0.8.2"]
                  [cheshire "5.8.0"]]
 
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
@@ -45,6 +46,8 @@
 
   :main ^:skip-aot aggregator.core
   :target-path "target/%s"
+
+  :local-repo ".m2/repo"
 
   :codox {:metadata {:doc/format :markdown}
           :themes [:rdash]})

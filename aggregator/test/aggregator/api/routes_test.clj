@@ -6,9 +6,9 @@
             [cheshire.core :as cheshire]))
 
 (defn fixtures [f]
-  (connector/init-connection!)
+  (connector/init-local-connection!)
   (f)
-  (connector/close-connection!))
+  (connector/close-local-connection!))
 (use-fixtures :once fixtures)
 
 (defn- parse-body [body]
@@ -16,9 +16,9 @@
 
 
 (deftest handler-test
-  (testing "Test root route for status 200"
+  (testing "Test root route for status 302"
     (let [response (routes/app (mock/request :get "/"))]
-      (is (= (:status response) 200)))))
+      (is (= (:status response) 302)))))
 
 (deftest statement-nonexistent-route
   (testing "Test nonexistent-route for status 500"

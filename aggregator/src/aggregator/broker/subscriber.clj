@@ -6,6 +6,8 @@
             [aggregator.utils.common :as lib]
             [aggregator.query.update :as qupd]
             [aggregator.specs :as gspecs]
+            [aggregator.broker.connector :as conn]
+            [aggregator.config :as config]
             [clojure.spec.alpha :as s])
   (:import [com.rabbitmq.client AuthenticationFailureException]))
 
@@ -37,21 +39,33 @@
       (log/debug "Received a valid link. Passing it to query-module...")
       (qupd/update-link nlink))))
 
+(defn save-sub-to-state!
+  "Adds a subscription and the corresponding channel to the app-state."
+  [broker sub-name channel]
+  (swap! config/app-state
+         assoc-in [:broker-info broker :subscriptions sub-name] channel))
+
 (defn subscribe
   "Subscribe to queue and call a function f with meta-information and payload.
 
   Example:
   (subscribe (fn [meta payload] [meta payload]) \"statements\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})
   (subscribe \"statements\" {:host \"broker\"})"
-  ([f queue {:keys [host user password]}]
+  ([f queue {:keys [host]}]
    (try
-     (let [conn (rmq/connect
-                 {:host host
-                  :username (or user (System/getenv "BROKER_USER"))
-                  :password (or password (System/getenv "BROKER_PASS"))})
-           ch (lch/open conn)]
-       (lcons/subscribe ch queue (partial message-handler f) {:auto-ack true})
-       (log/debug (format "Connected to queue %s. Channel id: %s" queue (.getChannelNumber ch)))
+     (let [current-subs (:subscriptions (conn/broker-data host))
+           connection (conn/get-connection! host)
+           channel (if-not (contains? current-subs queue)
+                     (do
+                       (log/debug (format
+                                   "The queue %s has no open channel for it."
+                                   queue))
+                       (lch/open connection))
+                     (get current-subs queue))]
+       (lcons/subscribe channel queue (partial message-handler f) {:auto-ack true})
+       (save-sub-to-state! host queue channel)
+       (log/debug (format "Connected to queue %s. Channel id: %s"
+                          queue (.getChannelNumber channel)))
        (lib/return-ok "Connection to message queue established."))
      (catch AuthenticationFailureException e
        (log/debug (:auth-ex exceptions))
@@ -63,7 +77,6 @@
        (log/debug (:queue-ex exceptions))
        (lib/return-error (:queue-ex exceptions)))))
   ([queue broker] (subscribe to-query queue broker)))
-
 
 ;; -----------------------------------------------------------------------------
 ;; Specs

@@ -11,12 +11,12 @@
 (defn- publish
   "Create queue for entity and publish it on this queue."
   [payload routing-key entity-type]
-  (let [ch (connector/open-channel)]
+  (let [ch (connector/open-channel!)]
     (try
       (lb/publish ch bconf/exchange routing-key (json/write-str payload)
                   {:content-type "application/json" :type (name entity-type)})
       (catch Throwable t (.printStackTrace t))
-      (finally (connector/close-channel ch)))))
+      (finally (connector/close-channel! ch)))))
 
 (defn publish-statement
   "Put a statement to the correct queue. Statement must conform spec to be

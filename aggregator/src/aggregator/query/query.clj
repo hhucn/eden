@@ -7,7 +7,8 @@
             [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [aggregator.query.update :as update]))
 
 (defn get-data
   "Get data from a remote aggregator."
@@ -24,9 +25,8 @@
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
   if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
-  (let [queue-name (get-in queue [:data :queue-name])
-        cleaned-host (first (str/split host #":"))]
-    (sub/subscribe queue-name {:host cleaned-host})))
+  (let [cleaned-host (first (str/split host #":"))]
+    (sub/subscribe queue {:host cleaned-host})))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
@@ -94,10 +94,13 @@
   [aggregate-id entity-id version]
   (if-let [possible-links (links-by-target aggregate-id entity-id version)]
     possible-links
-    (let [request-url (str config/protocol aggregate-id "/link/to/")
+    (let [request-url (str config/protocol aggregate-id "/links/to/")
           results (get-data request-url {:aggregate-id aggregate-id
                                          :entity-id entity-id
                                          :version version})]
+      (log/debug (format "Pulled %s downstream links for %s/%s/%s"
+                         (count results)
+                         aggregate-id entity-id version))
       (doseq [link results] (up/update-link link))
       results)))
 
@@ -138,7 +141,7 @@
 (defn starter-set
   "Retrieve a set of starting arguments, which can be used by remote aggregators to bootstrap the connection. This particular implementation just takes a random set of arguments from the cache or database."
   []
-  (db/random-statements 10))
+  (db/random-statements 100))
 
 (defn remote-starter-set
   "Retrieve remote starter sets and put them into the cache and db."
@@ -161,6 +164,7 @@
        (all-remote-statements aggregator))))
   ([aggregator]
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
+     (subscribe-to-queue "statements" aggregator)
      (doseq [statement results]
        (up/update-statement statement)))))
 
@@ -177,10 +181,16 @@
        (all-remote-links aggregator))))
   ([aggregator]
    (let [results (get-data (str config/protocol aggregator "/links"))]
+     (subscribe-to-queue "links" aggregator)
      (doseq [link results]
        (up/update-link link)))))
 
 (defn statements-contain
-  "Retrieve all statements where the content.content-string contains the `query`"
+  "Retrieve all statements where the content.text contains the `query`"
   [query]
   (db/statements-contain query))
+
+(defn custom-statement
+  "Retrieve a statement with a custom field containg a specific search-term."
+  [field search-term]
+  (db/custom-statement-search field search-term))
