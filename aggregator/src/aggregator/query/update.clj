@@ -74,15 +74,20 @@
 
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
-  [text author]
-  {:content {:text text
-             :author author
-             :created (utils/time-now-str)}
-   :identifier {:aggregate-id config/aggregate-name
-                :entity-id (str (java.util.UUID/randomUUID))
-                :version 1}
-   :delete-flag false
-   :predecessors []})
+  ([text author]
+   (statement-from-minimal text author {}))
+  ([text author additional]
+   (let [statement {:content {:text text
+                              :author author
+                              :created (utils/time-now-str)}
+                    :identifier {:aggregate-id config/aggregate-name
+                                 :entity-id (str (java.util.UUID/randomUUID))
+                                 :version 1}
+                    :delete-flag false
+                    :predecessors []}
+         forbidden-fields #{:content :identifier :delete-flag :predecessors}
+         filtered-additional (apply dissoc additional forbidden-fields)]
+     (conj statement filtered-additional))))
 
 (defn- link-premise-conclusion
   "Given a premise and a conclusion, link them both with an argument link."
@@ -115,16 +120,11 @@
 
 (defn statement-from-text
   "Adds an argument only from text and author-id. Assumes author belongs to local DGEP."
-  [text author-id]
-  (let [author (dbas/get-author author-id)]
-    {:content {:text text
-               :author author
-               :created (utils/time-now-str)}
-     :identifier {:aggregate-id config/aggregate-name
-                  :entity-id (str (java.util.UUID/randomUUID))
-                  :version 1}
-     :delete-flag false
-     :predecessors []}))
+  ([text author-id]
+   (statement-from-text text author-id {}))
+  ([text author-id additional]
+   (let [author (dbas/get-author author-id)]
+     (update-statement (statement-from-minimal text author additional)))))
 
 (defn quicklink
   "Add a link from source, destination, type and author. Assumes author belongs to local DGEP"

@@ -34,7 +34,9 @@
 (s/def ::link-type #{"support" "attack" "undercut"})
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
 
-(s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]))
+(s/def ::additional map?)
+(s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
+                                      :opt-un [::additional]))
 (s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
                                             ::eden-specs/destination ::author-id]))
 
@@ -148,7 +150,10 @@
              :return ::statement-map
              (created
               "/statement"
-              {:statement (update/statement-from-text request-body)}))))
+              (let [text (:text request-body)
+                    author-id (:author-id request-body)
+                    additional (:additional request-body)]
+                {:statement (update/statement-from-text text author-id additional)})))))
 
 (defn wrap-link-type [handler]
   (fn [request]
