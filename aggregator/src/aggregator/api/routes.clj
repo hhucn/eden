@@ -99,6 +99,12 @@
       :return ::statements-map
       (ok {:statements (query/custom-statement :reference.host host)}))
 
+    (GET "/by-reference-text" []
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [text :- spec/string?]
+      :return ::statements-map
+      (ok {:statements (query/custom-statement :reference.text text)}))
+
     (GET "/custom" []
          :summary "Returns all statements matching the search term in a custom field"
          :query-params [custom-field :- spec/string?
