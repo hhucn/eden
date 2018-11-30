@@ -94,3 +94,13 @@
     (is (= "anonymous" (get-in new-statement [:content :author :name])))
     (is (= config/aggregate-name (get-in new-statement [:identifier :aggregate-id])))
     (is (= 1 (get-in new-statement [:identifier :version])))))
+
+(deftest test-quicklink-add
+  (let [source (:source some-link)
+        destination (assoc (:source some-link) :entity-id "link_special_1")
+        new-link (update/quicklink :support source destination 1)]
+    (is (= "schneider.gg" (get-in new-link [:source :aggregate-id])))
+    (is (= "link_special_1" (get-in new-link [:destination :entity-id])))
+    (is (= config/aggregate-name (get-in new-link [:identifier :aggregate-id])))
+    (is (= 1 (get-in new-link [:identifier :version])))
+    (is (= "anonymous" (get-in new-link [:author :name])))))

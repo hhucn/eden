@@ -125,3 +125,17 @@
                   :version 1}
      :delete-flag false
      :predecessors []}))
+
+(defn quicklink
+  "Add a link from source, destination, type and author. Assumes author belongs to local DGEP"
+  [type source destination author-id]
+  (let [author (dbas/get-author author-id)]
+    {:type type
+     :source source
+     :destination destination
+     :identifier {:aggregate-id config/aggregate-name
+                  :entity-id (str "link-" (java.util.UUID/randomUUID))
+                  :version 1}
+     :delete-flag false
+     :created (utils/time-now-str)
+     :author author}))

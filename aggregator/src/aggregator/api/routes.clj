@@ -35,6 +35,8 @@
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
 
 (s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]))
+(s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
+                                            ::eden-specs/destination ::author-id]))
 
 (def argument-routes
   (context "/argument" []
@@ -176,7 +178,20 @@
                  :return ::link-map
                  (created
                   "/link"
-                  {:link (update/update-link (utils/json->edn link))}))))
+                  {:link (update/update-link (utils/json->edn link))}))
+
+           (POST "/shorthand" []
+             :summary "Add a link via source, destination and author. Autogenerate rest."
+             :middleware [wrap-link-type]
+             :body [quicklink-request ::quicklink-request]
+             :return ::link-map
+             (created
+              "/link"
+              (let [source (:source quicklink-request)
+                    destination (:destination quicklink-request)
+                    author-id (:author-id quicklink-request)
+                    link-type (:type quicklink-request)]
+                {:link (update/quicklink link-type source destination author-id)})))))
 
 (def app
   (let [compojure-api-handler
