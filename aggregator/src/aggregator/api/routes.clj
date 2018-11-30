@@ -33,8 +33,10 @@
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
 (s/def ::additional map?)
+(s/def ::additional-premise map?)
+(s/def ::additional-conclusion map?)
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
-                                  :opt-un [::additional]))
+                                  :opt-un [::additional-premise ::additional-conclusion]))
 
 (s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
                                       :opt-un [::additional]))
@@ -56,8 +58,9 @@
                         conclusion (:conclusion request-body)
                         link-type (:link-type request-body)
                         author-id (:author-id request-body)
-                        additional (:additional request-body)]
-                    (update/add-argument premise conclusion link-type author-id additional))))))
+                        additional-p (:additional-premise request-body)
+                        additional-c (:additional-conclusion request-body)]
+                    (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
 
 (def statements-routes
   (context "/statements" []
@@ -83,12 +86,18 @@
          (ok {:statements (query/starter-set)}))
 
     (GET "/by-id" []
-         :summary "Returns all statements matching aggregator and entity-id"
-         :query-params [aggregate-id :- ::eden-specs/aggregate-id,
-                        entity-id :- ::eden-specs/entity-id]
-         :return ::statements-map
-         (ok {:statements (query/tiered-retrieval aggregate-id entity-id
-                                                  {:opts [:no-remote]})}))
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id,
+                     entity-id :- ::eden-specs/entity-id]
+      :return ::statements-map
+      (ok {:statements (query/tiered-retrieval aggregate-id entity-id
+                                               {:opts [:no-remote]})}))
+
+    (GET "/by-reference-host" []
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [host :- spec/string?]
+      :return ::statements-map
+      (ok {:statements (query/custom-statement :reference.host host)}))
 
     (GET "/custom" []
          :summary "Returns all statements matching the search term in a custom field"
