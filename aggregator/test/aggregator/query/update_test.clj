@@ -85,3 +85,11 @@
               (count (query/retrieve-link (:aggregate-id link-id)
                                           (:entity-id link-id)
                                           (:version link-id))))))))
+
+(deftest test-statement-from-text
+  (let [text "This statement-stuff is craaaaazy"
+        new-statement (update/statement-from-text text 1)]
+    (is (= text (get-in new-statement [:content :text])))
+    (is (= "anonymous" (get-in new-statement [:content :author :name])))
+    (is (= config/aggregate-name (get-in new-statement [:identifier :aggregate-id])))
+    (is (= 1 (get-in new-statement [:identifier :version])))))

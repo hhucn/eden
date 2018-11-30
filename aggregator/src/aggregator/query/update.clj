@@ -112,3 +112,16 @@
     {:premise-id (:identifier complete-premise)
      :conclusion-id (:identifier complete-conclusion)
      :link-id (:identifier link)}))
+
+(defn statement-from-text
+  "Adds an argument only from text and author-id. Assumes author belongs to local DGEP."
+  [text author-id]
+  (let [author (dbas/get-author author-id)]
+    {:content {:text text
+               :author author
+               :created (utils/time-now-str)}
+     :identifier {:aggregate-id config/aggregate-name
+                  :entity-id (str (java.util.UUID/randomUUID))
+                  :version 1}
+     :delete-flag false
+     :predecessors []}))

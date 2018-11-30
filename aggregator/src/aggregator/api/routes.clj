@@ -34,6 +34,8 @@
 (s/def ::link-type #{"support" "attack" "undercut"})
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
 
+(s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]))
+
 (def argument-routes
   (context "/argument" []
            :tags ["argument"]
@@ -121,22 +123,30 @@
            :coercion :spec
 
            (GET "/" []
-                :summary "Return a specific statement by identifiers"
-                :query-params [aggregate-id :- ::eden-specs/aggregate-id
-                               entity-id :- ::eden-specs/entity-id
-                               version :- ::eden-specs/version]
-                :return ::statement-map
-                (if-let [statement (query/exact-statement aggregate-id entity-id version)]
-                  (ok {:statement statement})
-                  (not-found nil)))
+             :summary "Return a specific statement by identifiers"
+             :query-params [aggregate-id :- ::eden-specs/aggregate-id
+                            entity-id :- ::eden-specs/entity-id
+                            version :- ::eden-specs/version]
+             :return ::statement-map
+             (if-let [statement (query/exact-statement aggregate-id entity-id version)]
+               (ok {:statement statement})
+               (not-found nil)))
 
            (POST "/" []
-                 :summary "Add a statement to the EDEN database"
-                 :body [statement ::eden-specs/statement]
-                 :return ::statement-map
-                 (created
-                  "/statement"
-                  {:statement (update/update-statement (utils/json->edn statement))}))))
+             :summary "Add a statement to the EDEN database"
+             :body [statement ::eden-specs/statement]
+             :return ::statement-map
+             (created
+              "/statement"
+              {:statement (update/update-statement (utils/json->edn statement))}))
+
+           (POST "/from-text" []
+             :summary "Add a statement only providing text and author-id"
+             :body [request-body ::quick-statement-body]
+             :return ::statement-map
+             (created
+              "/statement"
+              {:statement (update/statement-from-text request-body)}))))
 
 (defn wrap-link-type [handler]
   (fn [request]
