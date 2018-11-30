@@ -3,7 +3,9 @@
             [aggregator.query.cache :as cache]
             [aggregator.broker.publish :as pub]
             [aggregator.config :as config]
+            [aggregator.graphql.dbas-connector :as dbas]
             [aggregator.specs :as specs]
+            [aggregator.utils.common :as utils]
             [clojure.spec.alpha :as s]
             [taoensso.timbre :as log]))
 
@@ -61,7 +63,7 @@
   [statement identifier text author]
   (let [updated-statement (-> statement
                               (assoc-in [:content :text] (str text))
-                              (assoc-in [:content :author] (str author))
+                              (assoc-in [:content :author] (utils/json->edn author))
                               (assoc :identifier identifier)
                               (assoc-in [:identifier :version] 1)
                               (assoc :predecessors [(:identifier statement)]))]
@@ -72,10 +74,10 @@
 
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
-  [{:keys [text author]}]
+  [text author]
   {:content {:text text
              :author author
-             :created nil}
+             :created (utils/time-now-str)}
    :identifier {:aggregate-id config/aggregate-name
                 :entity-id (str (java.util.UUID/randomUUID))
                 :version 1}
@@ -84,26 +86,56 @@
 
 (defn- link-premise-conclusion
   "Given a premise and a conclusion, link them both with an argument link."
-  [premise conclusion link-type]
+  [premise conclusion link-type author]
   (let [premise-id (:identifier premise)
         conclusion-id (:identifier conclusion)]
     {:type (:keyword link-type)
+     :author author
      :source premise-id
      :destination conclusion-id
      :delete-flag false
      :identifier {:aggregate-id config/aggregate-name
                   :entity-id (str "link_" (java.util.UUID/randomUUID))
-                  :version 1}}))
+                  :version 1}
+     :created (utils/time-now-str)}))
 
 (defn add-argument
-  "Adds an argument to the database."
-  [premise conclusion link-type]
-  (let [complete-premise (statement-from-minimal premise)
-        complete-conclusion (statement-from-minimal conclusion)
-        link (link-premise-conclusion complete-premise complete-conclusion link-type)]
+  "Adds an argument to the database. Asuming the author exists and belongs to the local DGEP."
+  [premise conclusion link-type author-id]
+  (let [author (dbas/get-author author-id)
+        complete-premise (statement-from-minimal premise author)
+        complete-conclusion (statement-from-minimal conclusion author)
+        link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
     (update-statement complete-premise)
     (update-statement complete-conclusion)
     (update-link link)
     {:premise-id (:identifier complete-premise)
      :conclusion-id (:identifier complete-conclusion)
      :link-id (:identifier link)}))
+
+(defn statement-from-text
+  "Adds an argument only from text and author-id. Assumes author belongs to local DGEP."
+  [text author-id]
+  (let [author (dbas/get-author author-id)]
+    {:content {:text text
+               :author author
+               :created (utils/time-now-str)}
+     :identifier {:aggregate-id config/aggregate-name
+                  :entity-id (str (java.util.UUID/randomUUID))
+                  :version 1}
+     :delete-flag false
+     :predecessors []}))
+
+(defn quicklink
+  "Add a link from source, destination, type and author. Assumes author belongs to local DGEP"
+  [type source destination author-id]
+  (let [author (dbas/get-author author-id)]
+    {:type type
+     :source source
+     :destination destination
+     :identifier {:aggregate-id config/aggregate-name
+                  :entity-id (str "link-" (java.util.UUID/randomUUID))
+                  :version 1}
+     :delete-flag false
+     :created (utils/time-now-str)
+     :author author}))

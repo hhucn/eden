@@ -16,9 +16,8 @@
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
 
-(s/def ::minimal-statement (s/keys :req-un [::eden-specs/text ::eden-specs/author]))
-(s/def ::premise ::minimal-statement)
-(s/def ::conclusion ::minimal-statement)
+(s/def ::premise ::eden-specs/text)
+(s/def ::conclusion ::eden-specs/text)
 
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
@@ -31,8 +30,13 @@
 (s/def ::new-argument (s/keys :req-un [::premise-name ::conclusion-name]
                               :opt-un [::link-name]))
 
+(s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type]))
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
+
+(s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]))
+(s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
+                                            ::eden-specs/destination ::author-id]))
 
 (def argument-routes
   (context "/argument" []
@@ -47,8 +51,9 @@
                   "/argument"
                   (let [premise (:premise request-body)
                         conclusion (:conclusion request-body)
-                        link-type (:link-type request-body)]
-                    (update/add-argument premise conclusion link-type))))))
+                        link-type (:link-type request-body)
+                        author-id (:author-id request-body)]
+                    (update/add-argument premise conclusion link-type author-id))))))
 
 (def statements-routes
   (context "/statements" []
@@ -120,22 +125,30 @@
            :coercion :spec
 
            (GET "/" []
-                :summary "Return a specific statement by identifiers"
-                :query-params [aggregate-id :- ::eden-specs/aggregate-id
-                               entity-id :- ::eden-specs/entity-id
-                               version :- ::eden-specs/version]
-                :return ::statement-map
-                (if-let [statement (query/exact-statement aggregate-id entity-id version)]
-                  (ok {:statement statement})
-                  (not-found nil)))
+             :summary "Return a specific statement by identifiers"
+             :query-params [aggregate-id :- ::eden-specs/aggregate-id
+                            entity-id :- ::eden-specs/entity-id
+                            version :- ::eden-specs/version]
+             :return ::statement-map
+             (if-let [statement (query/exact-statement aggregate-id entity-id version)]
+               (ok {:statement statement})
+               (not-found nil)))
 
            (POST "/" []
-                 :summary "Add a statement to the EDEN database"
-                 :body [statement ::eden-specs/statement]
-                 :return ::statement-map
-                 (created
-                  "/statement"
-                  {:statement (update/update-statement (utils/json->edn statement))}))))
+             :summary "Add a statement to the EDEN database"
+             :body [statement ::eden-specs/statement]
+             :return ::statement-map
+             (created
+              "/statement"
+              {:statement (update/update-statement (utils/json->edn statement))}))
+
+           (POST "/from-text" []
+             :summary "Add a statement only providing text and author-id"
+             :body [request-body ::quick-statement-body]
+             :return ::statement-map
+             (created
+              "/statement"
+              {:statement (update/statement-from-text request-body)}))))
 
 (defn wrap-link-type [handler]
   (fn [request]
@@ -165,7 +178,20 @@
                  :return ::link-map
                  (created
                   "/link"
-                  {:link (update/update-link (utils/json->edn link))}))))
+                  {:link (update/update-link (utils/json->edn link))}))
+
+           (POST "/shorthand" []
+             :summary "Add a link via source, destination and author. Autogenerate rest."
+             :middleware [wrap-link-type]
+             :body [quicklink-request ::quicklink-request]
+             :return ::link-map
+             (created
+              "/link"
+              (let [source (:source quicklink-request)
+                    destination (:destination quicklink-request)
+                    author-id (:author-id quicklink-request)
+                    link-type (:type quicklink-request)]
+                {:link (update/quicklink link-type source destination author-id)})))))
 
 (def app
   (let [compojure-api-handler
@@ -184,7 +210,7 @@
                              {:name "links" :description "Retrieve Links"}
                              {:name "statement" :description "Retrieve or add a single specific statement"}
                              {:name "link" :description "Retrieve or add a single specific link"}
-                             {:name "argument" :description "Retrive or add whole arguments"}]}}}
+                             {:name "argument" :description "Add whole arguments"}]}}}
              statement-routes
              statements-routes
              link-routes

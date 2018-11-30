@@ -58,6 +58,11 @@
   ([message data] (return-map :ok message data)))
 
 
+(defn time-now-str
+  "Returns the current time as an Linux Epoch Time String."
+  []
+  (str (.getEpochSecond (java.time.Instant/now))))
+
 ;; -----------------------------------------------------------------------------
 ;; Specs
 

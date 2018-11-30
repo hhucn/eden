@@ -6,14 +6,20 @@
 
 (def some-statement
   {:identifier {:aggregate-id "name-test" :entity-id "34" :version 1}
-   :content {:author "Jorge"
+   :content {:author {:name "Jorge"
+                      :id 666
+                      :dgep-native false}
              :text "money does not solve problems of our society"
              :created nil}
    :predecessors {}
    :delete-flag false})
 
 (def some-link
-  {:author "Wegi" :created nil :type :undercut
+  {:author {:name "Wegi"
+            :dgep-native true
+            :id 1234}
+   :created nil
+   :type :undercut
    :source {:aggregate-id "schneider.gg"
             :entity-id "W01" :version 1337}
    :destination {:aggregate-id "test-link"
@@ -46,29 +52,31 @@
   (let [updated-statement (update/fork-statement some-statement {:aggregate-id "new-agg.de"
                                                                  :entity-id "42"
                                                                  :version 15}
-                                                 "New content" "Der Wetschi")
+                                                 "New content"
+                                                 {:name "Der Wetschi"
+                                                  :dgep-native true
+                                                  :id 1})
         predecessor (first (:predecessors updated-statement))]
     (is (= 1 (get-in updated-statement [:identifier :version])))
     (is (= "New content" (get-in updated-statement [:content :text])))
     (is (= "new-agg.de" (get-in updated-statement [:identifier :aggregate-id])))
     (is (= "42" (get-in updated-statement [:identifier :entity-id])))
-    (is (= "Der Wetschi" (get-in updated-statement [:content :author])))
+    (is (= "Der Wetschi" (get-in updated-statement [:content :author :name])))
     (is (= "name-test" (:aggregate-id predecessor)))
     (is (= "34" (:entity-id predecessor)))))
 
 
-(deftest add-argument
+(deftest test-add-argument
   (let [{:keys [premise-id conclusion-id link-id]} (update/add-argument
-                                                    {:text "Der Kalli testet"
-                                                     :author "¯\\_(ツ)_/¯"}
-                                                    {:text "Conclusion wird supportet"
-                                                     :author "Foo"}
-                                                    :support)]
-    (is (= "¯\\_(ツ)_/¯"
+                                                    "Der Kalli testet"
+                                                    "Conclusion wird supportet"
+                                                    :support
+                                                    1)]
+    (is (= "anonymous"
            (get-in (query/exact-statement (:aggregate-id premise-id)
                                           (:entity-id premise-id)
                                           (:version premise-id))
-                   [:content :author])))
+                   [:content :author :name])))
     (is (= "Conclusion wird supportet"
            (get-in (query/exact-statement (:aggregate-id conclusion-id)
                                           (:entity-id conclusion-id)
@@ -78,3 +86,21 @@
               (count (query/retrieve-link (:aggregate-id link-id)
                                           (:entity-id link-id)
                                           (:version link-id))))))))
+
+(deftest test-statement-from-text
+  (let [text "This statement-stuff is craaaaazy"
+        new-statement (update/statement-from-text text 1)]
+    (is (= text (get-in new-statement [:content :text])))
+    (is (= "anonymous" (get-in new-statement [:content :author :name])))
+    (is (= config/aggregate-name (get-in new-statement [:identifier :aggregate-id])))
+    (is (= 1 (get-in new-statement [:identifier :version])))))
+
+(deftest test-quicklink-add
+  (let [source (:source some-link)
+        destination (assoc (:source some-link) :entity-id "link_special_1")
+        new-link (update/quicklink :support source destination 1)]
+    (is (= "schneider.gg" (get-in new-link [:source :aggregate-id])))
+    (is (= "link_special_1" (get-in new-link [:destination :entity-id])))
+    (is (= config/aggregate-name (get-in new-link [:identifier :aggregate-id])))
+    (is (= 1 (get-in new-link [:identifier :version])))
+    (is (= "anonymous" (get-in new-link [:author :name])))))

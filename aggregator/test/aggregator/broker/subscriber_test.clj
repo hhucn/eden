@@ -10,12 +10,16 @@
 (def queue (str (lib/uuid)))
 (def queue-two (str (lib/uuid)))  ;; like Mewto, hihi
 
-(def statement {:author "kangaroo"
-                :content "Schnapspralinen"
-                :aggregate-id "huepfer.verlag"
-                :entity-id "1"
-                :version 1
-                :created nil})
+(def statement {:content {:text "Schnapspralinen2"
+                          :created nil
+                          :author {:dgep-native false
+                                   :name "kangaroo"
+                                   :id 42}}
+                :identifier {:aggregate-id "huepfer.verlag"
+                             :entity-id "1"
+                             :version 1}
+                :delete-flag true
+                :predecessors []})
 
 (def link (first (last (s/exercise ::gspecs/link))))
 
