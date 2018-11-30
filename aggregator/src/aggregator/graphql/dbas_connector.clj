@@ -76,7 +76,7 @@
                             "query {premises(premisegroupUid: %d) {statementUid}}"
                             group-uid))
         link-type-val (link-type argument)
-        author (get argument [:author])]
+        author (:author argument)]
     (map (fn [premise]
            {:author {:dgep-native true
                      :name (:publicNickname author)
@@ -93,7 +93,6 @@
                          :entity-id (:uid argument)
                          :version 1}})
          (:premises premises))))
-
 
 (defn get-links
   "Return a map of all links that can be requested from the connected D-BAS instance."
