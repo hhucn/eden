@@ -106,17 +106,19 @@
 
 (defn add-argument
   "Adds an argument to the database. Asuming the author exists and belongs to the local DGEP."
-  [premise conclusion link-type author-id]
-  (let [author (dbas/get-author author-id)
-        complete-premise (statement-from-minimal premise author)
-        complete-conclusion (statement-from-minimal conclusion author)
-        link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
-    (update-statement complete-premise)
-    (update-statement complete-conclusion)
-    (update-link link)
-    {:premise-id (:identifier complete-premise)
-     :conclusion-id (:identifier complete-conclusion)
-     :link-id (:identifier link)}))
+  ([premise conclusion link-type author-id]
+   (add-argument premise conclusion link-type author-id {}))
+  ([premise conclusion link-type author-id additionals]
+   (let [author (dbas/get-author author-id)
+         complete-premise (statement-from-minimal premise author additionals)
+         complete-conclusion (statement-from-minimal conclusion author additionals)
+         link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
+     (update-statement complete-premise)
+     (update-statement complete-conclusion)
+     (update-link link)
+     {:premise-id (:identifier complete-premise)
+      :conclusion-id (:identifier complete-conclusion)
+      :link-id (:identifier link)})))
 
 (defn statement-from-text
   "Adds an argument only from text and author-id. Assumes author belongs to local DGEP."

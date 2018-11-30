@@ -32,9 +32,10 @@
 
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
-
 (s/def ::additional map?)
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
+                                  :opt-un [::additional]))
+
 (s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
                                       :opt-un [::additional]))
 (s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
@@ -54,8 +55,9 @@
                   (let [premise (:premise request-body)
                         conclusion (:conclusion request-body)
                         link-type (:link-type request-body)
-                        author-id (:author-id request-body)]
-                    (update/add-argument premise conclusion link-type author-id))))))
+                        author-id (:author-id request-body)
+                        additional (:additional request-body)]
+                    (update/add-argument premise conclusion link-type author-id additional))))))
 
 (def statements-routes
   (context "/statements" []
