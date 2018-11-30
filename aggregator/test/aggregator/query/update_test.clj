@@ -66,14 +66,12 @@
     (is (= "34" (:entity-id predecessor)))))
 
 
-(deftest add-argument
+(deftest test-add-argument
   (let [{:keys [premise-id conclusion-id link-id]} (update/add-argument
                                                     "Der Kalli testet"
                                                     "Conclusion wird supportet"
-                                                    :author {:name "¯\\_(ツ)_/¯"
-                                                             :dgep-native false
-                                                             :id 69})]
-    (is (= "¯\\_(ツ)_/¯"
+                                                    1)]
+    (is (= "anonymous"
            (get-in (query/exact-statement (:aggregate-id premise-id)
                                           (:entity-id premise-id)
                                           (:version premise-id))

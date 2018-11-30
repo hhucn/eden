@@ -100,7 +100,7 @@
      :created (utils/time-now-str)}))
 
 (defn add-argument
-  "Adds an argument to the database."
+  "Adds an argument to the database. Asuming the author exists and belongs to the local DGEP."
   [premise conclusion link-type author-id]
   (let [author (dbas/get-author author-id)
         complete-premise (statement-from-minimal premise author)
