@@ -107,7 +107,7 @@
 (defn add-argument
   "Adds an argument to the database. Asuming the author exists and belongs to the local DGEP."
   ([premise conclusion link-type author-id]
-   (add-argument premise conclusion link-type author-id {}))
+   (add-argument premise conclusion link-type author-id {} {}))
   ([premise conclusion link-type author-id additional-premise additional-conclusion]
    (let [author (dbas/get-author author-id)
          complete-premise (statement-from-minimal premise author additional-premise)
