@@ -89,11 +89,18 @@
 
 (deftest test-statement-from-text
   (let [text "This statement-stuff is craaaaazy"
-        new-statement (update/statement-from-text text 1)]
+        new-statement (update/statement-from-text text 1)
+        statement-with-adds (update/statement-from-text text 1 {:aggregator-id :rekt
+                                                                :content "doubly"
+                                                                :reference "My Humps"})]
     (is (= text (get-in new-statement [:content :text])))
     (is (= "anonymous" (get-in new-statement [:content :author :name])))
     (is (= config/aggregate-name (get-in new-statement [:identifier :aggregate-id])))
-    (is (= 1 (get-in new-statement [:identifier :version])))))
+    (is (= 1 (get-in new-statement [:identifier :version])))
+    (is (= text (get-in statement-with-adds [:content :text])))
+    (is (= "anonymous" (get-in statement-with-adds [:content :author :name])))
+    (is (= config/aggregate-name (get-in statement-with-adds [:identifier :aggregate-id])))
+    (is (= "My Humps" (:reference statement-with-adds)))))
 
 (deftest test-quicklink-add
   (let [source (:source some-link)

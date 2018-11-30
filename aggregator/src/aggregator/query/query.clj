@@ -7,7 +7,8 @@
             [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [aggregator.query.update :as update]))
 
 (defn get-data
   "Get data from a remote aggregator."
@@ -188,7 +189,6 @@
   "Retrieve all statements where the content.text contains the `query`"
   [query]
   (db/statements-contain query))
-
 
 (defn custom-statement
   "Retrieve a statement with a custom field containg a specific search-term."

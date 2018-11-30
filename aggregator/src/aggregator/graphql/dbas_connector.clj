@@ -76,29 +76,30 @@
                             "query {premises(premisegroupUid: %d) {statementUid}}"
                             group-uid))
         link-type-val (link-type argument)
-        author (get argument [:author])]
+        author (:author argument)
+        destination-id (or (:conclusionUid argument) (:argumentUid argument))]
     (map (fn [premise]
            {:author {:dgep-native true
                      :name (:publicNickname author)
-                     :id (:uid author)}
+                     :id (Integer/parseInt (:uid author))}
             :created nil ;; nil until we solve the graphql problem
             :type link-type-val
             :source {:aggregate-id config/aggregate-name
-                     :entity-id (:statementUid premise)
+                     :entity-id (str (:statementUid premise))
                      :version 1}
             :destination {:aggregate-id config/aggregate-name
                           :version 1
-                          :entity-id (:conclusionUid argument)}
+                          :entity-id (str destination-id)}
             :identifier {:aggregate-id config/aggregate-name
-                         :entity-id (:uid argument)
-                         :version 1}})
+                         :entity-id (str (:uid argument))
+                         :version 1}
+            :delete-flag (:isDisabled argument)})
          (:premises premises))))
-
 
 (defn get-links
   "Return a map of all links that can be requested from the connected D-BAS instance."
   []
-  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, author {publicNickname uid}, argumentUid, premisegroupUid}}")
+  (let [result (query-db "query {arguments {uid conclusionUid, isSupportive, author {publicNickname uid}, argumentUid, premisegroupUid, isDisabled}}")
         return-val (mapcat links-from-argument (:arguments result))]
     return-val))
 

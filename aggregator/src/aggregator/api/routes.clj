@@ -32,9 +32,14 @@
 
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
+(s/def ::additional map?)
+(s/def ::additional-premise map?)
+(s/def ::additional-conclusion map?)
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
+                                  :opt-un [::additional-premise ::additional-conclusion]))
 
-(s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]))
+(s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
+                                      :opt-un [::additional]))
 (s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
                                             ::eden-specs/destination ::author-id]))
 
@@ -52,8 +57,10 @@
                   (let [premise (:premise request-body)
                         conclusion (:conclusion request-body)
                         link-type (:link-type request-body)
-                        author-id (:author-id request-body)]
-                    (update/add-argument premise conclusion link-type author-id))))))
+                        author-id (:author-id request-body)
+                        additional-p (:additional-premise request-body)
+                        additional-c (:additional-conclusion request-body)]
+                    (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
 
 (def statements-routes
   (context "/statements" []
@@ -79,12 +86,24 @@
          (ok {:statements (query/starter-set)}))
 
     (GET "/by-id" []
-         :summary "Returns all statements matching aggregator and entity-id"
-         :query-params [aggregate-id :- ::eden-specs/aggregate-id,
-                        entity-id :- ::eden-specs/entity-id]
-         :return ::statements-map
-         (ok {:statements (query/tiered-retrieval aggregate-id entity-id
-                                                  {:opts [:no-remote]})}))
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [aggregate-id :- ::eden-specs/aggregate-id,
+                     entity-id :- ::eden-specs/entity-id]
+      :return ::statements-map
+      (ok {:statements (query/tiered-retrieval aggregate-id entity-id
+                                               {:opts [:no-remote]})}))
+
+    (GET "/by-reference-host" []
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [host :- spec/string?]
+      :return ::statements-map
+      (ok {:statements (query/custom-statement :reference.host host)}))
+
+    (GET "/by-reference-text" []
+      :summary "Returns all statements matching aggregator and entity-id"
+      :query-params [text :- spec/string?]
+      :return ::statements-map
+      (ok {:statements (query/custom-statement :reference.text text)}))
 
     (GET "/custom" []
          :summary "Returns all statements matching the search term in a custom field"
@@ -148,7 +167,10 @@
              :return ::statement-map
              (created
               "/statement"
-              {:statement (update/statement-from-text request-body)}))))
+              (let [text (:text request-body)
+                    author-id (:author-id request-body)
+                    additional (:additional request-body)]
+                {:statement (update/statement-from-text text author-id additional)})))))
 
 (defn wrap-link-type [handler]
   (fn [request]
