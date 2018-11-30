@@ -68,15 +68,11 @@
 
 (deftest add-argument
   (let [{:keys [premise-id conclusion-id link-id]} (update/add-argument
-                                                    {:text "Der Kalli testet"
-                                                     :author {:name "¯\\_(ツ)_/¯"
-                                                              :dgep-native false
-                                                              :id 69}}
-                                                    {:text "Conclusion wird supportet"
-                                                     :author {:name "Foo"
-                                                              :dgep-native false
-                                                              :id 89}}
-                                                    :support)]
+                                                    "Der Kalli testet"
+                                                    "Conclusion wird supportet"
+                                                    :author {:name "¯\\_(ツ)_/¯"
+                                                             :dgep-native false
+                                                             :id 69})]
     (is (= "¯\\_(ツ)_/¯"
            (get-in (query/exact-statement (:aggregate-id premise-id)
                                           (:entity-id premise-id)
