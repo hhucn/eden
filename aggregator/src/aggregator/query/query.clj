@@ -30,15 +30,17 @@
 
 (defn exact-statement
   "Return the exact statement from cache or db"
-  [aggregate-id entity-id version]
-  (let [cached-statement (cache/retrieve (utils/build-cache-pattern aggregate-id entity-id version))]
-    (if (and (not= cached-statement :missing)
-             (= (get-in cached-statement [:identifier :version]) version))
-      cached-statement
-      (when-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
-        (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
-            (log/debug "[query] Found exact statement in DB")
-            maybe-statement)))))
+  ([{:keys [aggregate-id entity-id version]}]
+   (exact-statement aggregate-id entity-id version))
+  ([aggregate-id entity-id version]
+   (let [cached-statement (cache/retrieve (utils/build-cache-pattern aggregate-id entity-id version))]
+     (if (and (not= cached-statement :missing)
+              (= (get-in cached-statement [:identifier :version]) version))
+       cached-statement
+       (when-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
+         (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
+             (log/debug "[query] Found exact statement in DB")
+             maybe-statement))))))
 
 (defn local-undercuts
   "Retrieve all links from the db that undercut the link passed as argument."
@@ -194,3 +196,28 @@
   "Retrieve a statement with a custom field containg a specific search-term."
   [field search-term]
   (db/custom-statement-search field search-term))
+
+(defn- argument-from-link
+  "Build the argument from the link. Only handles statements as premise and conclusion."
+  [link]
+  (let [premise (exact-statement (:source link))
+        conclusion (exact-statement (:destination link))]
+    (when (and premise conclusion)
+      {:link link
+       :premise premise
+       :conclusion conclusion})))
+
+(defn all-arguments
+  "Return all arguments from the DB."
+  []
+  (let [all-links (all-local-links)
+        correct-links (filter #(#{:attack :support} (:type %)) all-links)]
+    (map argument-from-link correct-links)))
+
+(defn arguments-by-author
+  "Return all arguments created by authors with given name."
+  [author-name]
+  (let [all-links (all-local-links)
+        author-links (filter #(= author-name (get-in % [:author :name])) all-links)
+        correct-links (filter #(#{:attack :support} (:type %)) author-links)]
+    (map argument-from-link correct-links)))

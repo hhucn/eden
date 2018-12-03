@@ -26,6 +26,7 @@
   (s/keys :req-un [::content
                    ::identifier ::predecessors
                    ::delete-flag]))
+
 ;; (s/exercise ::statement)
 
 (s/def ::type keyword?)
@@ -37,3 +38,7 @@
                    ::identifier ::delete-flag]
           :opt-un [::created ::author]))
 ;; (s/exercise ::link)
+
+(s/def ::premise ::statement)
+(s/def ::conclusion ::statement)
+(s/def ::argument (s/keys :req-un [::premise ::conclusion ::link]))

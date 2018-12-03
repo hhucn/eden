@@ -114,6 +114,16 @@
                                  :entity-id "W_link_35" :version 1}
                    :identifier {:aggregate-id "schneider.gg" :entity-id "link0r1337" :version 1}
                    :delete-flag false})
+  (db/insert-link {:author {:name "Wegi"
+                            :dgep-native true
+                            :id 1234}
+                   :created nil :type :support
+                   :source {:aggregate-id "hhu.de"
+                            :entity-id "P420" :version 1}
+                   :destination {:aggregate-id config/aggregate-name
+                                 :entity-id "P29v2" :version 1}
+                   :identifier {:aggregate-id config/aggregate-name :entity-id "link0r7331" :version 1}
+                   :delete-flag false})
   (Thread/sleep 2000)  ;; ElasticSearch needs around 2 seconds to add new entities to the index
   (f))
 (use-fixtures :once fixtures)
@@ -143,3 +153,12 @@
 
 (deftest test-statements-contain
   (is (= 1 (count (query/statements-contain "califragilistic")))))
+
+(deftest test-all-arguments
+  (is (not (empty? (query/all-arguments)))))
+
+(deftest test-argument-by-author
+  (let [argument (first (query/arguments-by-author "Wegi"))]
+    (is (= "Wegi" (get-in argument [:link :author :name])))
+    (is (or (= :support (get-in argument [:link :type]))
+            (= :attack (get-in argument [:link :type]))))))
