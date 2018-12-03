@@ -43,6 +43,9 @@
 (s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
                                             ::eden-specs/destination ::author-id]))
 
+(s/def ::arguments (s/coll-of ::eden-specs/argument))
+(s/def ::arguments-map (s/keys :req-un [::arguments]))
+
 (def argument-routes
   (context "/argument" []
            :tags ["argument"]
@@ -61,6 +64,23 @@
                         additional-p (:additional-premise request-body)
                         additional-c (:additional-conclusion request-body)]
                     (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
+
+(def arguments-routes
+  (context "/arguments" []
+           :tags ["arguments"]
+           :coercion :spec
+
+           (GET "/" []
+                :summary "Returns all arguments"
+                :query-params []
+                :return ::arguments-map
+                (ok {:arguments (query/all-arguments)}))
+
+           (GET "/by-author" []
+                :summary "Return all arguments by specific author"
+                :query-params [author-name :- spec/string?]
+                :return ::arguments-map
+                (ok {:arguments (query/arguments-by-author author-name)}))))
 
 (def statements-routes
   (context "/statements" []
@@ -232,12 +252,14 @@
                              {:name "links" :description "Retrieve Links"}
                              {:name "statement" :description "Retrieve or add a single specific statement"}
                              {:name "link" :description "Retrieve or add a single specific link"}
-                             {:name "argument" :description "Add whole arguments"}]}}}
+                             {:name "argument" :description "Add whole arguments"}
+                             {:name "arguments" :description "Retrieve argument objects"}]}}}
              statement-routes
              statements-routes
              link-routes
              links-routes
              argument-routes
+             arguments-routes
              (undocumented
               (compojure.route/not-found (not-found {:not "found"}))))]
     (ring-cors/wrap-cors

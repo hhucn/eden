@@ -1,3 +1,7 @@
+# Future
+* Add route to fetch all arguments
+* Add route to get arguments by a certain author (by name)
+
 # 0.3
 Major Changes with 0.3
 * The user is not a simple String anymore. The user is now a map containing the public Screenname (`:name`), the `:id` and the `dgep-native` flag which is set when the user is native to the aggregator stated in `identifier.aggregator-id`.
