@@ -182,7 +182,7 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-links aggregator))))
   ([aggregator]
-   (let [results (get-data (str config/protocol aggregator "/links"))]
+   (let [results (:links (get-data (str config/protocol aggregator "/links")))]
      (subscribe-to-queue "links" aggregator)
      (doseq [link results]
        (up/update-link link)))))
