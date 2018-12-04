@@ -114,13 +114,13 @@
                                                {:opts [:no-remote]})}))
 
     (GET "/by-reference-host" []
-      :summary "Returns all statements matching aggregator and entity-id"
+      :summary "Returns all statements matching the references host"
       :query-params [host :- spec/string?]
       :return ::statements-map
       (ok {:statements (query/custom-statement :reference.host host)}))
 
     (GET "/by-reference-text" []
-      :summary "Returns all statements matching aggregator and entity-id"
+      :summary "Returns all statements matching the references text"
       :query-params [text :- spec/string?]
       :return ::statements-map
       (ok {:statements (query/custom-statement :reference.text text)}))
@@ -246,7 +246,8 @@
               :swagger
               {:ui "/"
                :spec "/swagger.json"
-               :data {:info {:title "EDEN Aggregator API"
+               :data {:info {:version 0.5
+                             :title "EDEN Aggregator API"
                              :description "An API to request statements and links from the EDEN instance."}
                       :tags [{:name "statements" :description "Retrieve Statements"}
                              {:name "links" :description "Retrieve Links"}
