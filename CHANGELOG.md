@@ -1,4 +1,7 @@
-# Future
+## 0.4.1 
+* Fix wrong adding of arguments
+
+# 0.4
 * Add route to fetch all arguments
 * Add route to get arguments by a certain author (by name)
 
