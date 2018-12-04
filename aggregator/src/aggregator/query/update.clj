@@ -94,7 +94,7 @@
   [premise conclusion link-type author]
   (let [premise-id (:identifier premise)
         conclusion-id (:identifier conclusion)]
-    {:type (:keyword link-type)
+    {:type (keyword link-type)
      :author author
      :source premise-id
      :destination conclusion-id
