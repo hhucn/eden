@@ -186,8 +186,8 @@
     (search-request {:from 0 :size 10000} (str "statements/"))))
 
 (defmethod search :all-links [_ aggregate-id]
-  "Return the first 10.000 results of the statement from a specified
-   aggregate-id. Returns the first 10k statements on the queried host
+  "Return the first 10.000 results of the links from a specified
+   aggregate-id. Returns the first 10k links on the queried host
    if an empty aggregate-id is provided."
   (if aggregate-id
     (search-request {:from 0
