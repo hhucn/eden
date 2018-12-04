@@ -7,8 +7,7 @@
             [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
-            [taoensso.timbre :as log]
-            [aggregator.query.update :as update]))
+            [taoensso.timbre :as log]))
 
 (defn get-data
   "Get data from a remote aggregator."
@@ -173,6 +172,11 @@
 (defn all-local-links
   "Retrieve all locally saved statements belonging to the aggregator."
   []
+  (db/all-local-links))
+
+(defn all-known-links
+  "Retrieve all known links."
+  []
   (db/all-links))
 
 (defn all-remote-links
@@ -210,14 +214,14 @@
 (defn all-arguments
   "Return all arguments from the DB."
   []
-  (let [all-links (all-local-links)
+  (let [all-links (all-known-links)
         correct-links (filter #(#{:attack :support} (:type %)) all-links)]
     (map argument-from-link correct-links)))
 
 (defn arguments-by-author
   "Return all arguments created by authors with given name."
   [author-name]
-  (let [all-links (all-local-links)
+  (let [all-links (all-known-links)
         author-links (filter #(= author-name (get-in % [:author :name])) all-links)
         correct-links (filter #(#{:attack :support} (:type %)) author-links)]
     (map argument-from-link correct-links)))
