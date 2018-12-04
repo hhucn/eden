@@ -141,7 +141,7 @@
          :summary "Returns all links"
          :query-params []
          :return ::links-map
-         (ok {:links (query/all-local-links)}))
+         (ok {:links (query/all-known-links)}))
 
     (GET "/undercuts" []
          :summary "Return all undercuts targeting `aggregate-id/entity-id`"

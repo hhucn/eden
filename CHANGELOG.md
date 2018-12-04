@@ -1,3 +1,7 @@
+# WIP: 0.5
+* Return all links instead of local ones for /links
+* Use all links instead of local ones for arguments
+
 ## 0.4.1 
 * Fix wrong adding of arguments
 

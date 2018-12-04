@@ -61,10 +61,15 @@
   []
   (unpack-elastic (elastic/search :all-statements config/aggregate-name)))
 
-(defn all-links
-  "Returns all links currently saved in the elasticsearch database."
+(defn all-local-links
+  "Returns all links currently saved in the elasticsearch database for the local aggregator."
   []
   (keywordize-types (unpack-elastic (elastic/search :all-links config/aggregate-name))))
+
+(defn all-links
+  "Return all links in the db."
+  []
+  (keywordize-types (unpack-elastic (elastic/search :all-links nil))))
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."
