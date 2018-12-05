@@ -32,9 +32,9 @@
 
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::additional map?)
-(s/def ::additional-premise map?)
-(s/def ::additional-conclusion map?)
+(s/def ::additional (s/keys :opt-un [::eden-specs/references]))
+(s/def ::additional-premise (s/keys :opt-un [::eden-specs/references]))
+(s/def ::additional-conclusion (s/keys :opt-un [::eden-specs/references]))
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
                                   :opt-un [::additional-premise ::additional-conclusion]))
 
