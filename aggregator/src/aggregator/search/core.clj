@@ -165,12 +165,22 @@
 
 (defmethod search :statements [_ querymap]
   "Search for a matching entity (multiple versions possible)."
-  (search-request {:query {:bool {:must (construct-query querymap)}}} :statements))
+  (search-request {:query {:bool {:must (construct-query querymap)}}}
+                  :statements))
 
 (defmethod search :statements-predecessors [_ querymap]
   (search-request {:query
                    {:nested
                     {:path "predecessors"
+                     :query
+                     {:bool
+                      {:must (construct-query querymap)}}}}}
+                  :statements))
+
+(defmethod search :statements-references [_ querymap]
+  (search-request {:query
+                   {:nested
+                    {:path "references"
                      :query
                      {:bool
                       {:must (construct-query querymap)}}}}}

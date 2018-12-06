@@ -64,6 +64,22 @@
                                                              :predecessors.entity-id entity-id
                                                              :predecessors.version version}))))
 
+(defn- statements-by-reference-field
+  [field value]
+  (unpack-elastic (elastic/search :statements-references {(keyword (format "references.%s" field)) value})))
+
+(defn statements-by-reference-text
+  [text]
+  (statements-by-reference-field "text" text))
+
+(defn statements-by-reference-host
+  [host]
+  (statements-by-reference-field "host" host))
+
+(defn statements-by-reference-path
+  [path]
+  (statements-by-reference-field "path" path))
+
 (defn all-statements
   "Returns all statements currently saved in the elasticsearch database."
   []
