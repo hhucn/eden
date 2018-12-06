@@ -1,6 +1,9 @@
-# WIP: 0.5
+# 0.5
 * Return all links instead of local ones for /links
 * Use all links instead of local ones for arguments
+* Refactor statements to have a list of `:references` instead of a single one. 
+* Correctly handle `:predecessors` inside statements now
+* Automatically fetch `:references` if statements are coming from D-BAS
 
 ## 0.4.1 
 * Fix wrong adding of arguments
