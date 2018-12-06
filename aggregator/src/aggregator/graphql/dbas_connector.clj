@@ -115,3 +115,13 @@
     {:dgep-native true
      :id id
      :name (get-in result [:user :publicNickname])}))
+
+(defn get-references
+  "Return the references for given statement-id."
+  [sid]
+  (let [id (if (int? sid)
+             sid
+             (Integer/parseInt sid))
+        result (query-db (format "query {statement(uid: %d){references{text, host, path}}}"
+                                 sid))]
+    (get-in result [:statement :references])))
