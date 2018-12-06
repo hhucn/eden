@@ -221,7 +221,9 @@
                 {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
                                            :identifier.entity-id {:type :keyword}
                                            :content.text {:type "text"
-                                                          :analyzer "synonym_analyzer"}}}})
+                                                          :analyzer "synonym_analyzer"}
+                                           :predecessors {:type "nested"}
+                                           :references {:type "nested"}}}})
   (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
                                                 :identifier.entity-id {:type :keyword}}}}))
 
