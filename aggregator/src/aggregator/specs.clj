@@ -20,12 +20,18 @@
 (s/def ::identifier
   (s/keys :req-un [::aggregate-id ::entity-id ::version]))
 
+(s/def ::host ::non-empty-string)
+(s/def ::path ::non-empty-string)
+(s/def ::reference (s/keys :req-un [::text ::host ::path]))
+(s/def ::references (s/coll-of ::reference))
+
 (s/def ::predecessors (s/coll-of ::identifier))
 (s/def ::delete-flag boolean?)
 (s/def ::statement
   (s/keys :req-un [::content
                    ::identifier ::predecessors
-                   ::delete-flag]))
+                   ::delete-flag]
+          :opt-un [::references]))
 
 ;; (s/exercise ::statement)
 

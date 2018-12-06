@@ -15,6 +15,7 @@
   [textversion]
   (log/debug (format "Received new textversion from D-BAS: %s" (:data textversion)))
   (let [author-id (get-in textversion [:data :author_uid])
+        references (dbas-conn/get-references (get-in textversion [:data :statement_uid]))
         statement {:content {:author (dbas-conn/get-author author-id)
                              :text (get-in textversion [:data :content])
                              :created nil}
@@ -22,7 +23,8 @@
                                 :entity-id (str (get-in textversion [:data :uid]))
                                 :version 1}
                    :delete-flag false
-                   :predecessors []}
+                   :predecessors []
+                   :references references}
         origin (get-statement-origin (get-in textversion [:data :statement_uid]))]
     (if origin
       (update/update-statement

@@ -201,6 +201,14 @@
   [field search-term]
   (db/custom-statement-search field search-term))
 
+(defn statements-by-reference-text
+  [text]
+  (db/statements-by-reference-text text))
+
+(defn statements-by-reference-host
+  [host]
+  (db/statements-by-reference-host host))
+
 (defn- argument-from-link
   "Build the argument from the link. Only handles statements as premise and conclusion."
   [link]
