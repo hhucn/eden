@@ -56,6 +56,14 @@
                                                       :identifier.entity-id entity-id
                                                       :identifier.version version}))))
 
+(defn statements-by-predecessor
+  ([{:keys [aggregate-id entity-id version]}]
+   (statements-by-predecessor aggregate-id entity-id version))
+  ([aggregate-id entity-id version]
+   (unpack-elastic (elastic/search :statements-predecessors {:predecessors.aggregate-id aggregate-id
+                                                             :predecessors.entity-id entity-id
+                                                             :predecessors.version version}))))
+
 (defn all-statements
   "Returns all statements currently saved in the elasticsearch database."
   []

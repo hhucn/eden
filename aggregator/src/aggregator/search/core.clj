@@ -167,6 +167,15 @@
   "Search for a matching entity (multiple versions possible)."
   (search-request {:query {:bool {:must (construct-query querymap)}}} :statements))
 
+(defmethod search :statements-predecessors [_ querymap]
+  (search-request {:query
+                   {:nested
+                    {:path "predecessors"
+                     :query
+                     {:bool
+                      {:must (construct-query querymap)}}}}}
+                  :statements))
+
 (defmethod search :statements-fuzzy [_ querystring]
   (search-request
    {:query
