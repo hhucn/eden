@@ -28,7 +28,7 @@
 (defn get-statements
   "Return all statements from the D-BAS instance. The result is already in the EDEN-conform format."
   []
-  (let [result (query-db "query { statements { uid, textversions { content, author {publicNickname, uid}} }}")]
+  (let [result (query-db "query {statements {uid, textversions {content, author {publicNickname, uid}} references {text, host, path}}}")]
     (map (fn [statement]
            (let [author-name (get-in statement [:textversions :author :publicNickname])
                  author-id (get-in statement [:textversions :author :uid])
@@ -43,7 +43,8 @@
                                      :entity-id (:uid statement)
                                      :version 1}
                                     :predecessors []
-                                    :delete-flag false}
+                                    :delete-flag false
+                                    :references (:references statement)}
                  origin (get-statement-origin (:uid statement))]
              (if origin
                (assoc-in (assoc default-statement
@@ -112,5 +113,5 @@
         result (query-db (format "query {user(uid: %d){publicNickname}}" id))]
     (log/debug result)
     {:dgep-native true
-     :id id 
+     :id id
      :name (get-in result [:user :publicNickname])}))
