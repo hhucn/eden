@@ -77,7 +77,7 @@
 
 (defn complete-multiple-references
   [references referer]
-  (map #(complete-reference % referer) references))
+  (mapv #(complete-reference % referer) references))
 
 (defn build-additionals
   [additionals referer]

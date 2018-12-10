@@ -17,6 +17,14 @@
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
 
+(s/def ::reference (s/keys :req-un [::eden-specs/text]
+                           :opt-un [::eden-specs/path ::eden-specs/host]))
+(s/def ::references (s/coll-of ::reference))
+(s/def ::statement (s/keys :req-un [::eden-specs/content ::eden-specs/identifier
+                                    ::eden-specs/predecessors ::eden-specs/delete-flag]
+                           :opt-un [::references]))
+
+
 (s/def ::premise ::eden-specs/text)
 (s/def ::conclusion ::eden-specs/text)
 
@@ -33,9 +41,7 @@
 
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::reference (s/keys :req-un [::eden-specs/text]
-                           :opt-un [::eden-specs/path ::eden-specs/host]))
-(s/def ::references (s/coll-of ::reference))
+
 (s/def ::additional (s/keys :opt-un [::references]))
 (s/def ::additional-premise (s/keys :opt-un [::references]))
 (s/def ::additional-conclusion (s/keys :opt-un [::references]))
@@ -178,23 +184,26 @@
                (ok {:statement statement})
                (not-found nil)))
 
-           (POST "/" []
+           (POST "/" request
              :summary "Add a statement to the EDEN database"
-             :body [statement ::eden-specs/statement]
+             :body [statement ::statement]
              :return ::statement-map
              (created
               "/statement"
-              {:statement (update/update-statement (utils/json->edn statement))}))
+              (let [referer (get-in request [:headers "referer"])
+                    full-statement (utils/build-additionals statement referer)]
+                {:statement (update/update-statement full-statement)})))
 
-           (POST "/from-text" []
+           (POST "/from-text" request
              :summary "Add a statement only providing text and author-id"
              :body [request-body ::quick-statement-body]
              :return ::statement-map
              (created
               "/statement"
-              (let [text (:text request-body)
+              (let [referer (get-in request [:headers "referer"])
+                    text (:text request-body)
                     author-id (:author-id request-body)
-                    additional (:additional request-body)]
+                    additional (utils/build-additionals (:additional request-body) referer)]
                 {:statement (update/statement-from-text text author-id additional)})))))
 
 (defn wrap-link-type [handler]
