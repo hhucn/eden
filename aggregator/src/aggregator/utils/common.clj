@@ -63,6 +63,29 @@
   []
   (str (.getEpochSecond (java.time.Instant/now))))
 
+(defn complete-reference
+  "Takes a reference and a referer and delivers the complete statement where parts are missing."
+  [reference referer]
+  (let [uri (java.net.URI/create referer)
+        path (.getPath uri)
+        host (.getHost uri)
+        port (.getPort uri)
+        full-host (if (= -1 port) host (str host ":" port))]
+    (merge {:host full-host
+            :path path}
+           reference)))
+
+(defn complete-multiple-references
+  [references referer]
+  (map #(complete-reference % referer) references))
+
+(defn build-additionals
+  [additionals referer]
+  (if (contains? additionals :references)
+    (assoc additionals :references
+           (complete-multiple-references (:references additionals) referer))
+    additionals))
+
 ;; -----------------------------------------------------------------------------
 ;; Specs
 
