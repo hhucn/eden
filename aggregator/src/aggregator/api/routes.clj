@@ -10,11 +10,20 @@
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
             [ring.util.http-response :refer [ok not-found created]]
-            [ring.middleware.cors :as ring-cors]))
+            [ring.middleware.cors :as ring-cors]
+            [taoensso.timbre :as log]))
 
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
+
+(s/def ::reference (s/keys :req-un [::eden-specs/text]
+                           :opt-un [::eden-specs/path ::eden-specs/host]))
+(s/def ::references (s/coll-of ::reference))
+(s/def ::statement (s/keys :req-un [::eden-specs/content ::eden-specs/identifier
+                                    ::eden-specs/predecessors ::eden-specs/delete-flag]
+                           :opt-un [::references]))
+
 
 (s/def ::premise ::eden-specs/text)
 (s/def ::conclusion ::eden-specs/text)
@@ -32,9 +41,10 @@
 
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::additional (s/keys :opt-un [::eden-specs/references]))
-(s/def ::additional-premise (s/keys :opt-un [::eden-specs/references]))
-(s/def ::additional-conclusion (s/keys :opt-un [::eden-specs/references]))
+
+(s/def ::additional (s/keys :opt-un [::references]))
+(s/def ::additional-premise (s/keys :opt-un [::references]))
+(s/def ::additional-conclusion (s/keys :opt-un [::references]))
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
                                   :opt-un [::additional-premise ::additional-conclusion]))
 
@@ -51,19 +61,20 @@
            :tags ["argument"]
            :coercion :spec
 
-           (POST "/" []
-                 :summary "Add a new argument to the EDEN database."
-                 :body [request-body ::minimal-argument]
-                 :return ::new-argument
-                 (created
-                  "/argument"
-                  (let [premise (:premise request-body)
-                        conclusion (:conclusion request-body)
-                        link-type (:link-type request-body)
-                        author-id (:author-id request-body)
-                        additional-p (:additional-premise request-body)
-                        additional-c (:additional-conclusion request-body)]
-                    (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
+           (POST "/" request
+             :summary "Add a new argument to the EDEN database."
+             :body [request-body ::minimal-argument]
+             :return ::new-argument
+             (created
+              "/argument"
+              (let [referer (get-in request [:headers "referer"])
+                    premise (:premise request-body)
+                    conclusion (:conclusion request-body)
+                    link-type (:link-type request-body)
+                    author-id (:author-id request-body)
+                    additional-p (utils/build-additionals (:additional-premise request-body) referer)
+                    additional-c (utils/build-additionals (:additional-conclusion request-body) referer)]
+                (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
 
 (def arguments-routes
   (context "/arguments" []
@@ -173,23 +184,26 @@
                (ok {:statement statement})
                (not-found nil)))
 
-           (POST "/" []
+           (POST "/" request
              :summary "Add a statement to the EDEN database"
-             :body [statement ::eden-specs/statement]
+             :body [statement ::statement]
              :return ::statement-map
              (created
               "/statement"
-              {:statement (update/update-statement (utils/json->edn statement))}))
+              (let [referer (get-in request [:headers "referer"])
+                    full-statement (utils/build-additionals statement referer)]
+                {:statement (update/update-statement full-statement)})))
 
-           (POST "/from-text" []
+           (POST "/from-text" request
              :summary "Add a statement only providing text and author-id"
              :body [request-body ::quick-statement-body]
              :return ::statement-map
              (created
               "/statement"
-              (let [text (:text request-body)
+              (let [referer (get-in request [:headers "referer"])
+                    text (:text request-body)
                     author-id (:author-id request-body)
-                    additional (:additional request-body)]
+                    additional (utils/build-additionals (:additional request-body) referer)]
                 {:statement (update/statement-from-text text author-id additional)})))))
 
 (defn wrap-link-type [handler]

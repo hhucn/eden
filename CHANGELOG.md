@@ -1,3 +1,6 @@
+## 0.5.1
+* Adding a reference per API now only requires a text. If host and/or path are not given, the data sent via referer is added.
+
 # 0.5
 * Return all links instead of local ones for /links
 * Use all links instead of local ones for arguments
