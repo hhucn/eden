@@ -82,10 +82,8 @@
 (defn build-additionals
   [additionals referer]
   (if (contains? additionals :references)
-    (assoc additionals :references
-           (complete-multiple-references (:references additionals) referer))
+    (update additionals :references complete-multiple-references referer)
     additionals))
-
 ;; -----------------------------------------------------------------------------
 ;; Specs
 

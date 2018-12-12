@@ -16,9 +16,9 @@
 
 (deftest test-link-type
   (testing "Test whether the right link types are determined from the graphQL response"
-    (let [support {:argument {:uid 2, :conclusionUid 2, :isSupportive true, :authorUid 1, :argumentUid nil, :premisegroupUid 2}}
-          attack {:argument {:uid 3, :conclusionUid 2, :isSupportive false, :authorUid 1, :argumentUid nil, :premisegroupUid 3}}
-          undercut {:argument {:uid 6, :conclusionUid nil, :isSupportive false, :authorUid 1, :argumentUid 4, :premisegroupUid 6}}]
+    (let [support {:uid 2, :conclusionUid 2, :isSupportive true, :authorUid 1, :argumentUid nil, :premisegroupUid 2}
+          attack {:uid 3, :conclusionUid 2, :isSupportive false, :authorUid 1, :argumentUid nil, :premisegroupUid 3}
+          undercut {:uid 6, :conclusionUid nil, :isSupportive false, :authorUid 1, :argumentUid 4, :premisegroupUid 6}]
       (is (= :support (dbas-conn/link-type support)))
       (is (= :attack (dbas-conn/link-type attack)))
       (is (= :undercut (dbas-conn/link-type undercut))))))

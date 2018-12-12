@@ -60,13 +60,13 @@
   "Takes an `argument` (link) and returns the type of the link as a keyword.
   (One of `:support`, `:attack`, `:undercut`)"
   [argument]
-  (let [supportive? (get-in argument [:argument :isSupportive])
-        conclusion-id (get-in argument [:argument :conclusionUid])]
+  (let [supportive? (:isSupportive argument)
+        conclusion-id (:conclusionUid argument)]
     (if supportive?
       :support
-      (if conclusion-id
-        :attack
-        :undercut))))
+      (if (nil? conclusion-id)
+        :undercut
+        :attack))))
 
 (defn links-from-argument
   "Use the strange structure of D-BAS-arguments to create links. Needs a connection to the local dbas instance.
@@ -78,7 +78,7 @@
                             group-uid))
         link-type-val (link-type argument)
         author (:author argument)
-        destination-id (or (:conclusionUid argument) (:argumentUid argument))]
+        destination-id (or (:conclusionUid argument) (str "link_" (:argumentUid argument)))]
     (map (fn [premise]
            {:author {:dgep-native true
                      :name (:publicNickname author)
@@ -92,7 +92,7 @@
                           :version 1
                           :entity-id (str destination-id)}
             :identifier {:aggregate-id config/aggregate-name
-                         :entity-id (str (:uid argument))
+                         :entity-id (str "link_" (:uid argument))
                          :version 1}
             :delete-flag (:isDisabled argument)})
          (:premises premises))))
