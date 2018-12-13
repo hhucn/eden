@@ -27,11 +27,14 @@
 
 (s/def ::predecessors (s/coll-of ::identifier))
 (s/def ::delete-flag boolean?)
+(s/def ::tag ::non-empty-string)
+(s/def ::tags (s/coll-of ::tag))
 (s/def ::statement
   (s/keys :req-un [::content
                    ::identifier ::predecessors
                    ::delete-flag]
-          :opt-un [::references]))
+          :opt-un [::references
+                   ::tags]))
 
 ;; (s/exercise ::statement)
 

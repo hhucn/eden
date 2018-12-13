@@ -22,7 +22,8 @@
 (s/def ::references (s/coll-of ::reference))
 (s/def ::statement (s/keys :req-un [::eden-specs/content ::eden-specs/identifier
                                     ::eden-specs/predecessors ::eden-specs/delete-flag]
-                           :opt-un [::references]))
+                           :opt-un [::references
+                                    ::eden-specs/tags]))
 
 
 (s/def ::premise ::eden-specs/text)
@@ -42,9 +43,12 @@
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
 
-(s/def ::additional (s/keys :opt-un [::references]))
-(s/def ::additional-premise (s/keys :opt-un [::references]))
-(s/def ::additional-conclusion (s/keys :opt-un [::references]))
+(s/def ::additional (s/keys :opt-un [::references
+                                     ::eden-specs/tags]))
+(s/def ::additional-premise (s/keys :opt-un [::references
+                                             ::eden-specs/tags]))
+(s/def ::additional-conclusion (s/keys :opt-un [::references
+                                                ::eden-specs/tags]))
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
                                   :opt-un [::additional-premise ::additional-conclusion]))
 
@@ -135,6 +139,12 @@
       :query-params [text :- spec/string?]
       :return ::statements-map
       (ok {:statements (query/statements-by-reference-text text)}))
+
+    (GET "/by-tag" []
+         :summary "Return all statements matching a certain tag"
+         :query-params [text :- spec/string?]
+         :return ::statements-map
+         (ok {:statements (query/custom-statement "tags" text)}))
 
     (GET "/custom" []
          :summary "Returns all statements matching the search term in a custom field"
