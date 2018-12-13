@@ -1,3 +1,7 @@
+## 0.5.2
+* Tags are now supported as special data on statements
+* New route `statements/by-tag` enables searching for statements by tag strings 
+
 ## 0.5.1
 * Adding a reference per API now only requires a text. If host and/or path are not given, the data sent via referer is added.
 
