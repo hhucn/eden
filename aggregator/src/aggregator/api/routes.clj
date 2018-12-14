@@ -26,8 +26,10 @@
                                     ::eden-specs/tags]))
 
 
-(s/def ::premise ::eden-specs/text)
-(s/def ::conclusion ::eden-specs/text)
+(s/def ::premise (s/keys :req-un [::eden-specs/text]
+                         :opt-un [::references ::eden-specs/tags]))
+(s/def ::conclusion (s/keys :req-un [::eden-specs/text]
+                            :opt-un [::references ::eden-specs/tags]))
 
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
@@ -50,10 +52,10 @@
 (s/def ::additional-conclusion (s/keys :opt-un [::references
                                                 ::eden-specs/tags]))
 (s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
-                                  :opt-un [::additional-premise ::additional-conclusion]))
+))
 
 (s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
-                                      :opt-un [::additional]))
+                                      :opt-un [::references ::eden-specs/tags]))
 (s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
                                             ::eden-specs/destination ::author-id]))
 
@@ -72,13 +74,11 @@
              (created
               "/argument"
               (let [referer (get-in request [:headers "referer"])
-                    premise (:premise request-body)
-                    conclusion (:conclusion request-body)
+                    premise (utils/build-additionals (:premise request-body) referer)
+                    conclusion (utils/build-additionals (:conclusion request-body) referer)
                     link-type (:link-type request-body)
-                    author-id (:author-id request-body)
-                    additional-p (utils/build-additionals (:additional-premise request-body) referer)
-                    additional-c (utils/build-additionals (:additional-conclusion request-body) referer)]
-                (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
+                    author-id (:author-id request-body)]
+                (update/add-argument premise conclusion link-type author-id))))))
 
 (def arguments-routes
   (context "/arguments" []
@@ -213,8 +213,10 @@
               (let [referer (get-in request [:headers "referer"])
                     text (:text request-body)
                     author-id (:author-id request-body)
-                    additional (utils/build-additionals (:additional request-body) referer)]
-                {:statement (update/statement-from-text text author-id additional)})))))
+                    additionals (utils/build-additionals
+                                 (dissoc request-body :text :author-id)
+                                 referer)]
+                {:statement (update/statement-from-text text author-id additionals)})))))
 
 (defn wrap-link-type [handler]
   (fn [request]
