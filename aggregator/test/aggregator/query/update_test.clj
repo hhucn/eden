@@ -68,8 +68,8 @@
 
 (deftest test-add-argument
   (let [{:keys [premise-id conclusion-id link-id]} (update/add-argument
-                                                    "Der Kalli testet"
-                                                    "Conclusion wird supportet"
+                                                    {:text "Der Kalli testet"}
+                                                    {:text "Conclusion wird supportet"}
                                                     :support
                                                     1)]
     (is (= "anonymous"
