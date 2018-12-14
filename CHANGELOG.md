@@ -1,3 +1,7 @@
+# 10
+* Change versioning scheme. Semantic is bad style
+* Rework API to be easier to use when adding stuff
+
 ## 0.5.2
 * Tags are now supported as special data on statements
 * New route `statements/by-tag` enables searching for statements by tag strings 

@@ -1,4 +1,4 @@
-(defproject aggregator "0.5.2"
+(defproject aggregator "10"
   :description "The aggregator module for the EDEN framework. The aggregator coordinates the internal and external dataflows of an EDEN instance."
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
