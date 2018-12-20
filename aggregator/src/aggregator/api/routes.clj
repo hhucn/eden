@@ -9,7 +9,7 @@
             [spec-tools.spec :as spec]
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
-            [ring.util.http-response :refer [ok not-found created]]
+            [ring.util.http-response :refer [ok not-found created bad-request]]
             [ring.middleware.cors :as ring-cors]
             [taoensso.timbre :as log]))
 
@@ -26,10 +26,10 @@
                                     ::eden-specs/tags]))
 
 
-(s/def ::premise (s/keys :req-un [::eden-specs/text]
-                         :opt-un [::references ::eden-specs/tags]))
-(s/def ::conclusion (s/keys :req-un [::eden-specs/text]
-                            :opt-un [::references ::eden-specs/tags]))
+(s/def ::premise (s/keys :opt-un [::references ::eden-specs/tags
+                                  ::eden-specs/text ::eden-specs/identifier]))
+(s/def ::conclusion (s/keys :opt-un [::references ::eden-specs/tags
+                                     ::eden-specs/text ::eden-specs/identifier]))
 
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
@@ -62,23 +62,34 @@
 (s/def ::arguments (s/coll-of ::eden-specs/argument))
 (s/def ::arguments-map (s/keys :req-un [::arguments]))
 
+(defn- check-argument-body
+  [body]
+  (when (and (or (get-in body [:premise :identifier])
+                 (get-in body [:premise :text]))
+             (or (get-in body [:conclusion :identifier])
+                 (get-in body [:conclusion :text])))
+    true))
+
 (def argument-routes
   (context "/argument" []
            :tags ["argument"]
            :coercion :spec
 
            (POST "/" request
-             :summary "Add a new argument to the EDEN database."
+                 :summary "Add a new argument to the EDEN database. Premise and Conclusion need *either* a `:text` or an `:identifier` of an existing statement."
              :body [request-body ::minimal-argument]
              :return ::new-argument
-             (created
-              "/argument"
-              (let [referer (get-in request [:headers "referer"])
-                    premise (utils/build-additionals (:premise request-body) referer)
-                    conclusion (utils/build-additionals (:conclusion request-body) referer)
-                    link-type (:link-type request-body)
-                    author-id (:author-id request-body)]
-                (update/add-argument premise conclusion link-type author-id))))))
+             (if (check-argument-body request-body)
+               (created
+                "/argument"
+                (let [referer (get-in request [:headers "referer"])
+                      premise (utils/build-additionals (:premise request-body) referer)
+                      conclusion (utils/build-additionals (:conclusion request-body) referer)
+                      link-type (:link-type request-body)
+                      author-id (:author-id request-body)]
+                  (update/add-argument premise conclusion link-type author-id)))
+               (bad-request
+                "Premise and conclusion need to at least have either a :text attribute or an :identifier")))))
 
 (def arguments-routes
   (context "/arguments" []
