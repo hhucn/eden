@@ -102,12 +102,18 @@
                   :version 1}
      :created (utils/time-now-str)}))
 
+(defn- get-or-create-statement
+  [statement author]
+  (if (contains? statement :identifier)
+    (db/exact-statement (:identifier statement))
+    (statement-from-minimal statement author)))
+
 (defn add-argument
   "Adds an argument to the database. Asuming the author exists and belongs to the local DGEP."
   [premise conclusion link-type author-id]
   (let [author (dbas/get-author author-id)
-        complete-premise (statement-from-minimal premise author)
-        complete-conclusion (statement-from-minimal conclusion author)
+        complete-premise (get-or-create-statement premise author)
+        complete-conclusion (get-or-create-statement conclusion author)
         link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
     (update-statement complete-premise)
     (update-statement complete-conclusion)

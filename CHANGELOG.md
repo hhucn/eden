@@ -1,3 +1,8 @@
+# 11
+* Loosening restrictions when using /argument POST route
+  * :text is now only needed when an :identifier is not provided
+  * :identifier can be used to create an argument with an existing statement. All other fields of premise or conclusion are ignore when :identifier is present
+
 # 10
 * Change versioning scheme. Semantic is bad style
 * Rework API to be easier to use when adding stuff

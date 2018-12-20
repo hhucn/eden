@@ -51,10 +51,12 @@
 
 (defn exact-statement
   "Return the exact statement and only that if possible."
-  [aggregate-id entity-id version]
-  (first (unpack-elastic (elastic/search :statements {:identifier.aggregate-id aggregate-id
-                                                      :identifier.entity-id entity-id
-                                                      :identifier.version version}))))
+  ([{:keys [aggregate-id entity-id version]}]
+   (exact-statement aggregate-id entity-id version))
+  ([aggregate-id entity-id version]
+   (first (unpack-elastic (elastic/search :statements {:identifier.aggregate-id aggregate-id
+                                                       :identifier.entity-id entity-id
+                                                       :identifier.version version})))))
 
 (defn statements-by-predecessor
   ([{:keys [aggregate-id entity-id version]}]
