@@ -125,6 +125,13 @@
          :return ::statements-map
          (ok {:statements (query/statements-contain search-string)}))
 
+    (GET "/by-author" []
+         :summary "Returns all statements by author. Can also narrow down results by content."
+         :query-params [author :- spec/string?
+                        {query :- spec/string? ""}]
+         :return ::statements-map
+         (ok {:statements (query/by-author-content author query)}))
+
     (GET "/starter-set" []
          :summary "Returns up to 10 statements chosen by the Aggregator"
          :query-params []
