@@ -201,6 +201,14 @@
   [field search-term]
   (db/custom-statement-search field search-term))
 
+(defn by-author-content
+  "Retrieve statements by specific author and narrow them down by conent."
+  [author content]
+  (let [posts (if (empty? content)
+                (db/all-statements)
+                (db/statements-contain content))]
+    (filter #(= (get-in % [:content :author :name]) author) posts)))
+
 (defn statements-by-reference-text
   [text]
   (db/statements-by-reference-text text))
