@@ -20,6 +20,8 @@
 (s/def ::reference (s/keys :req-un [::eden-specs/text]
                            :opt-un [::eden-specs/path ::eden-specs/host]))
 (s/def ::references (s/coll-of ::reference))
+(s/def ::references-map (s/keys :req-un [::references]))
+
 (s/def ::statement (s/keys :req-un [::eden-specs/content ::eden-specs/identifier
                                     ::eden-specs/predecessors ::eden-specs/delete-flag]
                            :opt-un [::references
@@ -51,8 +53,7 @@
                                              ::eden-specs/tags]))
 (s/def ::additional-conclusion (s/keys :opt-un [::references
                                                 ::eden-specs/tags]))
-(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
-))
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
 
 (s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
                                       :opt-un [::references ::eden-specs/tags]))
@@ -62,6 +63,11 @@
 (s/def ::arguments (s/coll-of ::eden-specs/argument))
 (s/def ::arguments-map (s/keys :req-un [::arguments]))
 
+(s/def ::reference-plus (s/keys :req-un [::reference ::eden-specs/author]))
+(s/def ::elements (s/coll-of ::reference-plus))
+(s/def ::reference-plus-answer (s/keys :req-un [::elements]))
+
+
 (defn- check-argument-body
   [body]
   (when (and (or (get-in body [:premise :identifier])
@@ -69,6 +75,24 @@
              (or (get-in body [:conclusion :identifier])
                  (get-in body [:conclusion :text])))
     true))
+
+(def references-routes
+  (context "/references" []
+           :tags ["references"]
+           :coercion :spec
+
+           (GET "/" []
+                :summary "Return all references."
+                :query-params []
+                :return ::references-map
+                (ok {:references (query/all-references)}))
+
+           (GET "/by-location" []
+                :summary "Return all references by host and path"
+                :query-params [host :- spec/string?
+                               path :- spec/string?]
+                :return ::reference-plus-answer
+                (ok {:elements (query/references-by-location host path)}))))
 
 (def argument-routes
   (context "/argument" []
@@ -106,7 +130,10 @@
                 :summary "Return all arguments by specific author"
                 :query-params [author-name :- spec/string?]
                 :return ::arguments-map
-                (ok {:arguments (query/arguments-by-author author-name)}))))
+                (ok {:arguments (query/arguments-by-author author-name)}))
+
+           #_(GET "/by-reference" []
+                :summary "Return all arguments where the premise contains a specific reference.")))
 
 (def statements-routes
   (context "/statements" []
@@ -298,13 +325,15 @@
                              {:name "statement" :description "Retrieve or add a single specific statement"}
                              {:name "link" :description "Retrieve or add a single specific link"}
                              {:name "argument" :description "Add whole arguments"}
-                             {:name "arguments" :description "Retrieve argument objects"}]}}}
+                             {:name "arguments" :description "Retrieve argument objects"}
+                             [:name "references" :description "Retrieve references"]]}}}
              statement-routes
              statements-routes
              link-routes
              links-routes
              argument-routes
              arguments-routes
+             references-routes
              (undocumented
               (compojure.route/not-found (not-found {:not "found"}))))]
     (ring-cors/wrap-cors

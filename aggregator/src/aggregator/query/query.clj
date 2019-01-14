@@ -7,6 +7,7 @@
             [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
+            [clojure.set :as cset]
             [taoensso.timbre :as log]))
 
 (defn get-data
@@ -216,6 +217,28 @@
 (defn statements-by-reference-host
   [host]
   (db/statements-by-reference-host host))
+
+(defn- build-ref-plus
+  [{:keys [references content]}]
+  (set (map (fn [ref] {:reference ref
+                      :author (:author content)})
+            references)))
+
+(defn references-by-location
+  "Return all references (without the statement) that have a certain host and path"
+  [host path]
+  (let [matches (db/statements-by-reference-location host path)
+        references (map build-ref-plus matches)]
+    (reduce cset/union #{} references)))
+
+(defn all-references
+  "Return all references."
+  []
+  (->> (db/statements)
+       (map :references)
+       (remove nil?)
+       (remove empty?)
+       (reduce #(cset/union %1 (set (flatten %2))) #{})))
 
 (defn- argument-from-link
   "Build the argument from the link. Only handles statements as premise and conclusion."
