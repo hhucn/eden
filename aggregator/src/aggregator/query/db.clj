@@ -70,6 +70,11 @@
   [field value]
   (unpack-elastic (elastic/search :statements-references {(keyword (format "references.%s" field)) value})))
 
+(defn statements-by-reference-location
+  [host path]
+  (unpack-elastic (elastic/search :statements-references {:references.host host
+                                                          :references.path path})))
+
 (defn statements-by-reference-text
   [text]
   (statements-by-reference-field "text" text))
@@ -86,6 +91,11 @@
   "Returns all statements currently saved in the elasticsearch database."
   []
   (unpack-elastic (elastic/search :all-statements config/aggregate-name)))
+
+(defn statements
+  "Returns all statements, no matter from which aggregator."
+  []
+  (unpack-elastic (elastic/search :all-statements nil)))
 
 (defn all-local-links
   "Returns all links currently saved in the elasticsearch database for the local aggregator."

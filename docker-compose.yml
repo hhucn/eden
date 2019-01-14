@@ -78,6 +78,8 @@ services:
       - HHU_LDAP_ACCOUNT_LAST
       - HHU_LDAP_ACCOUNT_TITLE
       - HHU_LDAP_ACCOUNT_EMAIL
+      - KEY_PATH
+      - PUBKEY_PATH
     volumes:
       - ./dbas:/dbas
 
