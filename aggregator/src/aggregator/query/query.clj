@@ -264,3 +264,20 @@
         author-links (filter #(= author-name (get-in % [:author :name])) all-links)
         correct-links (filter #(#{:attack :support} (:type %)) author-links)]
     (map argument-from-link correct-links)))
+
+(defn- match-references
+  [argument text host path]
+  (let [references (get-in argument [:premise :references])
+        filtered-texts (filter #(= text (:text %)) references)
+        filtered-hosts (if (empty? host)
+                         filtered-texts
+                         (filter #(= host (:host %)) references))
+        filtered-paths (if (empty? path)
+                         filtered-hosts
+                         (filter #(= path (:path %)) references))]
+    (seq filtered-paths)))
+
+(defn arguments-by-reference
+  "Return all arguments where a premise matches a given reference text (and possibly host and path)"
+  [text host path]
+  (filter #(match-references % text host path) (all-arguments)))

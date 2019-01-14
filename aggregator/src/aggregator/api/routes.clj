@@ -132,8 +132,13 @@
                 :return ::arguments-map
                 (ok {:arguments (query/arguments-by-author author-name)}))
 
-           #_(GET "/by-reference" []
-                :summary "Return all arguments where the premise contains a specific reference.")))
+           (GET "/by-reference" []
+                :summary "Return all arguments where the premise contains a specific reference."
+                :query-params [text :- spec/string?
+                               {host :- spec/string? ""}
+                               {path :- spec/string? ""}]
+                :return ::arguments-map
+                (ok {:arguments (query/arguments-by-reference text host path)}))))
 
 (def statements-routes
   (context "/statements" []
@@ -326,7 +331,7 @@
                              {:name "link" :description "Retrieve or add a single specific link"}
                              {:name "argument" :description "Add whole arguments"}
                              {:name "arguments" :description "Retrieve argument objects"}
-                             [:name "references" :description "Retrieve references"]]}}}
+                             {:name "references" :description "Retrieve references"}]}}}
              statement-routes
              statements-routes
              link-routes
