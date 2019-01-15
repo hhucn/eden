@@ -206,7 +206,7 @@
   "Retrieve statements by specific author and narrow them down by conent."
   [author content]
   (let [posts (if (empty? content)
-                (db/all-statements)
+                (db/statements)
                 (db/statements-contain content))]
     (filter #(= (get-in % [:content :author :name]) author) posts)))
 
@@ -230,6 +230,11 @@
   (let [matches (db/statements-by-reference-location host path)
         references (map build-ref-plus matches)]
     (reduce cset/union #{} references)))
+
+(defn all-statements
+  "Return all statements inside the db."
+  []
+  (db/statements))
 
 (defn all-references
   "Return all references."
