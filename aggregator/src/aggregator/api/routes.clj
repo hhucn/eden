@@ -149,7 +149,7 @@
          :summary "Returns all statements"
          :query-params []
          :return ::statements-map
-         (ok {:statements (query/all-local-statements)}))
+         (ok {:statements (query/all-statements)}))
 
     (GET "/contain" []
          :summary "Returns all statements matching `search-string`"
