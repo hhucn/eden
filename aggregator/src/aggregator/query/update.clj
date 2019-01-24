@@ -31,7 +31,7 @@
 
 (defn update-link
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
-  [{:keys [source destination identifier] :as link}]
+  [{:keys [source destination identifier created] :as link}]
   (let [db-result (db/exact-link (:aggregate-id source) (:entity-id source) (:version source)
                                  (:aggregate-id destination) (:entity-id destination)
                                  (:version destination))]
@@ -39,14 +39,17 @@
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id destination))
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id source))
     (when-not db-result
-      (log/debug (format "[UPDATE] Added new link to db: %s" link))
-      (when (= (:aggregate-id identifier) config/aggregate-name)
-        (pub/publish-link link))
-      (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
-                                  (:version identifier))
-                             link)
-      (db/insert-link link))
-    link))
+      (let [new-link (if created
+                       link
+                       (assoc link :created (utils/time-now-str)))]
+        (log/debug (format "[UPDATE] Added new link to db: %s" link))
+        (when (= (:aggregate-id identifier) config/aggregate-name)
+          (pub/publish-link new-link))
+        (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
+                                    (:version identifier))
+                               new-link)
+        (db/insert-link new-link)
+        new-link))))
 
 (defn update-statement-content
   "Updates the text of a statement and bumps the version."
