@@ -38,18 +38,18 @@
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id identifier))
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id destination))
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id source))
-    (when-not db-result
-      (let [new-link (if created
-                       link
-                       (assoc link :created (utils/time-now-str)))]
+    (let [new-link (if created
+                     link
+                     (assoc link :created (utils/time-now-str)))]
+      (when-not db-result
         (log/debug (format "[UPDATE] Added new link to db: %s" link))
         (when (= (:aggregate-id identifier) config/aggregate-name)
           (pub/publish-link new-link))
         (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
                                     (:version identifier))
                                new-link)
-        (db/insert-link new-link)
-        new-link))))
+        (db/insert-link new-link))
+      new-link)))
 
 (defn update-statement-content
   "Updates the text of a statement and bumps the version."
