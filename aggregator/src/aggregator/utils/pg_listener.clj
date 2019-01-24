@@ -1,9 +1,10 @@
 (ns aggregator.utils.pg-listener
   (:require [postgres-listener.core :as pgl]
             [aggregator.config :as config]
+            [aggregator.utils.common :as utils]
             [aggregator.query.update :as update]
             [taoensso.timbre :as log]
-            [aggregator.graphql.dbas-connector :as dbas-conn :refer [links-from-argument get-statement-origin]]))
+            [aggregator.graphql.dbas-connector :as dbas-conn :refer [get-statement-origin]]))
 
 (defn- handle-statements
   "Handle changes in statements"
@@ -36,6 +37,40 @@
                                      :name (str (:author origin))
                                      :id 1234567}))
       (update/update-statement statement))))
+
+
+(defn- link-type
+  [argument]
+  (let [supportive? (:is_supportive argument)
+        conclusion-id (:conclusion_uid argument)]
+    (if supportive?
+      :support
+      (if (nil? conclusion-id)
+        :undercut
+        :attack))))
+
+(defn- links-from-argument
+  [argument]
+  (let [group-uid (:premisegroup_uid argument)
+        premises (dbas-conn/premises-from-premisegroup group-uid)
+        link-type-val (link-type argument)
+        author (dbas-conn/get-author (:author_uid argument))
+        destination-id (or (:conclusion_uid argument) (str "link_" (:argument_uid argument)))]
+    (map (fn [premise]
+           {:author author
+            :created (utils/time-now-str)
+            :type link-type-val
+            :source {:aggregate-id config/aggregate-name
+                     :entity-id (str (:statementUid premise))
+                     :version 1}
+            :destination {:aggregate-id config/aggregate-name
+                          :version 1
+                          :entity-id (str destination-id)}
+            :identifier {:aggregate-id config/aggregate-name
+                         :entity-id (str "link_" (:uid argument))
+                         :version 1}
+            :delete-flag (:is_disabled argument)})
+         (:premises premises))))
 
 (defn- handle-arguments
   "Handle changes in arguments and update links correspondingly."

@@ -32,6 +32,7 @@
 (defn update-link
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
   [{:keys [source destination identifier created] :as link}]
+  (log/debug (format "Checking if link needs to be added to db: %s" link))
   (let [db-result (db/exact-link (:aggregate-id source) (:entity-id source) (:version source)
                                  (:aggregate-id destination) (:entity-id destination)
                                  (:version destination))]
@@ -42,7 +43,7 @@
                      link
                      (assoc link :created (utils/time-now-str)))]
       (when-not db-result
-        (log/debug (format "[UPDATE] Added new link to db: %s" link))
+        (log/debug (format "[UPDATE] Added new link to db: %s" new-link))
         (when (= (:aggregate-id identifier) config/aggregate-name)
           (pub/publish-link new-link))
         (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"

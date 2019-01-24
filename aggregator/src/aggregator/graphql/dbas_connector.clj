@@ -19,6 +19,14 @@
    keywordize-keys
    ))
 
+(defn premises-from-premisegroup
+  "Return all premises from a premisegroup."
+  [premisgeoup-id]
+  (query-db
+   (format
+    "query {premises(premisegroupUid: %d) {statementUid}}"
+    premisgeoup-id)))
+
 (defn get-statement-origin
   "Return a certain statement-origin from D-BAS. This is needed from arguments which are not native to the queried D-BAS instance."
   [statement-uid]
