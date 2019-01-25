@@ -87,5 +87,6 @@ services:
     build: dbas/docker/db/
     volumes:
       - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
+      - ./dbas/docker/db/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
