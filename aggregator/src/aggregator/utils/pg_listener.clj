@@ -87,9 +87,7 @@
                 :database (System/getenv "DB_NAME")
                 :user (System/getenv "DB_USER")
                 :password (System/getenv "DB_PW")})
-  (doseq [[f event] [[handle-textversions "textversions_changes"]
-                     [handle-statements "statements_changes"]
-                     [handle-arguments "arguments_changes"]]]
-    (pgl/arm-listener f event)
-    (log/debug (format "Listener for event %s started." event)))
+  (pgl/arm-listener handle-textversions "textversions_changes")
+  (pgl/arm-listener handle-statements "statements_changes")
+  (pgl/arm-listener handle-arguments "arguments_changes")
   (log/debug "Started all listeners for DBAS-PG-DB"))
