@@ -82,12 +82,22 @@
 (defn start-listeners
   "Start all important listeners."
   []
-  (pgl/connect {:host (System/getenv "DB_HOST")
-                :port (read-string (System/getenv "DB_PORT"))
-                :database (System/getenv "DB_NAME")
-                :user (System/getenv "DB_USER")
-                :password (System/getenv "DB_PW")})
-  (pgl/arm-listener handle-textversions "textversions_changes")
-  (pgl/arm-listener handle-statements "statements_changes")
-  (pgl/arm-listener handle-arguments "arguments_changes")
+  ;; We are aware that this is an ugly hack, but its needed to keep the connection
+  ;; from being garbage collected.
+  (future
+    (loop [started? false]
+      (if-not started?
+        (do
+          (pgl/connect {:host (System/getenv "DB_HOST")
+                        :port (read-string (System/getenv "DB_PORT"))
+                        :database (System/getenv "DB_NAME")
+                        :user (System/getenv "DB_USER")
+                        :password (System/getenv "DB_PW")})
+          (pgl/arm-listener handle-textversions "textversions_changes")
+          (pgl/arm-listener handle-statements "statements_changes")
+          (pgl/arm-listener handle-arguments "arguments_changes")
+          (recur true))
+        (do
+          (Thread/sleep 1000)
+          (recur true)))))
   (log/debug "Started all listeners for DBAS-PG-DB"))
