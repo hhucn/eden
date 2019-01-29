@@ -87,8 +87,8 @@
                            :database (System/getenv "DB_NAME")
                            :user (System/getenv "DB_USER")
                            :password (System/getenv "DB_PW")})
-        _ (pgl/arm-listener handle-textversions "textversions_changes")
-        _ (pgl/arm-listener handle-statements "statements_changes")
-        _ (pgl/arm-listener handle-arguments "arguments_changes")]
+        text-listener (pgl/arm-listener handle-textversions "textversions_changes")
+        statement-listener (pgl/arm-listener handle-statements "statements_changes")
+        argument-listener (pgl/arm-listener handle-arguments "arguments_changes")]
     (log/debug "Started all listeners for DBAS-PG-DB")
-    conn))
+    [conn statement-listener text-listener argument-listener]))
