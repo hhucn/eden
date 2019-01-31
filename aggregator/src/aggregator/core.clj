@@ -28,7 +28,8 @@
   "Load variables from the config and use them correctly,
   by e.g. writing appropriate derivatives into the app-state or similar."
   []
-  (swap! config/app-state assoc :known-aggregators config/whitelist))
+  (swap! config/app-state assoc :known-aggregators config/whitelist)
+  (log/debug (format "Known Aggregators loaded: %s" (:known-aggregators @config/app-state))))
 
 (defn- watch-broker-conns
   "Periodically check, whether the subscription to known-aggregators is
@@ -36,7 +37,8 @@
   []
   (future
     (loop [go? true]
-      (doseq [agg (:known-aggregators @config/whitelist)]
+      (doseq [agg (:known-aggregators @config/app-state)]
+        (log/debug (format "Checking subs for aggregator: %s" agg))
         (query/subscribe-to-queue "statements" agg)
         (query/subscribe-to-queue "links" agg))
       ;; Check every ten minutes
