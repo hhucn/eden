@@ -37,8 +37,8 @@
   (future
     (loop [go? true]
       (doseq [agg (:known-aggregators @config/whitelist)]
-        (agg/subscribe-to-queue "statements" agg)
-        (agg/subscribe-to-queue "links" agg))
+        (query/subscribe-to-queue "statements" agg)
+        (query/subscribe-to-queue "links" agg))
       ;; Check every ten minutes
       (Thread/sleep 100000)
       (recur true))))
