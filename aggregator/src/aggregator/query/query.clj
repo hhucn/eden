@@ -21,7 +21,7 @@
      (catch Exception e
        {}))))
 
-(defn- subscribe-to-queue
+(defn subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
   if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
@@ -166,7 +166,6 @@
        (all-remote-statements aggregator))))
   ([aggregator]
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
-     (subscribe-to-queue "statements" aggregator)
      (doseq [statement results]
        (up/update-statement statement)))))
 
@@ -188,7 +187,6 @@
        (all-remote-links aggregator))))
   ([aggregator]
    (let [results (:links (get-data (str config/protocol aggregator "/links")))]
-     (subscribe-to-queue "links" aggregator)
      (doseq [link results]
        (up/update-link link)))))
 
