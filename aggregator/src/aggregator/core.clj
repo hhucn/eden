@@ -1,6 +1,7 @@
 (ns aggregator.core
   (:require [aggregator.query.retriever :as retriever]
             [aggregator.query.update :as update]
+            [aggregator.query.query :as query]
             [aggregator.graphql.dbas-connector :as dbas-conn]
             [aggregator.broker.connector :as broker]
             [aggregator.utils.pg-listener :as pg-listener]
@@ -29,6 +30,19 @@
   []
   (swap! config/app-state assoc :known-aggregators config/whitelist))
 
+(defn- watch-broker-conns
+  "Periodically check, whether the subscription to known-aggregators is
+  still open / possible. Try to renew if not."
+  []
+  (future
+    (loop [go? true]
+      (doseq [agg (:known-aggregators @config/whitelist)]
+        (agg/subscribe-to-queue "statements" agg)
+        (agg/subscribe-to-queue "links" agg))
+      ;; Check every ten minutes
+      (Thread/sleep 100000)
+      (recur true))))
+
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
@@ -39,5 +53,5 @@
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
-  (println "Started all Services!")
+  (watch-broker-conns)
   (log/debug "Main Bootstrap finished"))
