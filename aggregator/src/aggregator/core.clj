@@ -37,7 +37,7 @@
   []
   (future
     (loop [go? true]
-      (doseq [agg (:known-aggregators @config/app-state)]
+      (doseq [agg (disj (:known-aggregators @config/app-state) config/aggregate-name)]
         (log/debug (format "Checking subs for aggregator: %s" agg))
         (query/subscribe-to-queue "statements" agg)
         (query/subscribe-to-queue "links" agg))
