@@ -165,7 +165,26 @@
 
 (defmethod search :statements [_ querymap]
   "Search for a matching entity (multiple versions possible)."
-  (search-request {:query {:bool {:must (construct-query querymap)}}} :statements))
+  (search-request {:query {:bool {:must (construct-query querymap)}}}
+                  :statements))
+
+(defmethod search :statements-predecessors [_ querymap]
+  (search-request {:query
+                   {:nested
+                    {:path "predecessors"
+                     :query
+                     {:bool
+                      {:must (construct-query querymap)}}}}}
+                  :statements))
+
+(defmethod search :statements-references [_ querymap]
+  (search-request {:query
+                   {:nested
+                    {:path "references"
+                     :query
+                     {:bool
+                      {:must (construct-query querymap)}}}}}
+                  :statements))
 
 (defmethod search :statements-fuzzy [_ querystring]
   (search-request
@@ -186,8 +205,8 @@
     (search-request {:from 0 :size 10000} (str "statements/"))))
 
 (defmethod search :all-links [_ aggregate-id]
-  "Return the first 10.000 results of the statement from a specified
-   aggregate-id. Returns the first 10k statements on the queried host
+  "Return the first 10.000 results of the links from a specified
+   aggregate-id. Returns the first 10k links on the queried host
    if an empty aggregate-id is provided."
   (if aggregate-id
     (search-request {:from 0
@@ -221,7 +240,9 @@
                 {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
                                            :identifier.entity-id {:type :keyword}
                                            :content.text {:type "text"
-                                                          :analyzer "synonym_analyzer"}}}})
+                                                          :analyzer "synonym_analyzer"}
+                                           :predecessors {:type "nested"}
+                                           :references {:type "nested"}}}})
   (create-index "links" {} {:link {:properties {:identifier.aggregate-id {:type :keyword}
                                                 :identifier.entity-id {:type :keyword}}}}))
 

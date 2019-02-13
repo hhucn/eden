@@ -51,20 +51,61 @@
 
 (defn exact-statement
   "Return the exact statement and only that if possible."
-  [aggregate-id entity-id version]
-  (first (unpack-elastic (elastic/search :statements {:identifier.aggregate-id aggregate-id
-                                                      :identifier.entity-id entity-id
-                                                      :identifier.version version}))))
+  ([{:keys [aggregate-id entity-id version]}]
+   (exact-statement aggregate-id entity-id version))
+  ([aggregate-id entity-id version]
+   (first (unpack-elastic (elastic/search :statements {:identifier.aggregate-id aggregate-id
+                                                       :identifier.entity-id entity-id
+                                                       :identifier.version version})))))
+
+(defn statements-by-predecessor
+  ([{:keys [aggregate-id entity-id version]}]
+   (statements-by-predecessor aggregate-id entity-id version))
+  ([aggregate-id entity-id version]
+   (unpack-elastic (elastic/search :statements-predecessors {:predecessors.aggregate-id aggregate-id
+                                                             :predecessors.entity-id entity-id
+                                                             :predecessors.version version}))))
+
+(defn- statements-by-reference-field
+  [field value]
+  (unpack-elastic (elastic/search :statements-references {(keyword (format "references.%s" field)) value})))
+
+(defn statements-by-reference-location
+  [host path]
+  (unpack-elastic (elastic/search :statements-references {:references.host host
+                                                          :references.path path})))
+
+(defn statements-by-reference-text
+  [text]
+  (statements-by-reference-field "text" text))
+
+(defn statements-by-reference-host
+  [host]
+  (statements-by-reference-field "host" host))
+
+(defn statements-by-reference-path
+  [path]
+  (statements-by-reference-field "path" path))
 
 (defn all-statements
   "Returns all statements currently saved in the elasticsearch database."
   []
   (unpack-elastic (elastic/search :all-statements config/aggregate-name)))
 
-(defn all-links
-  "Returns all links currently saved in the elasticsearch database."
+(defn statements
+  "Returns all statements, no matter from which aggregator."
+  []
+  (unpack-elastic (elastic/search :all-statements nil)))
+
+(defn all-local-links
+  "Returns all links currently saved in the elasticsearch database for the local aggregator."
   []
   (keywordize-types (unpack-elastic (elastic/search :all-links config/aggregate-name))))
+
+(defn all-links
+  "Return all links in the db."
+  []
+  (keywordize-types (unpack-elastic (elastic/search :all-links nil))))
 
 (defn insert-statement
   "Requires a map conforming to the ::aggregator.specs/statement as input. Inserts the statement into the database."

@@ -9,15 +9,29 @@
             [spec-tools.spec :as spec]
             [clojure.spec.alpha :as s]
             [aggregator.specs :as eden-specs]
-            [ring.util.http-response :refer [ok not-found created]]
-            [ring.middleware.cors :as ring-cors]))
+            [ring.util.http-response :refer [ok not-found created bad-request]]
+            [ring.middleware.cors :as ring-cors]
+            [taoensso.timbre :as log]))
 
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
 (s/def ::statements-map (s/keys :req-un [::statements]))
 
-(s/def ::premise ::eden-specs/text)
-(s/def ::conclusion ::eden-specs/text)
+(s/def ::reference (s/keys :req-un [::eden-specs/text]
+                           :opt-un [::eden-specs/path ::eden-specs/host]))
+(s/def ::references (s/coll-of ::reference))
+(s/def ::references-map (s/keys :req-un [::references]))
+
+(s/def ::statement (s/keys :req-un [::eden-specs/content ::eden-specs/identifier
+                                    ::eden-specs/predecessors ::eden-specs/delete-flag]
+                           :opt-un [::references
+                                    ::eden-specs/tags]))
+
+
+(s/def ::premise (s/keys :opt-un [::references ::eden-specs/tags
+                                  ::eden-specs/text ::eden-specs/identifier]))
+(s/def ::conclusion (s/keys :opt-un [::references ::eden-specs/tags
+                                     ::eden-specs/text ::eden-specs/identifier]))
 
 (s/def ::links (s/coll-of ::eden-specs/link))
 (s/def ::links-map (s/keys :req-un [::links]))
@@ -32,35 +46,99 @@
 
 (s/def ::author-id ::eden-specs/id)
 (s/def ::link-type #{"support" "attack" "undercut"})
-(s/def ::additional map?)
-(s/def ::additional-premise map?)
-(s/def ::additional-conclusion map?)
-(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]
-                                  :opt-un [::additional-premise ::additional-conclusion]))
+
+(s/def ::additional (s/keys :opt-un [::references
+                                     ::eden-specs/tags]))
+(s/def ::additional-premise (s/keys :opt-un [::references
+                                             ::eden-specs/tags]))
+(s/def ::additional-conclusion (s/keys :opt-un [::references
+                                                ::eden-specs/tags]))
+(s/def ::minimal-argument (s/keys :req-un [::premise ::conclusion ::link-type ::author-id]))
 
 (s/def ::quick-statement-body (s/keys :req-un [::eden-specs/text ::author-id]
-                                      :opt-un [::additional]))
+                                      :opt-un [::references ::eden-specs/tags]))
 (s/def ::quicklink-request (s/keys :req-un [::eden-specs/type ::eden-specs/source
                                             ::eden-specs/destination ::author-id]))
+
+(s/def ::arguments (s/coll-of ::eden-specs/argument))
+(s/def ::arguments-map (s/keys :req-un [::arguments]))
+
+(s/def ::reference-plus (s/keys :req-un [::reference ::eden-specs/author]))
+(s/def ::elements (s/coll-of ::reference-plus))
+(s/def ::reference-plus-answer (s/keys :req-un [::elements]))
+
+
+(defn- check-argument-body
+  [body]
+  (when (and (or (get-in body [:premise :identifier])
+                 (get-in body [:premise :text]))
+             (or (get-in body [:conclusion :identifier])
+                 (get-in body [:conclusion :text])))
+    true))
+
+(def references-routes
+  (context "/references" []
+           :tags ["references"]
+           :coercion :spec
+
+           (GET "/" []
+                :summary "Return all references."
+                :query-params []
+                :return ::references-map
+                (ok {:references (query/all-references)}))
+
+           (GET "/by-location" []
+                :summary "Return all references by host and path"
+                :query-params [host :- spec/string?
+                               path :- spec/string?]
+                :return ::reference-plus-answer
+                (ok {:elements (query/references-by-location host path)}))))
 
 (def argument-routes
   (context "/argument" []
            :tags ["argument"]
            :coercion :spec
 
-           (POST "/" []
-                 :summary "Add a new argument to the EDEN database."
-                 :body [request-body ::minimal-argument]
-                 :return ::new-argument
-                 (created
-                  "/argument"
-                  (let [premise (:premise request-body)
-                        conclusion (:conclusion request-body)
-                        link-type (:link-type request-body)
-                        author-id (:author-id request-body)
-                        additional-p (:additional-premise request-body)
-                        additional-c (:additional-conclusion request-body)]
-                    (update/add-argument premise conclusion link-type author-id additional-p additional-c))))))
+           (POST "/" request
+                 :summary "Add a new argument to the EDEN database. Premise and Conclusion need *either* a `:text` or an `:identifier` of an existing statement."
+             :body [request-body ::minimal-argument]
+             :return ::new-argument
+             (if (check-argument-body request-body)
+               (created
+                "/argument"
+                (let [referer (get-in request [:headers "referer"])
+                      premise (utils/build-additionals (:premise request-body) referer)
+                      conclusion (utils/build-additionals (:conclusion request-body) referer)
+                      link-type (:link-type request-body)
+                      author-id (:author-id request-body)]
+                  (update/add-argument premise conclusion link-type author-id)))
+               (bad-request
+                "Premise and conclusion need to at least have either a :text attribute or an :identifier")))))
+
+(def arguments-routes
+  (context "/arguments" []
+           :tags ["arguments"]
+           :coercion :spec
+
+           (GET "/" []
+                :summary "Returns all arguments"
+                :query-params []
+                :return ::arguments-map
+                (ok {:arguments (query/all-arguments)}))
+
+           (GET "/by-author" []
+                :summary "Return all arguments by specific author"
+                :query-params [author-name :- spec/string?]
+                :return ::arguments-map
+                (ok {:arguments (query/arguments-by-author author-name)}))
+
+           (GET "/by-reference" []
+                :summary "Return all arguments where the premise contains a specific reference."
+                :query-params [text :- spec/string?
+                               {host :- spec/string? ""}
+                               {path :- spec/string? ""}]
+                :return ::arguments-map
+                (ok {:arguments (query/arguments-by-reference text host path)}))))
 
 (def statements-routes
   (context "/statements" []
@@ -71,13 +149,20 @@
          :summary "Returns all statements"
          :query-params []
          :return ::statements-map
-         (ok {:statements (query/all-local-statements)}))
+         (ok {:statements (query/all-statements)}))
 
     (GET "/contain" []
          :summary "Returns all statements matching `search-string`"
          :query-params [search-string :- spec/string?]
          :return ::statements-map
          (ok {:statements (query/statements-contain search-string)}))
+
+    (GET "/by-author" []
+         :summary "Returns all statements by author. Can also narrow down results by content."
+         :query-params [author :- spec/string?
+                        {query :- spec/string? ""}]
+         :return ::statements-map
+         (ok {:statements (query/by-author-content author query)}))
 
     (GET "/starter-set" []
          :summary "Returns up to 10 statements chosen by the Aggregator"
@@ -94,16 +179,22 @@
                                                {:opts [:no-remote]})}))
 
     (GET "/by-reference-host" []
-      :summary "Returns all statements matching aggregator and entity-id"
+      :summary "Returns all statements matching the references host"
       :query-params [host :- spec/string?]
       :return ::statements-map
-      (ok {:statements (query/custom-statement :reference.host host)}))
+      (ok {:statements (query/statements-by-reference-host host)}))
 
     (GET "/by-reference-text" []
-      :summary "Returns all statements matching aggregator and entity-id"
+      :summary "Returns all statements matching the references text"
       :query-params [text :- spec/string?]
       :return ::statements-map
-      (ok {:statements (query/custom-statement :reference.text text)}))
+      (ok {:statements (query/statements-by-reference-text text)}))
+
+    (GET "/by-tag" []
+         :summary "Return all statements matching a certain tag"
+         :query-params [text :- spec/string?]
+         :return ::statements-map
+         (ok {:statements (query/custom-statement "tags" text)}))
 
     (GET "/custom" []
          :summary "Returns all statements matching the search term in a custom field"
@@ -121,7 +212,7 @@
          :summary "Returns all links"
          :query-params []
          :return ::links-map
-         (ok {:links (query/all-local-links)}))
+         (ok {:links (query/all-known-links)}))
 
     (GET "/undercuts" []
          :summary "Return all undercuts targeting `aggregate-id/entity-id`"
@@ -153,24 +244,29 @@
                (ok {:statement statement})
                (not-found nil)))
 
-           (POST "/" []
+           (POST "/" request
              :summary "Add a statement to the EDEN database"
-             :body [statement ::eden-specs/statement]
+             :body [statement ::statement]
              :return ::statement-map
              (created
               "/statement"
-              {:statement (update/update-statement (utils/json->edn statement))}))
+              (let [referer (get-in request [:headers "referer"])
+                    full-statement (utils/build-additionals statement referer)]
+                {:statement (update/update-statement full-statement)})))
 
-           (POST "/from-text" []
+           (POST "/from-text" request
              :summary "Add a statement only providing text and author-id"
              :body [request-body ::quick-statement-body]
              :return ::statement-map
              (created
               "/statement"
-              (let [text (:text request-body)
+              (let [referer (get-in request [:headers "referer"])
+                    text (:text request-body)
                     author-id (:author-id request-body)
-                    additional (:additional request-body)]
-                {:statement (update/statement-from-text text author-id additional)})))))
+                    additionals (utils/build-additionals
+                                 (dissoc request-body :text :author-id)
+                                 referer)]
+                {:statement (update/statement-from-text text author-id additionals)})))))
 
 (defn wrap-link-type [handler]
   (fn [request]
@@ -226,18 +322,23 @@
               :swagger
               {:ui "/"
                :spec "/swagger.json"
-               :data {:info {:title "EDEN Aggregator API"
+               :data {:info {:version 0.5
+                             :title "EDEN Aggregator API"
                              :description "An API to request statements and links from the EDEN instance."}
                       :tags [{:name "statements" :description "Retrieve Statements"}
                              {:name "links" :description "Retrieve Links"}
                              {:name "statement" :description "Retrieve or add a single specific statement"}
                              {:name "link" :description "Retrieve or add a single specific link"}
-                             {:name "argument" :description "Add whole arguments"}]}}}
+                             {:name "argument" :description "Add whole arguments"}
+                             {:name "arguments" :description "Retrieve argument objects"}
+                             {:name "references" :description "Retrieve references"}]}}}
              statement-routes
              statements-routes
              link-routes
              links-routes
              argument-routes
+             arguments-routes
+             references-routes
              (undocumented
               (compojure.route/not-found (not-found {:not "found"}))))]
     (ring-cors/wrap-cors

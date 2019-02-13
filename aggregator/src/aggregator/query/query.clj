@@ -7,8 +7,8 @@
             [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
-            [taoensso.timbre :as log]
-            [aggregator.query.update :as update]))
+            [clojure.set :as cset]
+            [taoensso.timbre :as log]))
 
 (defn get-data
   "Get data from a remote aggregator."
@@ -21,7 +21,7 @@
      (catch Exception e
        {}))))
 
-(defn- subscribe-to-queue
+(defn subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
   if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
@@ -30,15 +30,17 @@
 
 (defn exact-statement
   "Return the exact statement from cache or db"
-  [aggregate-id entity-id version]
-  (let [cached-statement (cache/retrieve (utils/build-cache-pattern aggregate-id entity-id version))]
-    (if (and (not= cached-statement :missing)
-             (= (get-in cached-statement [:identifier :version]) version))
-      cached-statement
-      (when-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
-        (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
-            (log/debug "[query] Found exact statement in DB")
-            maybe-statement)))))
+  ([{:keys [aggregate-id entity-id version]}]
+   (exact-statement aggregate-id entity-id version))
+  ([aggregate-id entity-id version]
+   (let [cached-statement (cache/retrieve (utils/build-cache-pattern aggregate-id entity-id version))]
+     (if (and (not= cached-statement :missing)
+              (= (get-in cached-statement [:identifier :version]) version))
+       cached-statement
+       (when-let [maybe-statement (db/exact-statement aggregate-id entity-id version)]
+         (do (cache/cache-miss (utils/build-cache-pattern maybe-statement) maybe-statement)
+             (log/debug "[query] Found exact statement in DB")
+             maybe-statement))))))
 
 (defn local-undercuts
   "Retrieve all links from the db that undercut the link passed as argument."
@@ -164,12 +166,16 @@
        (all-remote-statements aggregator))))
   ([aggregator]
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
-     (subscribe-to-queue "statements" aggregator)
      (doseq [statement results]
        (up/update-statement statement)))))
 
 (defn all-local-links
   "Retrieve all locally saved statements belonging to the aggregator."
+  []
+  (db/all-local-links))
+
+(defn all-known-links
+  "Retrieve all known links."
   []
   (db/all-links))
 
@@ -180,8 +186,7 @@
      (when (not= aggregator config/aggregate-name)
        (all-remote-links aggregator))))
   ([aggregator]
-   (let [results (get-data (str config/protocol aggregator "/links"))]
-     (subscribe-to-queue "links" aggregator)
+   (let [results (:links (get-data (str config/protocol aggregator "/links")))]
      (doseq [link results]
        (up/update-link link)))))
 
@@ -194,3 +199,88 @@
   "Retrieve a statement with a custom field containg a specific search-term."
   [field search-term]
   (db/custom-statement-search field search-term))
+
+(defn by-author-content
+  "Retrieve statements by specific author and narrow them down by conent."
+  [author content]
+  (let [posts (if (empty? content)
+                (db/statements)
+                (db/statements-contain content))]
+    (filter #(= (get-in % [:content :author :name]) author) posts)))
+
+(defn statements-by-reference-text
+  [text]
+  (db/statements-by-reference-text text))
+
+(defn statements-by-reference-host
+  [host]
+  (db/statements-by-reference-host host))
+
+(defn- build-ref-plus
+  [{:keys [references content]}]
+  (set (map (fn [ref] {:reference ref
+                      :author (:author content)})
+            references)))
+
+(defn references-by-location
+  "Return all references (without the statement) that have a certain host and path"
+  [host path]
+  (let [matches (db/statements-by-reference-location host path)
+        references (map build-ref-plus matches)]
+    (reduce cset/union #{} references)))
+
+(defn all-statements
+  "Return all statements inside the db."
+  []
+  (db/statements))
+
+(defn all-references
+  "Return all references."
+  []
+  (->> (db/statements)
+       (map :references)
+       (remove nil?)
+       (remove empty?)
+       (reduce #(cset/union %1 (set (flatten %2))) #{})))
+
+(defn- argument-from-link
+  "Build the argument from the link. Only handles statements as premise and conclusion."
+  [link]
+  (let [premise (exact-statement (:source link))
+        conclusion (exact-statement (:destination link))]
+    (when (and premise conclusion)
+      {:link link
+       :premise premise
+       :conclusion conclusion})))
+
+(defn all-arguments
+  "Return all arguments from the DB."
+  []
+  (let [all-links (all-known-links)
+        correct-links (filter #(#{:attack :support} (:type %)) all-links)]
+    (map argument-from-link correct-links)))
+
+(defn arguments-by-author
+  "Return all arguments created by authors with given name."
+  [author-name]
+  (let [all-links (all-known-links)
+        author-links (filter #(= author-name (get-in % [:author :name])) all-links)
+        correct-links (filter #(#{:attack :support} (:type %)) author-links)]
+    (map argument-from-link correct-links)))
+
+(defn- match-references
+  [argument text host path]
+  (let [references (get-in argument [:premise :references])
+        filtered-texts (filter #(= text (:text %)) references)
+        filtered-hosts (if (empty? host)
+                         filtered-texts
+                         (filter #(= host (:host %)) references))
+        filtered-paths (if (empty? path)
+                         filtered-hosts
+                         (filter #(= path (:path %)) references))]
+    (seq filtered-paths)))
+
+(defn arguments-by-reference
+  "Return all arguments where a premise matches a given reference text (and possibly host and path)"
+  [text host path]
+  (filter #(match-references % text host path) (all-arguments)))

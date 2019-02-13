@@ -19,6 +19,14 @@
    keywordize-keys
    ))
 
+(defn premises-from-premisegroup
+  "Return all premises from a premisegroup."
+  [premisgeoup-id]
+  (query-db
+   (format
+    "query {premises(premisegroupUid: %d) {statementUid}}"
+    premisgeoup-id)))
+
 (defn get-statement-origin
   "Return a certain statement-origin from D-BAS. This is needed from arguments which are not native to the queried D-BAS instance."
   [statement-uid]
@@ -28,7 +36,7 @@
 (defn get-statements
   "Return all statements from the D-BAS instance. The result is already in the EDEN-conform format."
   []
-  (let [result (query-db "query { statements { uid, textversions { content, author {publicNickname, uid}} }}")]
+  (let [result (query-db "query {statements {uid, textversions {content, author {publicNickname, uid}} references {text, host, path}}}")]
     (map (fn [statement]
            (let [author-name (get-in statement [:textversions :author :publicNickname])
                  author-id (get-in statement [:textversions :author :uid])
@@ -43,7 +51,8 @@
                                      :entity-id (:uid statement)
                                      :version 1}
                                     :predecessors []
-                                    :delete-flag false}
+                                    :delete-flag false
+                                    :references (:references statement)}
                  origin (get-statement-origin (:uid statement))]
              (if origin
                (assoc-in (assoc default-statement
@@ -59,13 +68,13 @@
   "Takes an `argument` (link) and returns the type of the link as a keyword.
   (One of `:support`, `:attack`, `:undercut`)"
   [argument]
-  (let [supportive? (get-in argument [:argument :isSupportive])
-        conclusion-id (get-in argument [:argument :conclusionUid])]
+  (let [supportive? (:isSupportive argument)
+        conclusion-id (:conclusionUid argument)]
     (if supportive?
       :support
-      (if conclusion-id
-        :attack
-        :undercut))))
+      (if (nil? conclusion-id)
+        :undercut
+        :attack))))
 
 (defn links-from-argument
   "Use the strange structure of D-BAS-arguments to create links. Needs a connection to the local dbas instance.
@@ -77,7 +86,7 @@
                             group-uid))
         link-type-val (link-type argument)
         author (:author argument)
-        destination-id (or (:conclusionUid argument) (:argumentUid argument))]
+        destination-id (or (:conclusionUid argument) (str "link_" (:argumentUid argument)))]
     (map (fn [premise]
            {:author {:dgep-native true
                      :name (:publicNickname author)
@@ -91,7 +100,7 @@
                           :version 1
                           :entity-id (str destination-id)}
             :identifier {:aggregate-id config/aggregate-name
-                         :entity-id (str (:uid argument))
+                         :entity-id (str "link_" (:uid argument))
                          :version 1}
             :delete-flag (:isDisabled argument)})
          (:premises premises))))
@@ -112,5 +121,15 @@
         result (query-db (format "query {user(uid: %d){publicNickname}}" id))]
     (log/debug result)
     {:dgep-native true
-     :id id 
+     :id id
      :name (get-in result [:user :publicNickname])}))
+
+(defn get-references
+  "Return the references for given statement-id."
+  [sid]
+  (let [id (if (int? sid)
+             sid
+             (Integer/parseInt sid))
+        result (query-db (format "query {statement(uid: %d){references{text, host, path}}}"
+                                 sid))]
+    (get-in result [:statement :references])))

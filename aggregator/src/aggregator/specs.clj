@@ -20,12 +20,22 @@
 (s/def ::identifier
   (s/keys :req-un [::aggregate-id ::entity-id ::version]))
 
+(s/def ::host ::non-empty-string)
+(s/def ::path ::non-empty-string)
+(s/def ::reference (s/keys :req-un [::text ::host ::path]))
+(s/def ::references (s/coll-of ::reference))
+
 (s/def ::predecessors (s/coll-of ::identifier))
 (s/def ::delete-flag boolean?)
+(s/def ::tag ::non-empty-string)
+(s/def ::tags (s/coll-of ::tag))
 (s/def ::statement
   (s/keys :req-un [::content
                    ::identifier ::predecessors
-                   ::delete-flag]))
+                   ::delete-flag]
+          :opt-un [::references
+                   ::tags]))
+
 ;; (s/exercise ::statement)
 
 (s/def ::type keyword?)
@@ -37,3 +47,7 @@
                    ::identifier ::delete-flag]
           :opt-un [::created ::author]))
 ;; (s/exercise ::link)
+
+(s/def ::premise ::statement)
+(s/def ::conclusion ::statement)
+(s/def ::argument (s/keys :req-un [::premise ::conclusion ::link]))

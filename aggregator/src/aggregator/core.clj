@@ -1,6 +1,7 @@
 (ns aggregator.core
   (:require [aggregator.query.retriever :as retriever]
             [aggregator.query.update :as update]
+            [aggregator.query.query :as query]
             [aggregator.graphql.dbas-connector :as dbas-conn]
             [aggregator.broker.connector :as broker]
             [aggregator.utils.pg-listener :as pg-listener]
@@ -27,7 +28,22 @@
   "Load variables from the config and use them correctly,
   by e.g. writing appropriate derivatives into the app-state or similar."
   []
-  (swap! config/app-state assoc :known-aggregators config/whitelist))
+  (swap! config/app-state assoc :known-aggregators config/whitelist)
+  (log/debug (format "Known Aggregators loaded: %s" (:known-aggregators @config/app-state))))
+
+(defn- watch-broker-conns
+  "Periodically check, whether the subscription to known-aggregators is
+  still open / possible. Try to renew if not."
+  []
+  (future
+    (loop [go? true]
+      (doseq [agg (disj (:known-aggregators @config/app-state) config/aggregate-name)]
+        (log/debug (format "Checking subs for aggregator: %s" agg))
+        (query/subscribe-to-queue "statements" agg)
+        (query/subscribe-to-queue "links" agg))
+      ;; Check every ten minutes
+      (Thread/sleep 100000)
+      (recur true))))
 
 (defn -main
   "Bootstrap everything needed for the provider."
@@ -39,5 +55,5 @@
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
-  (println "Started all Services!")
+  (watch-broker-conns)
   (log/debug "Main Bootstrap finished"))

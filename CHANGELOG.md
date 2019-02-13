@@ -1,3 +1,33 @@
+# 11
+* Loosening restrictions when using /argument POST route
+  * :text is now only needed when an :identifier is not provided
+  * :identifier can be used to create an argument with an existing statement. All other fields of premise or conclusion are ignore when :identifier is present
+
+# 10
+* Change versioning scheme. Semantic is bad style
+* Rework API to be easier to use when adding stuff
+
+## 0.5.2
+* Tags are now supported as special data on statements
+* New route `statements/by-tag` enables searching for statements by tag strings 
+
+## 0.5.1
+* Adding a reference per API now only requires a text. If host and/or path are not given, the data sent via referer is added.
+
+# 0.5
+* Return all links instead of local ones for /links
+* Use all links instead of local ones for arguments
+* Refactor statements to have a list of `:references` instead of a single one. 
+* Correctly handle `:predecessors` inside statements now
+* Automatically fetch `:references` if statements are coming from D-BAS
+
+## 0.4.1 
+* Fix wrong adding of arguments
+
+# 0.4
+* Add route to fetch all arguments
+* Add route to get arguments by a certain author (by name)
+
 # 0.3
 Major Changes with 0.3
 * The user is not a simple String anymore. The user is now a map containing the public Screenname (`:name`), the `:id` and the `dgep-native` flag which is set when the user is native to the aggregator stated in `identifier.aggregator-id`.

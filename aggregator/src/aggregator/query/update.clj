@@ -31,22 +31,26 @@
 
 (defn update-link
   "Update a database-entry for a link. Typically inserts a link if not in DB yet."
-  [{:keys [source destination identifier] :as link}]
+  [{:keys [source destination identifier created] :as link}]
+  (log/debug (format "Checking if link needs to be added to db: %s" link))
   (let [db-result (db/exact-link (:aggregate-id source) (:entity-id source) (:version source)
                                  (:aggregate-id destination) (:entity-id destination)
                                  (:version destination))]
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id identifier))
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id destination))
     (swap! config/app-state update-in [:known-aggregators] conj (:aggregate-id source))
-    (when-not db-result
-      (log/debug (format "[UPDATE] Added new link to db: %s" link))
-      (when (= (:aggregate-id identifier) config/aggregate-name)
-        (pub/publish-link link))
-      (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
-                                  (:version identifier))
-                             link)
-      (db/insert-link link))
-    link))
+    (let [new-link (if created
+                     link
+                     (assoc link :created (utils/time-now-str)))]
+      (when-not db-result
+        (log/debug (format "[UPDATE] Added new link to db: %s" new-link))
+        (when (= (:aggregate-id identifier) config/aggregate-name)
+          (pub/publish-link new-link))
+        (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
+                                    (:version identifier))
+                               new-link)
+        (db/insert-link new-link))
+      new-link)))
 
 (defn update-statement-content
   "Updates the text of a statement and bumps the version."
@@ -74,27 +78,25 @@
 
 (defn- statement-from-minimal
   "Generate a statement from the minimal needed information."
-  ([text author]
-   (statement-from-minimal text author {}))
-  ([text author additional]
-   (let [statement {:content {:text text
-                              :author author
-                              :created (utils/time-now-str)}
-                    :identifier {:aggregate-id config/aggregate-name
-                                 :entity-id (str (java.util.UUID/randomUUID))
-                                 :version 1}
-                    :delete-flag false
-                    :predecessors []}
-         forbidden-fields #{:content :identifier :delete-flag :predecessors}
-         filtered-additional (apply dissoc additional forbidden-fields)]
-     (conj statement filtered-additional))))
+  [unfinished-statement author]
+  (let [text (:text unfinished-statement)
+        prepared-statement (dissoc unfinished-statement :text)
+        statement {:content {:text text
+                             :author author
+                             :created (utils/time-now-str)}
+                   :identifier {:aggregate-id config/aggregate-name
+                                :entity-id (str (java.util.UUID/randomUUID))
+                                :version 1}
+                   :delete-flag false
+                   :predecessors []}]
+    (merge prepared-statement statement)))
 
 (defn- link-premise-conclusion
   "Given a premise and a conclusion, link them both with an argument link."
   [premise conclusion link-type author]
   (let [premise-id (:identifier premise)
         conclusion-id (:identifier conclusion)]
-    {:type (:keyword link-type)
+    {:type (keyword link-type)
      :author author
      :source premise-id
      :destination conclusion-id
@@ -104,29 +106,34 @@
                   :version 1}
      :created (utils/time-now-str)}))
 
+(defn- get-or-create-statement
+  [statement author]
+  (if (contains? statement :identifier)
+    (db/exact-statement (:identifier statement))
+    (statement-from-minimal statement author)))
+
 (defn add-argument
   "Adds an argument to the database. Asuming the author exists and belongs to the local DGEP."
-  ([premise conclusion link-type author-id]
-   (add-argument premise conclusion link-type author-id {} {}))
-  ([premise conclusion link-type author-id additional-premise additional-conclusion]
-   (let [author (dbas/get-author author-id)
-         complete-premise (statement-from-minimal premise author additional-premise)
-         complete-conclusion (statement-from-minimal conclusion author additional-conclusion)
-         link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
-     (update-statement complete-premise)
-     (update-statement complete-conclusion)
-     (update-link link)
-     {:premise-id (:identifier complete-premise)
-      :conclusion-id (:identifier complete-conclusion)
-      :link-id (:identifier link)})))
+  [premise conclusion link-type author-id]
+  (let [author (dbas/get-author author-id)
+        complete-premise (get-or-create-statement premise author)
+        complete-conclusion (get-or-create-statement conclusion author)
+        link (link-premise-conclusion complete-premise complete-conclusion link-type author)]
+    (update-statement complete-premise)
+    (update-statement complete-conclusion)
+    (update-link link)
+    {:premise-id (:identifier complete-premise)
+     :conclusion-id (:identifier complete-conclusion)
+     :link-id (:identifier link)}))
 
 (defn statement-from-text
   "Adds an argument only from text and author-id. Assumes author belongs to local DGEP."
   ([text author-id]
    (statement-from-text text author-id {}))
-  ([text author-id additional]
-   (let [author (dbas/get-author author-id)]
-     (update-statement (statement-from-minimal text author additional)))))
+  ([text author-id additionals]
+   (let [author (dbas/get-author author-id)
+         unfinished-statement (merge additionals {:text text})]
+     (update-statement (statement-from-minimal unfinished-statement author)))))
 
 (defn quicklink
   "Add a link from source, destination, type and author. Assumes author belongs to local DGEP"
