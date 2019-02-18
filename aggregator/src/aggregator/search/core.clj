@@ -194,6 +194,25 @@
       {:query (append-star-if-not-empty querystring)
        :fuzziness "AUTO"}}}} :statements))
 
+(defmethod search :statements-fully [_ querystring]
+  (search-request
+   {:query
+    {:bool
+     {:should
+      [{:match_phrase
+          {:content.text
+           {:query querystring}}}
+       {:query_string
+          {:query (append-star-if-not-empty querystring)
+           :default_field "content.text"}}
+       {:match
+        {:content.text
+         {:query querystring
+          :fuzziness "AUTO"
+          :prefix_length 1}}}]
+      :minimum_should_match 1
+      :boost 1.0}}} :statements))
+
 (defmethod search :all-statements [_ aggregate-id]
   "Return the first 10.000 results of the statements from a specified
   aggregate-id. Returns the first 10k statements on the queried host if an empty
@@ -232,11 +251,18 @@
                                 {:synonym_filter
                                  {:expand true
                                   :type "synonym"
-                                  :synonyms_path "synonyms_english.txt"}}
+                                  :synonyms_path "synonyms_english.txt"}
+                                 :stop_english
+                                 {:type "stop"
+                                  :stopwords "_english_"}
+                                 :stop_german
+                                 {:type "stop"
+                                  :stopwords "_german_"}}
                                 :analyzer
-                                {:synonym_analyzer
-                                 {:tokenizer "standard"
-                                  :filter ["lowercase" "synonym_filter"]}}}}}
+                                {:default
+                                 {:expand true
+                                  :tokenizer "text"
+                                  :filter ["lowercase" "synonym_filter" "stop_english" "stop_german"]}}}}}
                 {:statement {:properties  {:identifier.aggregate-id {:type :keyword}
                                            :identifier.entity-id {:type :keyword}
                                            :content.text {:type "text"
