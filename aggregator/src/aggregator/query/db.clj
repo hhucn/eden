@@ -14,7 +14,9 @@
 (defn unpack-elastic
   "Unpack an elasticsearch response to a list of entities."
   [response]
-  (map :_source (get-in response [:data :hits])))
+  (let [res (get-in response [:data :hits])
+        mapped-res (mapv :_source res)]
+    mapped-res))
 
 (defn- keywordize-types
   "Keywordize the type value of links coming from the elastic db."
@@ -156,7 +158,7 @@
 (defn statements-contain
   "Return all statements from the elasticsearch-db where content.text containts `query`"
   [query]
-  (unpack-elastic (elastic/search :statements-fuzzy query)))
+  (unpack-elastic (elastic/search :statements-fully query)))
 
 
 (defn custom-statement-search
