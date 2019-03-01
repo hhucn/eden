@@ -3,6 +3,7 @@ version: "3.2"
 services:
   broker:
     image: rabbitmq:3.6-management-alpine
+    restart: unless-stopped
     ports:
       - "15672:15672"  # web-access to management console
       - "5671-5672:5671-5672"  # for debugging, exposes RabbitMQs port to connect from localhost
@@ -12,6 +13,7 @@ services:
 
   aggregator:
     build: aggregator/
+    restart: unless-stopped
     volumes:
       - ~/.m2:/root/.m2  # cache leiningen dependencies
       - ./aggregator/:/code  # enable hot-code reloading
@@ -41,6 +43,7 @@ services:
 
   search:
     build: elasticsearch/
+    restart: unless-stopped
     volumes:
       - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
       - ./elasticsearch/config/synonyms_english.txt:/usr/share/elasticsearch/config/synonyms_english.txt
@@ -51,6 +54,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:5.6.0
+    restart: unless-stopped
     environment:
       ELASTICSEARCH_URL: http://search:9200
     ports:
@@ -58,6 +62,7 @@ services:
 
   dbas:
     build: dbas/
+    restart: unless-stopped
     command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
     ports:
       - "4284:4284"
@@ -85,6 +90,7 @@ services:
 
   dbas-db:
     build: dbas/docker/db/
+    restart: unless-stopped
     volumes:
       - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
       - ./dbas/docker/db/data:/var/lib/postgresql/data
