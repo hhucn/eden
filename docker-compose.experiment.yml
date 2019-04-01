@@ -1,0 +1,81 @@
+version: "3.2"
+
+services:
+  broker:
+    image: rabbitmq:3.6-management-alpine
+    restart: unless-stopped
+    environment:
+      - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
+      - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
+
+  aggregator:
+    build: aggregator/
+    restart: unless-stopped
+    volumes:
+      - ~/.m2:/root/.m2  # cache leiningen dependencies
+      - ./aggregator/:/code  # enable hot-code reloading
+      - ./aggregator/db/set1/:/code/db/entrypoint # Testdata. Use the set you need
+    ports:
+      - "${PUBLIC_AGGREGATOR_PORT}:8888" # ring dev server
+    links:
+      - broker
+      - search
+      - dbas
+      - dbas-db
+    environment:
+      - ELASTICSEARCH_URL
+      - "BROKER_HOST=broker"
+      - "BROKER_USER=${BROKER_USER}"
+      - "BROKER_PASS=${BROKER_PASS}"
+      - "DB_USER=${DB_USER}"
+      - "DB_PW=${DB_PW}"
+      - "DB_PORT=${DB_PORT}"
+      - "DB_NAME=${DB_NAME}"
+      - "DBAS_HOST=dbas"
+      - "ELASTICSEARCH_HOST=search"
+      - "DB_HOST=dbas-db"
+      - AGGREGATOR_NAME
+
+  search:
+    build: elasticsearch/
+    restart: unless-stopped
+    volumes:
+      - ./elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/config/synonyms_english.txt:/usr/share/elasticsearch/config/synonyms_english.txt
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+  dbas:
+    build: dbas/
+    restart: unless-stopped
+    command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
+    ports:
+      - "${PUBLIC_DBAS_PORT}:4284"
+    links:
+      - dbas-db:db 
+    environment:
+      - "DB_USER=${DB_USER}"
+      - "DB_PW=${DB_PW}"
+      - "DB_PORT=${DB_PORT}"
+      - "DB_NAME=${DB_NAME}"
+      - "DB_HOST=${DB_HOST}"
+      - "AUTHN_SECRET=${AUTHN_SECRET}"
+      - HHU_LDAP_SERVER
+      - HHU_LDAP_BASE
+      - HHU_LDAP_ACCOUNT_SCOPE
+      - HHU_LDAP_ACCOUNT_FILTER
+      - HHU_LDAP_ACCOUNT_FIRSTNAME
+      - HHU_LDAP_ACCOUNT_LAST
+      - HHU_LDAP_ACCOUNT_TITLE
+      - HHU_LDAP_ACCOUNT_EMAIL
+      - KEY_PATH
+      - PUBKEY_PATH
+    volumes:
+      - ./dbas:/dbas
+
+  dbas-db:
+    build: dbas/docker/db/
+    restart: unless-stopped
+    volumes:
+      - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
+      - ./dbas/docker/db/data:/var/lib/postgresql/data
