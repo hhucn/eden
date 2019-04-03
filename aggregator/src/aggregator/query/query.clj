@@ -26,7 +26,11 @@
   if a port is appended. Example: example.com:8888 is treated as example.com."
   [queue host]
   (let [cleaned-host (first (str/split host #":"))]
-    (sub/subscribe queue {:host cleaned-host})))
+    ;; Quick Fix Solution for experiment. Change in next big update
+    ;; Then send the queue data with the statements and links
+    (if (str/starts-with? cleaned-host "dbas.")
+      (sub/subscribe queue {:host (str/replace cleaned-host #"dbas\." "broker.")})
+      (sub/subscribe queue {:host cleaned-host}))))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
