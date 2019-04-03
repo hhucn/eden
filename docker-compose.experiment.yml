@@ -71,7 +71,7 @@ services:
       - HHU_LDAP_ACCOUNT_EMAIL
       - KEY_PATH
       - PUBKEY_PATH
-      - URL: ${URL}
+      - URL
 
   dbas-db:
     build: dbas/docker/db/
