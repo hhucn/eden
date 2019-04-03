@@ -46,9 +46,8 @@ services:
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
 
   dbas:
-    build: dbas/
+    image: hhucn/dbas:latest
     restart: unless-stopped
-    command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
     ports:
       - "${PUBLIC_DBAS_PORT}:4284"
     links:
@@ -70,8 +69,6 @@ services:
       - HHU_LDAP_ACCOUNT_EMAIL
       - KEY_PATH
       - PUBKEY_PATH
-    volumes:
-      - ./dbas:/dbas
 
   dbas-db:
     build: dbas/docker/db/
