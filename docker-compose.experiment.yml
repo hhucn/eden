@@ -4,6 +4,8 @@ services:
   broker:
     image: rabbitmq:3.6-management-alpine
     restart: unless-stopped
+    ports:
+      - "${PUBLIC_BROKER_PORT}:5672"
     environment:
       - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
       - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
