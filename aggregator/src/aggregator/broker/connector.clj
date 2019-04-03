@@ -38,7 +38,7 @@
   [hostname] (rmq/connect {:host hostname
                            :username (System/getenv "BROKER_USER")
                            :password (System/getenv "BROKER_PASS")
-                           :port (or (System/getenv "BROKER_PORT") 80)}))
+                           :port (or (Integer/parseInt (System/getenv "BROKER_PORT")) 80)}))
 
 (defn get-connection!
   "Opens a connection to a remote broker. If the connection is already opened, returns the opened connection.
