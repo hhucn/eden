@@ -18,7 +18,7 @@
   ([broker-name broker-port]
    (:conn (broker-data broker-name broker-port)))
   ([]
-   (connected? (System/getenv "BROKER_HOST") (System/getenv "BROKER_PORT"))))
+   (connected? (System/getenv "BROKER_HOST") 5672)))
 
 #_(defmacro with-connection
   "Executes the body if the local connection is established.
