@@ -61,9 +61,8 @@ services:
       - "5601:5601"
 
   dbas:
-    build: dbas/
+    image: hhucn/dbas:latest
     restart: unless-stopped
-    command: bash -c "sleep 8 && alembic upgrade head && pserve development.ini --reload"
     ports:
       - "4284:4284"
     links:
@@ -85,8 +84,6 @@ services:
       - HHU_LDAP_ACCOUNT_EMAIL
       - KEY_PATH
       - PUBKEY_PATH
-    volumes:
-      - ./dbas:/dbas
 
   dbas-db:
     build: dbas/docker/db/
