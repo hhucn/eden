@@ -86,10 +86,10 @@ services:
       - PUBKEY_PATH
 
   dbas-db:
-    build: dbas/docker/db/
+    build: docker/db/
     restart: unless-stopped
     volumes:
-      - ./dbas/docker/db/entrypoint:/docker-entrypoint-initdb.d
-      - ./dbas/docker/db/data:/var/lib/postgresql/data
+      - ./docker/db/entrypoint:/docker-entrypoint-initdb.d
+      - ./docker/db/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
