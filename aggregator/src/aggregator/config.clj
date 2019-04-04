@@ -13,6 +13,10 @@
   "Allow automatic retrieval from all aggregators in the whitelist."
   #{"aggregator:8888" "aggregator_set2:8888"})
 
+(def remote-brokers
+  "Define known brokers which are always subscribed if possible for queues statements and links."
+  #{["localhost" 5672]})
+
 (def aggregate-name
   "Own name that is advertised."
   (System/getenv "AGGREGATOR_NAME"))

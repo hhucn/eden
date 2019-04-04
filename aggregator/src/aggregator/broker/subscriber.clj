@@ -51,10 +51,12 @@
   Example:
   (subscribe (fn [meta payload] [meta payload]) \"statements\" {:host \"broker\" :user \"groot\" :password \"iamgroot\"})
   (subscribe \"statements\" {:host \"broker\"})"
-  ([f queue {:keys [host]}]
+  ([f queue {:keys [host port]}]
    (try
      (let [current-subs (:subscriptions (conn/broker-data host))
-           connection (conn/get-connection! host)
+           connection (if port
+                        (conn/get-connection! host port)
+                        (conn/get-connection! host))
            channel (if-not (contains? current-subs queue)
                      (do
                        (log/debug (format

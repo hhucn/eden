@@ -32,17 +32,17 @@
   (log/debug (format "Known Aggregators loaded: %s" (:known-aggregators @config/app-state))))
 
 (defn- watch-broker-conns
-  "Periodically check, whether the subscription to known-aggregators is
+  "Periodically check, whether the subscription to known-brokers is
   still open / possible. Try to renew if not."
   []
   (future
     (loop [_ true]
-      (doseq [agg (disj (:known-aggregators @config/app-state) config/aggregate-name)]
-        (log/debug (format "Checking subs for aggregator: %s" agg))
-        (query/subscribe-to-queue "statements" agg)
-        (query/subscribe-to-queue "links" agg))
-      ;; Check every ten minutes
-      (Thread/sleep 100000)
+      (doseq [[broker-name broker-port] config/remote-brokers]
+        (log/debug (format "Checking subs for broker: %s" broker-name))
+        (query/subscribe-to-queue "statements" broker-name broker-port)
+        (query/subscribe-to-queue "links" broker-name broker-port))
+      ;; Check every 5 Minutes
+      (Thread/sleep 300000)
       (recur true))))
 
 (defn -main

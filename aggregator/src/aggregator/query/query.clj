@@ -24,13 +24,15 @@
 (defn subscribe-to-queue
   "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
   if a port is appended. Example: example.com:8888 is treated as example.com."
-  [queue host]
-  (let [cleaned-host (first (str/split host #":"))]
-    ;; Quick Fix Solution for experiment. Change in next big update
-    ;; Then send the queue data with the statements and links
-    (if (str/starts-with? cleaned-host "eden.")
-      (sub/subscribe queue {:host (str/replace cleaned-host #"eden\." "broker.")})
-      (sub/subscribe queue {:host cleaned-host}))))
+  ([queue host port]
+   (let [cleaned-host (first (str/split host #":"))]
+     ;; Quick Fix Solution for experiment. Change in next big update
+     ;; Then send the queue data with the statements and links
+     (if (str/starts-with? cleaned-host "eden.")
+       (sub/subscribe queue {:host (str/replace cleaned-host #"eden\." "broker.") :port port})
+       (sub/subscribe queue {:host cleaned-host :port port}))))
+  ([queue host]
+   (subscribe-to-queue queue host nil)))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
