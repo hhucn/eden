@@ -37,6 +37,7 @@ services:
       - "ELASTICSEARCH_HOST=search"
       - "DB_HOST=dbas-db"
       - AGGREGATOR_NAME
+      - BROKER_PORT
 
   search:
     build: elasticsearch/

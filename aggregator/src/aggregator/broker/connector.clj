@@ -35,10 +35,16 @@
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
   broker."
-  [hostname] (rmq/connect {:host hostname
-                           :username (System/getenv "BROKER_USER")
-                           :password (System/getenv "BROKER_PASS")
-                           :port (or (Integer/parseInt (System/getenv "BROKER_PORT")) 80)}))
+  [hostname]
+  (let [broker-port-raw (or (System/getenv "BROKER_PORT") 5672)
+        broker-port (try (Integer/parseInt broker-port-raw)
+                         (catch Exception e (do
+                                              (log/warn "BROKER_PORT Variable not set")
+                                              5672)))]
+    (rmq/connect {:host hostname
+                  :username (System/getenv "BROKER_USER")
+                  :password (System/getenv "BROKER_PASS")
+                  :port broker-port})))
 
 (defn get-connection!
   "Opens a connection to a remote broker. If the connection is already opened, returns the opened connection.
