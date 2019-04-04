@@ -36,7 +36,7 @@
   still open / possible. Try to renew if not."
   []
   (future
-    (loop [go? true]
+    (loop [_ true]
       (doseq [agg (disj (:known-aggregators @config/app-state) config/aggregate-name)]
         (log/debug (format "Checking subs for aggregator: %s" agg))
         (query/subscribe-to-queue "statements" agg)
