@@ -28,8 +28,8 @@
   (let [cleaned-host (first (str/split host #":"))]
     ;; Quick Fix Solution for experiment. Change in next big update
     ;; Then send the queue data with the statements and links
-    (if (str/starts-with? cleaned-host "dbas.")
-      (sub/subscribe queue {:host (str/replace cleaned-host #"dbas\." "broker.")})
+    (if (str/starts-with? cleaned-host "eden.")
+      (sub/subscribe queue {:host (str/replace cleaned-host #"eden\." "broker.")})
       (sub/subscribe queue {:host cleaned-host}))))
 
 (defn exact-statement
