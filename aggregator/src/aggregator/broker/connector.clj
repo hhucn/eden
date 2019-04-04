@@ -35,20 +35,27 @@
 (defn- create-connection!
   "Read variables from environment and establish connection to the message
   broker."
-  [hostname]
-  (let [broker-port-raw (or (System/getenv "BROKER_PORT") 5672)
-        broker-port (try (Integer/parseInt broker-port-raw)
-                         (catch Exception e (do
-                                              (log/warn "BROKER_PORT Variable not set")
-                                              5672)))]
-    (rmq/connect {:host hostname
-                  :username (System/getenv "BROKER_USER")
-                  :password (System/getenv "BROKER_PASS")
-                  :port broker-port})))
+  ([hostname]
+   (try (Integer/parseInt (System/getenv "BROKER_PORT"))
+        (catch Exception e
+          (do
+            (log/warn "BROKER_PORT Variable not set")
+            (create-connection! hostname 5672)))))
+  ([hostname port]
+   (rmq/connect {:host hostname
+                 :username (System/getenv "BROKER_USER")
+                 :password (System/getenv "BROKER_PASS")
+                 :port port})))
 
 (defn get-connection!
   "Opens a connection to a remote broker. If the connection is already opened, returns the opened connection.
   Connections are stored within the app-state inside the config-module."
+  ([broker-name port]
+   (let [conn (:conn (broker-data broker-name))]
+     (or conn
+         (let [new-conn (create-connection! broker-name port)]
+           (swap! config/app-state assoc-in [:broker-info broker-name :conn] new-conn)
+           new-conn))))
   ([broker-name]
    (let [conn (:conn (broker-data broker-name))]
      (or conn
@@ -61,7 +68,7 @@
 (defn init-local-connection!
   "Initializes connection to local broker and creates an exchange."
   []
-  (get-connection! (System/getenv "BROKER_HOST"))
+  (get-connection! (System/getenv "BROKER_HOST") 5672)
   (log/debug "Connection to Message Broker established.")
   (lib/return-ok "Connection established."))
 
