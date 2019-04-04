@@ -18,7 +18,7 @@
   ([broker-name broker-port]
    (:conn (broker-data broker-name broker-port)))
   ([]
-   (connected? (System/getenv "BROKER_HOST") (System/getenv "BROKER_PORT"))))
+   (connected? (System/getenv "BROKER_HOST") 5672)))
 
 #_(defmacro with-connection
   "Executes the body if the local connection is established.
@@ -57,7 +57,8 @@
            (swap! config/app-state assoc-in [:broker-info broker-name port :conn] new-conn)
            new-conn))))
   ([broker-name]
-   (let [conn (:conn (broker-data broker-name nil))]
+   (let [conn (:conn (broker-data broker-name 5672))]
+     (log/debug (format "Returning connection: %s" conn))
      (or conn
          (let [new-conn (create-connection! broker-name)]
            (swap! config/app-state assoc-in [:broker-info broker-name nil :conn] new-conn)
@@ -75,12 +76,14 @@
 (declare close-all-channels!)
 (defn close-connection!
   "Closes a connection for a given broker and returns :ok. If the connection is already closed, return nil."
-  [broker-name]
-  (when-let [conn (:conn (broker-data broker-name nil))]
-    (close-all-channels! broker-name)
-    (rmq/close conn)
-    (swap! config/app-state assoc-in [:broker-info broker-name nil :conn] nil)
-    :ok))
+  ([broker-name]
+   (close-connection! broker-name 5672))
+  ([broker-name port]
+   (when-let [conn (:conn (broker-data broker-name port))]
+     (close-all-channels! broker-name)
+     (rmq/close conn)
+     (swap! config/app-state assoc-in [:broker-info broker-name port :conn] nil)
+     :ok)))
 
 (defn close-local-connection!
   "Close connection to the local message broker."
