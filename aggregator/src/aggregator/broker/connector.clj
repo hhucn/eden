@@ -76,12 +76,14 @@
 (declare close-all-channels!)
 (defn close-connection!
   "Closes a connection for a given broker and returns :ok. If the connection is already closed, return nil."
-  [broker-name]
-  (when-let [conn (:conn (broker-data broker-name nil))]
-    (close-all-channels! broker-name)
-    (rmq/close conn)
-    (swap! config/app-state assoc-in [:broker-info broker-name nil :conn] nil)
-    :ok))
+  ([broker-name]
+   (close-connection! broker-name 5672))
+  ([broker-name port]
+   (when-let [conn (:conn (broker-data broker-name port))]
+     (close-all-channels! broker-name)
+     (rmq/close conn)
+     (swap! config/app-state assoc-in [:broker-info broker-name port :conn] nil)
+     :ok)))
 
 (defn close-local-connection!
   "Close connection to the local message broker."
