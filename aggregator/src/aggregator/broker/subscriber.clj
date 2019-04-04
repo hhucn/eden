@@ -53,7 +53,7 @@
   (subscribe \"statements\" {:host \"broker\"})"
   ([f queue {:keys [host port]}]
    (try
-     (let [current-subs (:subscriptions (conn/broker-data host))
+     (let [current-subs (:subscriptions (conn/broker-data host port))
            connection (if port
                         (conn/get-connection! host port)
                         (conn/get-connection! host))
