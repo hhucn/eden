@@ -10,15 +10,15 @@
 
 (defn broker-data
   "Helper shortcut to get the broker-data from the state."
-  [name]
-  (get-in @config/app-state [:broker-info name]))
+  [name port]
+  (get-in @config/app-state [:broker-info name port]))
 
 (defn connected?
   "Check if connection to broker is established. When no broker-name is given, the local broker is checked. If connection is established return connection, otherwise nil."
-  ([broker-name]
-   (:conn (broker-data broker-name)))
+  ([broker-name broker-port]
+   (:conn (broker-data broker-name broker-port)))
   ([]
-   (connected? (System/getenv "BROKER_HOST"))))
+   (connected? (System/getenv "BROKER_HOST") (System/getenv "BROKER_PORT"))))
 
 #_(defmacro with-connection
   "Executes the body if the local connection is established.
@@ -51,16 +51,16 @@
   "Opens a connection to a remote broker. If the connection is already opened, returns the opened connection.
   Connections are stored within the app-state inside the config-module."
   ([broker-name port]
-   (let [conn (:conn (broker-data broker-name))]
+   (let [conn (:conn (broker-data broker-name port))]
      (or conn
          (let [new-conn (create-connection! broker-name port)]
-           (swap! config/app-state assoc-in [:broker-info broker-name :conn] new-conn)
+           (swap! config/app-state assoc-in [:broker-info broker-name port :conn] new-conn)
            new-conn))))
   ([broker-name]
-   (let [conn (:conn (broker-data broker-name))]
+   (let [conn (:conn (broker-data broker-name nil))]
      (or conn
          (let [new-conn (create-connection! broker-name)]
-           (swap! config/app-state assoc-in [:broker-info broker-name :conn] new-conn)
+           (swap! config/app-state assoc-in [:broker-info broker-name nil :conn] new-conn)
            new-conn))))
   ([]
    (get-connection! (System/getenv "BROKER_HOST"))))
@@ -76,10 +76,10 @@
 (defn close-connection!
   "Closes a connection for a given broker and returns :ok. If the connection is already closed, return nil."
   [broker-name]
-  (when-let [conn (:conn (broker-data broker-name))]
+  (when-let [conn (:conn (broker-data broker-name nil))]
     (close-all-channels! broker-name)
     (rmq/close conn)
-    (swap! config/app-state assoc-in [:broker-info broker-name :conn] nil)
+    (swap! config/app-state assoc-in [:broker-info broker-name nil :conn] nil)
     :ok))
 
 (defn close-local-connection!
@@ -110,9 +110,9 @@
 (defn close-all-channels!
   "Closes all known channels for a certain broker."
   [broker-name]
-  (let [channels (:subscriptions (broker-data broker-name))]
+  (let [channels (:subscriptions (broker-data broker-name nil))]
     (run! (fn [[_ chan]] (lch/close chan)) channels)
-    (swap! config/app-state assoc-in [:broker-info broker-name :subscriptions] {})))
+    (swap! config/app-state assoc-in [:broker-info broker-name nil :subscriptions] {})))
 
 (defn create-queue
   "Creates a queue for a given aggregator. Uses aggregator as the queue name and

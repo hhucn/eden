@@ -41,9 +41,9 @@
 
 (defn save-sub-to-state!
   "Adds a subscription and the corresponding channel to the app-state."
-  [broker sub-name channel]
+  [broker port sub-name channel]
   (swap! config/app-state
-         assoc-in [:broker-info broker :subscriptions sub-name] channel))
+         assoc-in [:broker-info broker port :subscriptions sub-name] channel))
 
 (defn subscribe
   "Subscribe to queue and call a function f with meta-information and payload.
@@ -65,7 +65,7 @@
                        (lch/open connection))
                      (get current-subs queue))]
        (lcons/subscribe channel queue (partial message-handler f) {:auto-ack true})
-       (save-sub-to-state! host queue channel)
+       (save-sub-to-state! host port queue channel)
        (log/debug (format "Connected to queue %s. Channel id: %s"
                           queue (.getChannelNumber channel)))
        (lib/return-ok "Connection to message queue established."))
