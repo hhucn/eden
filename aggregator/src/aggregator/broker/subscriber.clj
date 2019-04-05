@@ -58,12 +58,15 @@
                         (conn/get-connection! host port)
                         (conn/get-connection! host))
            channel (if-not (contains? current-subs queue)
-                     (do
-                       (log/debug (format
-                                   "The queue %s has no open channel for it."
-                                   queue))
-                       (lch/open connection))
-                     (get current-subs queue))]
+                            ;; Open new channel, no channel provided
+                           (do
+                             (log/debug (format "The queue %s has no open channel for it."
+                                                queue))
+                             (lch/open connection))
+                           ;; Is the existing channel still open?
+                           (if (rmq/open?(get current-subs queue))
+                             (get current-subs queue)
+                             (lch/open connection)))]
        (lcons/subscribe channel queue (partial message-handler f) {:auto-ack true})
        (save-sub-to-state! host port queue channel)
        (log/debug (format "Connected to queue %s. Channel id: %s"
