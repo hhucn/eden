@@ -12,7 +12,6 @@ services:
     ports:
       - "${PUBLIC_AGGREGATOR_PORT}:8888" # ring dev server
     links:
-      - broker
       - search
       - dbas
       - dbas-db

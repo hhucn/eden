@@ -13,7 +13,6 @@ services:
       - "7777:7777"  # expose port to REPL
       - "8888:8888" # ring dev server
     links:
-      - broker
       - search
       - dbas
       - dbas-db
