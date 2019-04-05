@@ -9,7 +9,6 @@
                  [org.clojure/core.cache "0.7.2"]
                  [org.clojure/core.async "0.4.490"]
                  [org.postgresql/postgresql "42.2.5"]
-                 [com.novemberain/langohr "5.1.0"]
                  [com.taoensso/timbre "4.10.0"]  ;; logging lib
                  [cc.qbits/spandex "0.6.4"] ;; query-lib for elasticsearch
                  [compojure "1.6.1"]
