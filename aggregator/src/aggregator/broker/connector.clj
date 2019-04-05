@@ -57,12 +57,7 @@
            (swap! config/app-state assoc-in [:broker-info broker-name port :conn] new-conn)
            new-conn))))
   ([broker-name]
-   (let [conn (:conn (broker-data broker-name 5672))]
-     (log/debug (format "Returning connection: %s" conn))
-     (or conn
-         (let [new-conn (create-connection! broker-name)]
-           (swap! config/app-state assoc-in [:broker-info broker-name nil :conn] new-conn)
-           new-conn))))
+   (get-connection! broker-name 5672))
   ([]
    (get-connection! (System/getenv "BROKER_HOST"))))
 
