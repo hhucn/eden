@@ -38,11 +38,11 @@
   (future
     (loop [_ true]
       (doseq [[broker-name broker-port] config/remote-brokers]
-        (log/debug (format "Checking subs for broker: %s" broker-name))
+        (log/debug (format "Checking subs for broker: %s port %s" broker-name broker-port))
         (query/subscribe-to-queue "statements" broker-name broker-port)
         (query/subscribe-to-queue "links" broker-name broker-port))
       ;; Check every 5 Minutes
-      (Thread/sleep 300000)
+      (Thread/sleep 600000)
       (recur true))))
 
 (defn -main
