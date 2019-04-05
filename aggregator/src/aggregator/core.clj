@@ -42,7 +42,7 @@
         (query/subscribe-to-queue "statements" broker-name broker-port)
         (query/subscribe-to-queue "links" broker-name broker-port))
       ;; Check every 5 Minutes
-      (Thread/sleep 600000)
+      (Thread/sleep 300000)
       (recur true))))
 
 (defn -main

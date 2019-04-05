@@ -17,8 +17,10 @@
   "Check if connection to broker is established. When no broker-name is given, the local broker is checked. If connection is established return connection, otherwise nil."
   ([broker-name broker-port]
    (:conn (broker-data broker-name broker-port)))
+  ([broker-name]
+   (connected? broker-name 5672))
   ([]
-   (connected? (System/getenv "BROKER_HOST") 5672)))
+   (connected? (System/getenv "BROKER_HOST"))))
 
 #_(defmacro with-connection
   "Executes the body if the local connection is established.
@@ -108,9 +110,9 @@
 (defn close-all-channels!
   "Closes all known channels for a certain broker."
   [broker-name]
-  (let [channels (:subscriptions (broker-data broker-name nil))]
+  (let [channels (:subscriptions (broker-data broker-name 5672))]
     (run! (fn [[_ chan]] (lch/close chan)) channels)
-    (swap! config/app-state assoc-in [:broker-info broker-name nil :subscriptions] {})))
+    (swap! config/app-state assoc-in [:broker-info broker-name 5672 :subscriptions] {})))
 
 (defn create-queue
   "Creates a queue for a given aggregator. Uses aggregator as the queue name and
