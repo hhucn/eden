@@ -28,11 +28,9 @@
    (let [cleaned-host (first (str/split host #":"))]
      ;; Quick Fix Solution for experiment. Change in next big update
      ;; Then send the queue data with the statements and links
-     (if (str/starts-with? cleaned-host "eden.")
-       (sub/subscribe queue {:host (str/replace cleaned-host #"eden\." "broker.") :port port})
-       (sub/subscribe queue {:host cleaned-host :port port}))))
+     (sub/subscribe queue {:host cleaned-host :port port})))
   ([queue host]
-   (subscribe-to-queue queue host nil)))
+   (subscribe-to-queue queue host 5672)))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
