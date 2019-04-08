@@ -7,7 +7,6 @@
             [clj-http.client :as client]
             [clojure.string :as str]
             [clojure.set :as cset]
-            [clj-time.coerce :as timec]
             [taoensso.timbre :as log]))
 
 (defn get-data
@@ -153,9 +152,10 @@
   "Retrieve all statements since a certain timestamp (epoch)."
   [timestamp]
   (let [local-statements (all-local-statements)
-        epoch-time (timec/to-long timestamp)]
-    (filter #(when-let [timestamp (get-in % [:content :created])]
-               (> (timec/to-long timestamp) epoch-time)) local-statements)))
+        epoch-time (bigdec timestamp)]
+    (filter #(when-let [created (get-in % [:content :created])]
+               (log/debug (format "trying comparisson for %s and input %s" created epoch-time))
+               (> (bigdec created) epoch-time)) local-statements)))
 
 (defn remote-statements-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
@@ -174,9 +174,9 @@
   "Retrieve all links since a certain timestamp (epoch)."
   [timestamp]
   (let [local-links (all-local-links)
-        epoch-time (timec/to-long timestamp)]
-    (filter #(when-let [timestamp (:created %)]
-               (> (timec/to-long timestamp) epoch-time)) local-links)))
+        epoch-time (bigdec timestamp)]
+    (filter #(when-let [created (:created %)]
+               (> (bigdec created) epoch-time)) local-links)))
 
 (defn remote-links-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."

@@ -18,7 +18,6 @@
                  [ring/ring-jetty-adapter "1.7.1"]
                  [ring-cors "0.1.13"]
                  [clj-http "3.9.1"]
-                 [clj-time "0.15.0"]
                  [codox-theme-rdash "0.1.2"]
                  [metosin/compojure-api "2.0.0-alpha28"]
                  [metosin/spec-tools "0.8.3"]
