@@ -30,20 +30,6 @@
   (swap! config/app-state assoc :known-aggregators config/whitelist)
   (log/debug (format "Known Aggregators loaded: %s" (:known-aggregators @config/app-state))))
 
-(defn- watch-broker-conns
-  "Periodically check, whether the subscription to known-brokers is
-  still open / possible. Try to renew if not."
-  []
-  (future
-    (loop [_ true]
-      (doseq [[broker-name broker-port] config/remote-brokers]
-        (log/debug (format "Checking subs for broker: %s port %s" broker-name broker-port))
-        (queues/subscribe-to-queue "statements" broker-name)
-        (queues/subscribe-to-queue "links" broker-name))
-      ;; Check every 5 Minutes
-      (Thread/sleep 300000)
-      (recur true))))
-
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
@@ -54,5 +40,4 @@
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
-  #_(watch-broker-conns) ;; TODO maybe remove
   (log/debug "Main Bootstrap finished"))
