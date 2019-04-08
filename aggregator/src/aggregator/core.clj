@@ -1,9 +1,8 @@
 (ns aggregator.core
   (:require [aggregator.query.retriever :as retriever]
             [aggregator.query.update :as update]
-            [aggregator.query.query :as query]
             [aggregator.graphql.dbas-connector :as dbas-conn]
-            [aggregator.broker.connector :as broker]
+            [aggregator.broker.provider :as queues]
             [aggregator.utils.pg-listener :as pg-listener]
             [aggregator.config :as config]
             [aggregator.search.core :as search]
@@ -31,29 +30,14 @@
   (swap! config/app-state assoc :known-aggregators config/whitelist)
   (log/debug (format "Known Aggregators loaded: %s" (:known-aggregators @config/app-state))))
 
-(defn- watch-broker-conns
-  "Periodically check, whether the subscription to known-brokers is
-  still open / possible. Try to renew if not."
-  []
-  (future
-    (loop [_ true]
-      (doseq [[broker-name broker-port] config/remote-brokers]
-        (log/debug (format "Checking subs for broker: %s port %s" broker-name broker-port))
-        (query/subscribe-to-queue "statements" broker-name broker-port)
-        (query/subscribe-to-queue "links" broker-name broker-port))
-      ;; Check every 5 Minutes
-      (Thread/sleep 300000)
-      (recur true))))
-
 (defn -main
   "Bootstrap everything needed for the provider."
   [& args]
   (load-config)
   (search/entrypoint)
-  (broker/entrypoint)
+  (queues/entrypoint)
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
-  (watch-broker-conns)
   (log/debug "Main Bootstrap finished"))

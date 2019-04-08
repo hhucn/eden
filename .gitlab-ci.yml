@@ -23,9 +23,6 @@ variables:
     DB_USER: "postgres"
     DB_PW: "DXxCNtfnt!MOo!f8LY1!P%sw3KGzt@s!"
     AUTHN_SECRET: "89#s3cr3t_15"
-    BROKER_HOST: "broker"
-    BROKER_USER: "groot"
-    BROKER_PASS: "iamgroot"
     ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     AGGREGATOR_NAME: "aggregator:8888"
 
@@ -67,25 +64,23 @@ test:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
     - docker pull $CI_REGISTRY/cn-tsn/project/dbas/dbas/db:latest
     - docker pull $CI_REGISTRY/cn-tsn/project/dbas/dbas:latest
-    - docker pull rabbitmq:3.7.5-alpine
     - docker pull $CI_REGISTRY_IMAGE/search:testing
     - docker pull $CI_REGISTRY_IMAGE:testing
     - docker network create -d bridge dbas_$CI_JOB_ID
-    - docker run -d --name broker_$CI_JOB_ID --net=dbas_$CI_JOB_ID -e RABBITMQ_DEFAULT_USER=groot -e RABBITMQ_DEFAULT_PASS=iamgroot rabbitmq:3.7.5-alpine
     - docker run -d --name db_$CI_JOB_ID --net=dbas_$CI_JOB_ID $CI_REGISTRY/cn-tsn/project/dbas/dbas/db:latest
-    - sleep 20  # init dbas' database
+    - sleep 10  # init dbas' database
     - docker run -d --name web_$CI_JOB_ID --net=dbas_$CI_JOB_ID -e DB_PW=DXxCNtfnt!MOo!f8LY1!P%sw3KGzt@s! -e DB_NAME=discussion -e DB_USER=postgres -e DB_PORT=5432 -e DB_HOST=db_$CI_JOB_ID -e AUTHN_SECRET=89#s3cr3t_15 -e KEY_PATH=devkey.pem -e PUBKEY_PATH=devpublic.pem $CI_REGISTRY/cn-tsn/project/dbas/dbas:development 
     - sleep 20 # give the web instance time to start
     - docker run -d --name search_$CI_JOB_ID --net=dbas_$CI_JOB_ID $CI_REGISTRY_IMAGE/search:testing
 
   script:
     - cd aggregator
-    - docker run -d --net=dbas_$CI_JOB_ID --env-file ../.env --name aggregator_$CI_JOB_ID -e DBAS_HOST=web_$CI_JOB_ID -e BROKER_HOST=broker_$CI_JOB_ID -e ELASTICSEARCH_HOST=search_$CI_JOB_ID $CI_REGISTRY_IMAGE:testing
+    - docker run -d --net=dbas_$CI_JOB_ID --env-file ../.env --name aggregator_$CI_JOB_ID -e DBAS_HOST=web_$CI_JOB_ID -e ELASTICSEARCH_HOST=search_$CI_JOB_ID $CI_REGISTRY_IMAGE:testing
     - sleep 30 #Wait for container to properly start
     - docker exec aggregator_$CI_JOB_ID lein cloverage
 
   after_script:
-    - docker kill db_$CI_JOB_ID web_$CI_JOB_ID broker_$CI_JOB_ID search_$CI_JOB_ID aggregator_$CI_JOB_ID|| true
+    - docker kill db_$CI_JOB_ID web_$CI_JOB_ID search_$CI_JOB_ID aggregator_$CI_JOB_ID|| true
     - docker network rm dbas_$CI_JOB_ID || true
 
 ################################

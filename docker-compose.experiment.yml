@@ -1,14 +1,6 @@
 version: "3.2"
 
 services:
-  broker:
-    image: rabbitmq:3.6-management-alpine
-    restart: unless-stopped
-    ports:
-      - "${PUBLIC_BROKER_PORT}:5672"
-    environment:
-      - "RABBITMQ_DEFAULT_USER=${BROKER_USER}"
-      - "RABBITMQ_DEFAULT_PASS=${BROKER_PASS}"
 
   aggregator:
     build: aggregator/
@@ -20,15 +12,11 @@ services:
     ports:
       - "${PUBLIC_AGGREGATOR_PORT}:8888" # ring dev server
     links:
-      - broker
       - search
       - dbas
       - dbas-db
     environment:
       - ELASTICSEARCH_URL
-      - "BROKER_HOST=broker"
-      - "BROKER_USER=${BROKER_USER}"
-      - "BROKER_PASS=${BROKER_PASS}"
       - "DB_USER=${DB_USER}"
       - "DB_PW=${DB_PW}"
       - "DB_PORT=${DB_PORT}"
@@ -37,7 +25,6 @@ services:
       - "ELASTICSEARCH_HOST=search"
       - "DB_HOST=dbas-db"
       - AGGREGATOR_NAME
-      - BROKER_PORT
 
   search:
     build: elasticsearch/

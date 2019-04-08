@@ -3,7 +3,6 @@
             [aggregator.query.db :as db]
             [aggregator.query.update :as up]
             [aggregator.query.utils :as utils]
-            [aggregator.broker.subscriber :as sub]
             [aggregator.config :as config]
             [clj-http.client :as client]
             [clojure.string :as str]
@@ -20,17 +19,6 @@
                                      :query-params query-params}))
      (catch Exception e
        {}))))
-
-(defn subscribe-to-queue
-  "Uses the broker module to subscribe to a queue for updates. Sanitizes the host
-  if a port is appended. Example: example.com:8888 is treated as example.com."
-  ([queue host port]
-   (let [cleaned-host (first (str/split host #":"))]
-     ;; Quick Fix Solution for experiment. Change in next big update
-     ;; Then send the queue data with the statements and links
-     (sub/subscribe queue {:host cleaned-host :port port})))
-  ([queue host]
-   (subscribe-to-queue queue host 5672)))
 
 (defn exact-statement
   "Return the exact statement from cache or db"
@@ -65,8 +53,6 @@
    (let [request-url (str config/protocol aggregate-id "/statements/by-id")
          result-data (:statements (get-data request-url {:aggregate-id aggregate-id
                                                          :entity-id entity-id}))]
-     (subscribe-to-queue "statements" aggregate-id)
-     (subscribe-to-queue "links" aggregate-id)
      (doseq [statement result-data] (up/update-statement statement))
      result-data)))
 
@@ -162,6 +148,44 @@
   []
   (db/all-statements))
 
+(defn statements-since
+  "Retrieve all statements since a certain timestamp (epoch)."
+  [timestamp]
+  (let [local-statements (all-local-statements)
+        epoch-time (bigdec timestamp)]
+    (filter #(when-let [created (get-in % [:content :created])]
+               (log/debug (format "trying comparisson for %s and input %s" created epoch-time))
+               (> (bigdec created) epoch-time)) local-statements)))
+
+(defn remote-statements-since
+  "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
+  [aggregator timestamp]
+  (let [results (:statements (get-data (str config/protocol aggregator "/statements/since")
+                                       {:timestamp timestamp}))]
+    (doseq [statement results]
+      (up/update-statement statement))))
+
+(defn all-local-links
+  "Retrieve all locally saved statements belonging to the aggregator."
+  []
+  (db/all-local-links))
+
+(defn links-since
+  "Retrieve all links since a certain timestamp (epoch)."
+  [timestamp]
+  (let [local-links (all-local-links)
+        epoch-time (bigdec timestamp)]
+    (filter #(when-let [created (:created %)]
+               (> (bigdec created) epoch-time)) local-links)))
+
+(defn remote-links-since
+  "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
+  [aggregator timestamp]
+  (let [results (:links (get-data (str config/protocol aggregator "/linkss/since")
+                                       {:timestamp timestamp}))]
+    (doseq [link results]
+      (up/update-link link))))
+
 (defn all-remote-statements
   "Retrieve all statements from a remote aggregator."
   ([]
@@ -172,11 +196,6 @@
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
      (doseq [statement results]
        (up/update-statement statement)))))
-
-(defn all-local-links
-  "Retrieve all locally saved statements belonging to the aggregator."
-  []
-  (db/all-local-links))
 
 (defn all-known-links
   "Retrieve all known links."
