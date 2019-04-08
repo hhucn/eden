@@ -168,7 +168,8 @@
   [timestamp]
   (let [local-statements (all-local-statements)
         epoch-time (timec/to-long timestamp)]
-    (filter #(> (timec/to-long %) epoch-time) local-statements)))
+    (filter #(> (timec/to-long (get-in % [:content :created])) epoch-time)
+            local-statements)))
 
 (defn remote-statements-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
@@ -177,6 +178,26 @@
                                        {:timestamp timestamp}))]
     (doseq [statement results]
       (up/update-statement statement))))
+
+(defn all-local-links
+  "Retrieve all locally saved statements belonging to the aggregator."
+  []
+  (db/all-local-links))
+
+(defn links-since
+  "Retrieve all links since a certain timestamp (epoch)."
+  [timestamp]
+  (let [local-links (all-local-links)
+        epoch-time (timec/to-long timestamp)]
+    (filter #(> (timec/to-long (:created %)) epoch-time) local-links)))
+
+(defn remote-links-since
+  "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
+  [aggregator timestamp]
+  (let [results (:links (get-data (str config/protocol aggregator "/linkss/since")
+                                       {:timestamp timestamp}))]
+    (doseq [link results]
+      (up/update-link link))))
 
 (defn all-remote-statements
   "Retrieve all statements from a remote aggregator."
@@ -188,11 +209,6 @@
    (let [results (:statements (get-data (str config/protocol aggregator "/statements")))]
      (doseq [statement results]
        (up/update-statement statement)))))
-
-(defn all-local-links
-  "Retrieve all locally saved statements belonging to the aggregator."
-  []
-  (db/all-local-links))
 
 (defn all-known-links
   "Retrieve all known links."

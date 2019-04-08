@@ -30,7 +30,14 @@
        (quot (System/currentTimeMillis) 1000))
       (recur (rest to-do)))))
 
-(defmethod pull-new :links)
+(defmethod pull-new :links
+  [_]
+  (loop [to-do (get-subscriptions "links")]
+    (when (seq to-do)
+      (query/remote-links-since
+       (first to-do)
+       (quot (System/currentTimeMillis) 1000))
+      (recur (rest to-do)))))
 
 (defn entrypoint
   "Call this on programm-start."

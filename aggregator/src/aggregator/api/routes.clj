@@ -234,7 +234,13 @@
                         entity-id :- ::eden-specs/entity-id
                         version :- ::eden-specs/version]
          :return ::links-map
-         (ok {:links (query/links-by-target aggregate-id entity-id version)}))))
+         (ok {:links (query/links-by-target aggregate-id entity-id version)}))
+
+    (GET "/since" []
+         :summary "Return all links that were made by users of the aggregator since the timestamp (epoch)."
+         :query-params [timestamp :- spec/string?]
+         :return ::links-map
+         (ok {:links (query/links-since timestamp)}))))
 
 (def statement-routes
   (context "/statement" []
