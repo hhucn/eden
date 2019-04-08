@@ -154,8 +154,8 @@
   [timestamp]
   (let [local-statements (all-local-statements)
         epoch-time (timec/to-long timestamp)]
-    (filter #(> (timec/to-long (get-in % [:content :created])) epoch-time)
-            local-statements)))
+    (filter #(when-let [timestamp (get-in % [:content :created])]
+               (> (timec/to-long timestamp) epoch-time)) local-statements)))
 
 (defn remote-statements-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
@@ -175,7 +175,8 @@
   [timestamp]
   (let [local-links (all-local-links)
         epoch-time (timec/to-long timestamp)]
-    (filter #(> (timec/to-long (:created %)) epoch-time) local-links)))
+    (filter #(when-let [timestamp (:created %)]
+               (> (timec/to-long timestamp) epoch-time)) local-links)))
 
 (defn remote-links-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
