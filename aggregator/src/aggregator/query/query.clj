@@ -164,14 +164,14 @@
   (db/all-statements))
 
 (defn statements-since
-  "Retrieve all statements since a certain timestamp."
+  "Retrieve all statements since a certain timestamp (epoch)."
   [timestamp]
   (let [local-statements (all-local-statements)
         epoch-time (timec/to-long timestamp)]
     (filter #(> (timec/to-long %) epoch-time) local-statements)))
 
 (defn remote-statements-since
-  "Retrieve all statements belonging to an aggregator since some timestamp."
+  "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
   [aggregator timestamp]
   (let [results (:statements (get-data (str config/protocol aggregator "/statements/since")
                                        {:timestamp timestamp}))]

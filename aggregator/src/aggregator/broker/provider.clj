@@ -18,11 +18,19 @@
   [queue aggregator]
   (swap! config/app-state update-in [:broker :queues queue] disj aggregator))
 
-(defn pull-new
-  "Pulls new objects from several supported queues."
-  ;;TODO
-  []
-  nil)
+(defmulti pull-new identity
+  "Pulls new objects from several supported queues.")
+
+(defmethod pull-new :statements
+  [_]
+  (loop [to-do (get-subscriptions "statements")]
+    (when (seq to-do)
+      (query/remote-statements-since
+       (first to-do)
+       (quot (System/currentTimeMillis) 1000))
+      (recur (rest to-do)))))
+
+(defmethod pull-new :links)
 
 (defn entrypoint
   "Call this on programm-start."
