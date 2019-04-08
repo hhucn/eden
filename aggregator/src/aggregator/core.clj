@@ -1,9 +1,8 @@
 (ns aggregator.core
   (:require [aggregator.query.retriever :as retriever]
             [aggregator.query.update :as update]
-            [aggregator.query.query :as query]
             [aggregator.graphql.dbas-connector :as dbas-conn]
-            [aggregator.broker.connector :as broker]
+            [aggregator.broker.provider :as queues]
             [aggregator.utils.pg-listener :as pg-listener]
             [aggregator.config :as config]
             [aggregator.search.core :as search]
@@ -39,8 +38,8 @@
     (loop [_ true]
       (doseq [[broker-name broker-port] config/remote-brokers]
         (log/debug (format "Checking subs for broker: %s port %s" broker-name broker-port))
-        (query/subscribe-to-queue "statements" broker-name broker-port)
-        (query/subscribe-to-queue "links" broker-name broker-port))
+        (queues/subscribe-to-queue "statements" broker-name)
+        (queues/subscribe-to-queue "links" broker-name))
       ;; Check every 5 Minutes
       (Thread/sleep 300000)
       (recur true))))
@@ -50,10 +49,10 @@
   [& args]
   (load-config)
   (search/entrypoint)
-  (broker/entrypoint)
+  (queues/entrypoint)
   (load-test-data)
   (bootstrap-dgep-data)
   (pg-listener/start-listeners)
   (retriever/bootstrap) ;; no initial pull needed due to dgep data bootstrap
-  (watch-broker-conns)
+  #_(watch-broker-conns) ;; TODO maybe remove
   (log/debug "Main Bootstrap finished"))

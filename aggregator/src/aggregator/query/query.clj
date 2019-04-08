@@ -8,6 +8,7 @@
             [clj-http.client :as client]
             [clojure.string :as str]
             [clojure.set :as cset]
+            [clj-time.coerce :as timec]
             [taoensso.timbre :as log]))
 
 (defn get-data
@@ -161,6 +162,21 @@
   "Retrieve all locally saved statements belonging to the aggregator."
   []
   (db/all-statements))
+
+(defn statements-since
+  "Retrieve all statements since a certain timestamp."
+  [timestamp]
+  (let [local-statements (all-local-statements)
+        epoch-time (timec/to-long timestamp)]
+    (filter #(> (timec/to-long %) epoch-time) local-statements)))
+
+(defn remote-statements-since
+  "Retrieve all statements belonging to an aggregator since some timestamp."
+  [aggregator timestamp]
+  (let [results (:statements (get-data (str config/protocol aggregator "/statements/since")
+                                       {:timestamp timestamp}))]
+    (doseq [statement results]
+      (up/update-statement statement))))
 
 (defn all-remote-statements
   "Retrieve all statements from a remote aggregator."

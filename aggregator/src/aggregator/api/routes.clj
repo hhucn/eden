@@ -11,7 +11,7 @@
             [aggregator.specs :as eden-specs]
             [ring.util.http-response :refer [ok not-found created bad-request]]
             [ring.middleware.cors :as ring-cors]
-            [taoensso.timbre :as log]))
+            #_[taoensso.timbre :as log]))
 
 (s/def ::welcome-message spec/string?)
 (s/def ::statements (s/coll-of ::eden-specs/statement))
@@ -202,7 +202,13 @@
          :query-params [custom-field :- spec/string?
                         search-term :- spec/string?]
          :return ::statements-map
-         (ok {:statements (query/custom-statement custom-field search-term)}))))
+         (ok {:statements (query/custom-statement custom-field search-term)}))
+
+    (GET "/since" []
+         :summary "Return all statements that were made by users of the aggregator since the timestamp."
+         :query-params [timestamp :- spec/string?]
+         :return ::statements-map
+         (ok {:statements (query/statements-since timestamp)}))))
 
 (def links-routes
   (context "/links" []
