@@ -1,19 +1,11 @@
 (ns aggregator.api.routes-test
   (:require [aggregator.api.routes :as routes]
             [clojure.test :refer [deftest is use-fixtures testing]]
-            [aggregator.broker.connector :as connector]
             [ring.mock.request :as mock]
             [cheshire.core :as cheshire]))
 
-(defn fixtures [f]
-  (connector/init-local-connection!)
-  (f)
-  (connector/close-local-connection!))
-(use-fixtures :once fixtures)
-
 (defn- parse-body [body]
   (cheshire/parse-string (slurp body) true))
-
 
 (deftest handler-test
   (testing "Test root route for status 302"
