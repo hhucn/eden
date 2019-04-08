@@ -1,7 +1,6 @@
 (ns aggregator.query.update
   (:require [aggregator.query.db :as db]
             [aggregator.query.cache :as cache]
-            [aggregator.broker.publish :as pub]
             [aggregator.config :as config]
             [aggregator.graphql.dbas-connector :as dbas]
             [aggregator.specs :as specs]
@@ -19,8 +18,6 @@
                                       (:version identifier))]
     (when-not db-result
       (log/debug (format "[UPDATE] Added new statement to db: %s " statement))
-      (when (= (:aggregate-id identifier) config/aggregate-name)
-        (pub/publish-statement statement))
       (db/insert-statement statement))
     (let [cache-uri (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
                          (:version identifier))
@@ -44,8 +41,6 @@
                      (assoc link :created (utils/time-now-str)))]
       (when-not db-result
         (log/debug (format "[UPDATE] Added new link to db: %s" new-link))
-        (when (= (:aggregate-id identifier) config/aggregate-name)
-          (pub/publish-link new-link))
         (cache/cache-miss-link (str (:aggregate-id identifier) "/" (:entity-id identifier) "/"
                                     (:version identifier))
                                new-link)
@@ -73,7 +68,6 @@
                               (assoc :predecessors [(:identifier statement)]))]
     (when (s/valid? ::specs/statement updated-statement)
       (db/insert-statement updated-statement)
-      (pub/publish-statement updated-statement)
       updated-statement)))
 
 (defn- statement-from-minimal
