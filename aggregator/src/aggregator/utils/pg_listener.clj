@@ -19,7 +19,7 @@
         references (dbas-conn/get-references (get-in textversion [:data :statement_uid]))
         statement {:content {:author (dbas-conn/get-author author-id)
                              :text (get-in textversion [:data :content])
-                             :created nil}
+                             :created (utils/time-now-str)}
                    :identifier {:aggregate-id config/aggregate-name
                                 :entity-id (str (get-in textversion [:data :uid]))
                                 :version 1}

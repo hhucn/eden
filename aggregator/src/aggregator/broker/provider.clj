@@ -1,6 +1,7 @@
 (ns aggregator.broker.provider
   (:require [aggregator.config :as config]
             [aggregator.query.query :as query]
+            [aggregator.utils.common :as utils]
             [taoensso.timbre :as log]))
 
 (defn subscribe-to-queue!
@@ -40,7 +41,7 @@
   (loop [to-do (get-subscriptions "statements")]
     (when (seq to-do)
       (query/remote-statements-since (first to-do) (last-timestamp! "statements" (first to-do)))
-      (set-timestamp! "statements" (first to-do) (quot (System/currentTimeMillis) 1000))
+      (set-timestamp! "statements" (first to-do) (utils/time-now-str))
       (recur (rest to-do)))))
 
 (defmethod pull-new! :links
@@ -48,7 +49,7 @@
   (loop [to-do (get-subscriptions "links")]
     (when (seq to-do)
       (query/remote-links-since (first to-do) (last-timestamp! "statements" (first to-do)))
-      (set-timestamp! "statements" (first to-do) (quot (System/currentTimeMillis) 1000))
+      (set-timestamp! "statements" (first to-do) (utils/time-now-str))
       (recur (rest to-do)))))
 
 
