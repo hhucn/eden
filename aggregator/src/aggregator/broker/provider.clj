@@ -19,7 +19,7 @@
 (defn remove-subscription!
   "Remove subscription for specific queue"
   [queue aggregator]
-  (log/debug (format "Deleting % from queue %s" aggregator queue))
+  (log/debug (format "Deleting %s from queue %s" aggregator queue))
   (swap! config/app-state update-in [:broker :queues queue] disj aggregator))
 
 (defn- set-timestamp!
