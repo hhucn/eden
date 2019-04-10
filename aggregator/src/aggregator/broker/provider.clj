@@ -40,6 +40,7 @@
   [_]
   (loop [to-do (get-subscriptions "statements")]
     (when (seq to-do)
+      (log/debug (format "querying links for timestamp %s on aggregator %s" (last-timestamp! "links" (first to-do)) (first to-do)))
       (query/remote-statements-since (first to-do) (last-timestamp! "statements" (first to-do)))
       (set-timestamp! "statements" (first to-do) (utils/time-now-str))
       (recur (rest to-do)))))
@@ -48,6 +49,7 @@
   [_]
   (loop [to-do (get-subscriptions "links")]
     (when (seq to-do)
+      (log/debug (format "querying links for timestamp %s on aggregator %s" (last-timestamp! "links" (first to-do)) (first to-do)))
       (query/remote-links-since (first to-do) (last-timestamp! "links" (first to-do)))
       (set-timestamp! "links" (first to-do) (utils/time-now-str))
       (recur (rest to-do)))))
