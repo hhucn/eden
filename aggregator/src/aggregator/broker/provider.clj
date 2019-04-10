@@ -40,7 +40,7 @@
   [_]
   (loop [to-do (get-subscriptions "statements")]
     (when (seq to-do)
-      (log/debug (format "querying links for timestamp %s on aggregator %s" (last-timestamp! "statements" (first to-do)) (first to-do)))
+      (log/debug (format "querying statements for timestamp %s on aggregator %s" (last-timestamp! "statements" (first to-do)) (first to-do)))
       (query/remote-statements-since (first to-do) (last-timestamp! "statements" (first to-do)))
       (set-timestamp! "statements" (first to-do) (utils/time-now-str))
       (recur (rest to-do)))))

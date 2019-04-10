@@ -160,9 +160,12 @@
 (defn remote-statements-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
   [aggregator timestamp]
-  (let [results (:statements (get-data (str config/protocol aggregator "/statements/since")
-                                       {:timestamp timestamp}))]
-    (doseq [statement results]
+  (let [results (get-data (str config/protocol aggregator "/statements/since")
+                          {:timestamp timestamp})
+        statements (:statements results)]
+    (log/debug (format "Result of remote statement query: %s" results))
+    (log/debug (format "Resulting statements from query: %s" statements))
+    (doseq [statement statements]
       (log/debug (format "Pulled statement: %s" statement))
       (up/update-statement statement))))
 
