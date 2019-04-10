@@ -45,11 +45,11 @@
       (recur (rest to-do)))))
 
 (defmethod pull-new! :links
-  [_ timestamp]
+  [_]
   (loop [to-do (get-subscriptions "links")]
     (when (seq to-do)
-      (query/remote-links-since (first to-do) (last-timestamp! "statements" (first to-do)))
-      (set-timestamp! "statements" (first to-do) (utils/time-now-str))
+      (query/remote-links-since (first to-do) (last-timestamp! "links" (first to-do)))
+      (set-timestamp! "links" (first to-do) (utils/time-now-str))
       (recur (rest to-do)))))
 
 
@@ -71,7 +71,9 @@
   []
   ;; Set any neccesary preparations before the service launches here.
   (doseq [aggregator config/whitelist]
+    (log/debug (format "Subscribing to queue statements for aggregator %s" aggregator))
     (subscribe-to-queue! "statements" aggregator)
+    (log/debug (format "Subscribing to queue links for aggregator %s" aggregator))
     (subscribe-to-queue! "links" aggregator))
   (start-background-pull!)
   (log/debug "Initializing broker done."))
