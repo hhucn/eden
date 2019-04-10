@@ -163,6 +163,7 @@
   (let [results (:statements (get-data (str config/protocol aggregator "/statements/since")
                                        {:timestamp timestamp}))]
     (doseq [statement results]
+      (log/debug (format "Pulled statement: %s" statement))
       (up/update-statement statement))))
 
 (defn all-local-links
@@ -181,9 +182,10 @@
 (defn remote-links-since
   "Retrieve all statements belonging to an aggregator since some timestamp (epoch)."
   [aggregator timestamp]
-  (let [results (:links (get-data (str config/protocol aggregator "/linkss/since")
-                                       {:timestamp timestamp}))]
+  (let [results (:links (get-data (str config/protocol aggregator "/links/since")
+                                  {:timestamp timestamp}))]
     (doseq [link results]
+      (log/debug (format "Pulled link: %s" link))
       (up/update-link link))))
 
 (defn all-remote-statements
