@@ -60,6 +60,13 @@ services:
       - KEY_PATH
       - PUBKEY_PATH
       - URL
+      - MAIL_HOST
+      - MAIL_PORT
+      - MAIL_USERNAME
+      - MAIL_PASSWORD
+      - MAIL_SSL
+      - MAIL_TLS
+      - MAIL_DEFAULT__SENDER
 
   dbas-db:
     build: docker/db/
