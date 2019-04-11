@@ -67,6 +67,7 @@ services:
       - MAIL_SSL
       - MAIL_TLS
       - MAIL_DEFAULT__SENDER
+      - "DBAS_PROTOCOL=https"
 
   dbas-db:
     build: docker/db/
