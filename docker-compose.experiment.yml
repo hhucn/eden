@@ -40,6 +40,8 @@ services:
     restart: unless-stopped
     ports:
       - "${PUBLIC_DBAS_PORT}:4284"
+    volumes:
+      - ./experiment.ini:/dbas/development.ini
     links:
       - dbas-db:db 
     environment:
