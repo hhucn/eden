@@ -72,10 +72,9 @@ services:
       - PUBKEY_PATH
 
   dbas-db:
-    build: docker/db/
+    image: hhucn/dbas:db
     restart: unless-stopped
     volumes:
-      - ./docker/db/entrypoint:/docker-entrypoint-initdb.d
       - ./docker/db/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
