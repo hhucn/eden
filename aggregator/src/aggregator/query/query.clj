@@ -312,3 +312,10 @@
   "Return all arguments where a premise matches a given reference text (and possibly host and path)"
   [text host path]
   (filter #(match-references % text host path) (all-arguments)))
+
+
+(defn unique-statements
+  "Deduplicate multiple same statements form different sources."
+  [statements]
+  (let [grouped-statements (group-by #(get-in % [:content :text]) statements)]
+    (map #(first (second %)) grouped-statements)))

@@ -150,20 +150,20 @@
          :summary "Returns all statements"
          :query-params []
          :return ::statements-map
-         (ok {:statements (query/all-statements)}))
+         (ok {:statements (query/unique-statements (query/all-statements))}))
 
     (GET "/contain" []
          :summary "Returns all statements matching `search-string`"
          :query-params [search-string :- spec/string?]
          :return ::statements-map
-         (ok {:statements (query/statements-contain search-string)}))
+         (ok {:statements (query/unique-statements (query/statements-contain search-string))}))
 
     (GET "/by-author" []
          :summary "Returns all statements by author. Can also narrow down results by content."
          :query-params [author :- spec/string?
                         {query :- spec/string? ""}]
          :return ::statements-map
-         (ok {:statements (query/by-author-content author query)}))
+         (ok {:statements (query/unique-statements (query/by-author-content author query))}))
 
     (GET "/starter-set" []
          :summary "Returns up to 10 statements chosen by the Aggregator"
@@ -183,32 +183,32 @@
       :summary "Returns all statements matching the references host"
       :query-params [host :- spec/string?]
       :return ::statements-map
-      (ok {:statements (query/statements-by-reference-host host)}))
+      (ok {:statements (query/unique-statements (query/statements-by-reference-host host))}))
 
     (GET "/by-reference-text" []
       :summary "Returns all statements matching the references text"
       :query-params [text :- spec/string?]
       :return ::statements-map
-      (ok {:statements (query/statements-by-reference-text text)}))
+      (ok {:statements (query/unique-statements (query/statements-by-reference-text text))}))
 
     (GET "/by-tag" []
          :summary "Return all statements matching a certain tag"
          :query-params [text :- spec/string?]
          :return ::statements-map
-         (ok {:statements (query/custom-statement "tags" text)}))
+         (ok {:statements (query/unique-statements (query/custom-statement "tags" text))}))
 
     (GET "/custom" []
          :summary "Returns all statements matching the search term in a custom field"
          :query-params [custom-field :- spec/string?
                         search-term :- spec/string?]
          :return ::statements-map
-         (ok {:statements (query/custom-statement custom-field search-term)}))
+         (ok {:statements (query/unique-statements (query/custom-statement custom-field search-term))}))
 
     (GET "/since" []
          :summary "Return all statements that were made by users of the aggregator since the timestamp."
          :query-params [timestamp :- spec/string?]
          :return ::statements-map
-         (ok {:statements (query/statements-since timestamp)}))))
+         (ok {:statements (query/unique-statements (query/statements-since timestamp))}))))
 
 (def links-routes
   (context "/links" []
