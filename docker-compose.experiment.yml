@@ -76,3 +76,4 @@ services:
     restart: unless-stopped
     volumes:
       - ./docker/db/data:/var/lib/postgresql/data
+      - ./seeds/seed.db:/docker-entrypoint-initdb.d/0001_seed.sql
