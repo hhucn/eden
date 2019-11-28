@@ -42,6 +42,7 @@ services:
       - "${PUBLIC_DBAS_PORT}:4284"
     volumes:
       - ./experiment.ini:/dbas/development.ini
+      - ./experiment_results:/dbas/experiment_results
     links:
       - dbas-db:db 
     environment:
