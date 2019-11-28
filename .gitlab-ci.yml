@@ -1,3 +1,8 @@
+image: docker
+
+services:
+  - docker:stable-dind
+
 stages:
   - build
   - test
